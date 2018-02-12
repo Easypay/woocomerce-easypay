@@ -560,16 +560,22 @@ function woocommerce_gateway_easypay_split_init() {
 
                   $cart = WC()->cart;
                   $cart_contents = $cart->get_cart_contents();
-                  //Use a foreach to determine the category of each product and add it to the split json tru array - use json_encode after
+                  // Init the JSON array
+                  $json_obj = array();
+                  global $increment;
                   foreach($cart_contents as $cart_row) {
+                    $increment += 1;
+                    // Init the temp array
+                    $temp_list = array();
                     $product = wc_get_product( $cart_row["product_id"] );
                     echo "<br/>";
                     echo "<br/>";
                     echo "Product Category ID: " . $product->category_ids[0];
                     echo "<br/>";
+                    echo "Product Name: " . $product->name;
+                    echo "<br/>";
                     $product_category = get_term_by( 'id', $product->category_ids[0], 'product_cat', 'ARRAY_A' );
                     echo $product_category["name"];
-                    // get the clientid, cin, entity and country:
                     echo "<br/>";
                     $productCatMetaClient = get_term_meta($product->category_ids[0], 'wh_meta_clientid', true);
                     echo "ep_user: " . $productCatMetaClient;
@@ -583,15 +589,35 @@ function woocommerce_gateway_easypay_split_init() {
                     $productCatMetaCountry = get_term_meta($product->category_ids[0], 'wh_meta_country', true);
                     echo "ep_country: " . $productCatMetaCountry;
                     echo "<br/>";
+                    echo "t_value: " . $cart_row["line_total"];
                     echo "<br/>";
-                    print_r($product);
+                    echo "Product Quantity: " . $cart_row["quantity"];
+                    echo "<br/>";
+                    echo "<br/>";
+                    //print_r($product);
+
+                    // Fill the data
+                    $temp_list = array(
+                      'ep_user' => $productCatMetaClient,
+                      'ep_partner' => $this->user,
+                      'ep_cin' =>     $productCatMetaCin,
+                      'ep_entity' =>  $productCatMetaEntity,
+                      'ep_country' => $productCatMetaCountry,
+                      't_value_type' => 'fixed',
+                      't_value' => $cart_row["line_total"]
+                    );
+                    // Add the data to a JSON object
+                    $json_obj[$increment] = $temp_list;
                     echo "<br/>";
                     echo "<br/>";
                     echo "<br/>";
-                    echo "<center>* ** ***** SPLIT ***** ** *</center>";
+                    echo "<center>* ** ***** SPLIT ***** ** * o)></center>";
                     echo "<br/>";
 
                   }
+                  // encode JSON data
+                  $json_data = json_encode(array("split_payment" => $json_obj));
+                  print_r($json_data);
                   die;
 
 
