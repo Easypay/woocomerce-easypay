@@ -617,9 +617,11 @@ function woocommerce_gateway_easypay_split_init() {
                   }
                   // encode JSON data
                   $json_data = json_encode(array("split_payment" => $json_obj));
-                  print_r($json_data);
+                  // Add to args data
+                  $args["ep_split"] = "normal";
+                  $args["split_json"] = $json_data;
+                  print_r($args);
                   die;
-
 
                   $this->log('Arguments for order #' . $order->get_id() . ': ' . print_r($args, true));
 
@@ -724,6 +726,12 @@ function woocommerce_gateway_easypay_split_init() {
                   if (function_exists('curl_init')) {
                       $curl = curl_init();
                       curl_setopt($curl, CURLOPT_URL, $url);
+                      curl_setopt($ch, CURLOPT_POST, 1);
+                      curl_setopt($ch, CURLOPT_POSTFIELDS,
+                                  "dispnumber=567567567&extension=6"); // Insert args here
+                      curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded'));
+                      // Since XAMPP doesn't ship with a pem file:
+                      curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
                       curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
                       $result = curl_exec($curl);
                       curl_close($curl);
