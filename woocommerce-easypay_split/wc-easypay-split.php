@@ -163,7 +163,7 @@ function woocommerce_gateway_easypay_split_init() {
                   $this->a        = '</a>';
                   // Apis
                   $this->apis     = array(
-                      'request_reference' => 'api_easypay_01BG.php',
+                      'request_reference' => 'api_easypay_01SP.php',
                       'request_payment_info' => 'api_easypay_03AG.php',
                       'request_payment' => 'api_easypay_05AG.php',
                       'payment_listings' => 'api_easypay_040BG1.php'
@@ -400,7 +400,7 @@ function woocommerce_gateway_easypay_split_init() {
                           'title' => __('Title', 'wceasypay'),
                           'type' => 'text',
                           'description' => __('This controls the title which the user sees during checkout.', 'wceasypay'),
-                          'default' => __('Easypay MB', 'wceasypay'),
+                          'default' => __('Easypay SPLIT', 'wceasypay'),
                           'desc_tip' => true,
                       ),
                       'description' => array(
@@ -565,35 +565,35 @@ function woocommerce_gateway_easypay_split_init() {
                   global $increment;
                   foreach($cart_contents as $cart_row) {
                     $increment += 1;
-                    // Init the temp array
+
                     $temp_list = array();
                     $product = wc_get_product( $cart_row["product_id"] );
-                    echo "<br/>";
-                    echo "<br/>";
-                    echo "Product Category ID: " . $product->category_ids[0];
-                    echo "<br/>";
-                    echo "Product Name: " . $product->name;
-                    echo "<br/>";
+                    // echo "<br/>";
+                    // echo "<br/>";
+                    // echo "Product Category ID: " . $product->category_ids[0];
+                    // echo "<br/>";
+                    // echo "Product Name: " . $product->name;
+                    // echo "<br/>";
                     $product_category = get_term_by( 'id', $product->category_ids[0], 'product_cat', 'ARRAY_A' );
-                    echo $product_category["name"];
-                    echo "<br/>";
+                    // echo $product_category["name"];
+                    // echo "<br/>";
                     $productCatMetaClient = get_term_meta($product->category_ids[0], 'wh_meta_clientid', true);
-                    echo "ep_user: " . $productCatMetaClient;
-                    echo "<br/>";
+                    // echo "ep_user: " . $productCatMetaClient;
+                    // echo "<br/>";
                     $productCatMetaCin = get_term_meta($product->category_ids[0], 'wh_meta_cin', true);
-                    echo "ep_cin: " . $productCatMetaCin;
-                    echo "<br/>";
+                    // echo "ep_cin: " . $productCatMetaCin;
+                    // echo "<br/>";
                     $productCatMetaEntity = get_term_meta($product->category_ids[0], 'wh_meta_entity', true);
-                    echo "ep_entity: " . $productCatMetaEntity;
-                    echo "<br/>";
+                    // echo "ep_entity: " . $productCatMetaEntity;
+                    // echo "<br/>";
                     $productCatMetaCountry = get_term_meta($product->category_ids[0], 'wh_meta_country', true);
-                    echo "ep_country: " . $productCatMetaCountry;
-                    echo "<br/>";
-                    echo "t_value: " . $cart_row["line_total"];
-                    echo "<br/>";
-                    echo "Product Quantity: " . $cart_row["quantity"];
-                    echo "<br/>";
-                    echo "<br/>";
+                    // echo "ep_country: " . $productCatMetaCountry;
+                    // echo "<br/>";
+                    // echo "t_value: " . $cart_row["line_total"];
+                    // echo "<br/>";
+                    // echo "Product Quantity: " . $cart_row["quantity"];
+                    // echo "<br/>";
+                    // echo "<br/>";
                     //print_r($product);
 
                     // Fill the data
@@ -608,11 +608,11 @@ function woocommerce_gateway_easypay_split_init() {
                     );
                     // Add the data to a JSON object
                     $json_obj[$increment] = $temp_list;
-                    echo "<br/>";
-                    echo "<br/>";
-                    echo "<br/>";
-                    echo "<center>* ** ***** SPLIT ***** ** * o)></center>";
-                    echo "<br/>";
+                    //echo "<br/>";
+                    //echo "<br/>";
+                    //echo "<br/>";
+                    //echo "<center>* ** ***** SPLIT ***** ** * o)></center>";
+                    //echo "<br/>";
 
                   }
                   // encode JSON data
@@ -620,16 +620,16 @@ function woocommerce_gateway_easypay_split_init() {
                   // Add to args data
                   $args["ep_split"] = "normal";
                   $args["split_json"] = $json_data;
-                  print_r($args);
-                  die;
+                  //print_r($args);
+                  //die;
 
                   $this->log('Arguments for order #' . $order->get_id() . ': ' . print_r($args, true));
 
-                  $url = $this->get_request_url($this->apis['request_reference'], $args);
+                  $url = $this->get_request_url($this->apis['request_reference']);
 
-                  $this->log('Request URL #' . $order->get_id() . ': ' . $url);
-
-                  $contents = $this->get_contents($url);
+                  //$this->log('Request URL #' . $order->get_id() . ': ' . $url);
+                  // lets accept args here to send directly in body
+                  $contents = $this->get_contents($url, $args);
 
                   $obj = simplexml_load_string($contents);
                   $data = json_decode(json_encode($obj), true);
@@ -653,7 +653,7 @@ function woocommerce_gateway_easypay_split_init() {
                   }
 
                   // Create a new row in database:
-                  //      Table wp_easypay_notifications
+                  // Table wp_easypay_notifications
                   // The row without ep_doc, ep_status with 'pending' and t_key with
                   // a number (order_id) was generated by the next code.
                   // This row is used for show this data in email.
@@ -707,12 +707,9 @@ function woocommerce_gateway_easypay_split_init() {
                * @param   array $args List of Arguments
                * @return  string
                */
-              public function get_request_url($api, $args)
+              public function get_request_url($api)
               {
-                  return ($this->test ? $this->test_url : $this->live_url) .
-                      $api . '?' .
-                      http_build_query($args) .
-                      ( $this->code != '' ? '&s_code=' . $this->code : '');
+                  return ($this->test ? $this->test_url : $this->live_url) . $api;
               }
 
               /**
@@ -721,25 +718,26 @@ function woocommerce_gateway_easypay_split_init() {
                * @param string $url
                * @return string
                */
-              public function get_contents($url)
+              public function get_contents($url, $post)
               {
+                  $post = http_build_query($post);
                   if (function_exists('curl_init')) {
                       $curl = curl_init();
                       curl_setopt($curl, CURLOPT_URL, $url);
-                      curl_setopt($ch, CURLOPT_POST, 1);
-                      curl_setopt($ch, CURLOPT_POSTFIELDS,
-                                  "dispnumber=567567567&extension=6"); // Insert args here
-                      curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded'));
-                      // Since XAMPP doesn't ship with a pem file:
+                      curl_setopt($curl, CURLOPT_POST, 1);
+                      curl_setopt($curl, CURLOPT_POSTFIELDS, $post); // Insert args here
+                      curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded'));
                       curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
                       curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
                       $result = curl_exec($curl);
+                      var_dump($result);
                       curl_close($curl);
-
+                      die;
+                      //
                       return $result;
 
                   } else {
-                      return file_get_contents($url);
+                      die();
                   }
               }
 
