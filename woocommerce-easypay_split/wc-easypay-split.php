@@ -622,7 +622,7 @@ function woocommerce_gateway_easypay_split_init() {
                   $args["split_json"] = $json_data;
                   //print_r($args);
                   //die;
-
+                  $this->code != '' ? $args["s_code"] = $this->code : '';
                   $this->log('Arguments for order #' . $order->get_id() . ': ' . print_r($args, true));
 
                   $url = $this->get_request_url($this->apis['request_reference']);
@@ -725,7 +725,7 @@ function woocommerce_gateway_easypay_split_init() {
                       $curl = curl_init();
                       curl_setopt($curl, CURLOPT_URL, $url);
                       curl_setopt($curl, CURLOPT_POST, 1);
-                      curl_setopt($curl, CURLOPT_POSTFIELDS, $post); // Insert args here
+                      curl_setopt($curl, CURLOPT_POSTFIELDS, $post);
                       curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded'));
                       curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
                       curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
