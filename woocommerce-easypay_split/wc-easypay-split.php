@@ -244,9 +244,10 @@ function woocommerce_gateway_easypay_split_init() {
 
               protected function payment_on_hold( $order, $reason = '' ) {
                   $order->update_status( 'on-hold', $reason );
-                  wc_reduce_stock_levels($order->get_id());
+                  // Leave commented unless you need to reserve some limited stock product before payment
+                  //wc_reduce_stock_levels($order->get_id());
                   WC()->cart->empty_cart();
-      	    }
+      	      }
 
                /**
                * Put the reference, entity and value in the email.
@@ -267,7 +268,7 @@ function woocommerce_gateway_easypay_split_init() {
                           $row = $wpdb->get_row( $wpdb->prepare(
                               "
                               SELECT *
-                              FROM ".$wpdb -> prefix."easypay_notifications
+                              FROM " . $wpdb -> prefix . "easypay_notifications
                               WHERE t_key = %d;
                               ",
                               $order->get_id()
@@ -373,8 +374,7 @@ function woocommerce_gateway_easypay_split_init() {
                   if (!$this->is_valid_for_use()) {
                       add_action('admin_notices', array(&$this, 'error_invalid_currency'));
                   }
-
-                  // Validate expiration
+                  // Validate PI expiration
                   if ($this->expiration < 1 || $this->expiration > 93) {
                       add_action('admin_notices', array(&$this, 'error_invalid_expiration'));
                   }
@@ -636,8 +636,7 @@ function woocommerce_gateway_easypay_split_init() {
                       $note .= 'Entity: ' . $data['ep_entity'] . '; ' . PHP_EOL;
                       $note .= 'Value: ' . $data['ep_value'] . '; ' . PHP_EOL;
                       $note .= 'Reference: ' . $data['ep_reference'] . '; ' . PHP_EOL;
-                      // In this point the order status is pending, so, only add a note
-                      //add_order_note($note, $is_customer_note - default: 0)
+                      // At this point the order status is pending, so, only add a note
                       $order->add_order_note($note, 0);
                   }
 
@@ -656,7 +655,6 @@ function woocommerce_gateway_easypay_split_init() {
                       $result .= 'Value: ' . $data['ep_value'] . ';' . PHP_EOL;
                       $result .= 'Reference: ' . $data['ep_reference'] . ';' . PHP_EOL;
                       $this->log($result);
-                      #die("Error: I couldn't insert the reference in the database!");
                   } else {
                       $result = 'New data inserted in database:' . PHP_EOL;
                       $result .= 'Order ID: ' . $order->get_id() . ';' . PHP_EOL;
@@ -666,11 +664,8 @@ function woocommerce_gateway_easypay_split_init() {
                       $this->log($result);
                   }
 
-                  // It's necessary these changes for send a email with an order in processing
-                  #$order->update_status('on-hold'); // pending->on-hold
-                  #$order->update_status('pending'); // on-hold->pending
-                  $this->payment_on_hold( $order, $reason = '' ); // reduces stock
-                              // Send Email
+                  $this->payment_on_hold( $order, $reason = '' );
+
                   add_action(
                       'mail_the_guy',
                       array($this, 'reference_in_mail'),
@@ -681,7 +676,6 @@ function woocommerce_gateway_easypay_split_init() {
 
                   return $this->get_reference_html($data);
               }
-
 
               /**
                * Builds a resquest url
@@ -725,9 +719,7 @@ function woocommerce_gateway_easypay_split_init() {
 
                         return $result;
 
-                    } else {
-                        die();
-                    }
+                    } else { die(); }
                 } else {
                   if (function_exists('curl_init')) {
                     $curl = curl_init();
@@ -812,7 +804,6 @@ function woocommerce_gateway_easypay_split_init() {
                   return in_array(get_woocommerce_currency(), array('EUR'));
               }
 
-              //Templates
               /**
                * Returns the Easypay MB Box
                * @param integer   $reference
