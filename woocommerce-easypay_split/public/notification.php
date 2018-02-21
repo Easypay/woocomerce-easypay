@@ -1,16 +1,7 @@
 <?php
-
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
-
-$easypay_ips = array('127.0.0.1', '195.22.18.130', '195.22.18.133', '46.101.9.8', '46.101.92.191');
-
-/*
-if (!in_array($_SERVER['REMOTE_ADDR'], $easypay_ips)) {
-	die("No valid IP" . $_SERVER['REMOTE_ADDR']);
-}
-*/
 
 if (!isset($_GET['ep_doc']) || !isset($_GET['ep_cin']) || !isset($_GET['ep_user'])) {
 	die("No valid Params!" . $_GET['ep_doc'] . " _ " . $_GET['ep_cin'] ." _ ". $_GET['ep_user']);
@@ -27,7 +18,7 @@ require_once $wpLoadFilePath;
 
 global $wpdb;
 
-$wcep = new WC_Gateway_Easypay_MB();
+$wcep = new WC_Gateway_Easypay_Split();
 
 $data_to_insert = array(
     'ep_doc' => $_GET['ep_doc'],
@@ -35,10 +26,11 @@ $data_to_insert = array(
     'ep_user' => $_GET['ep_user']
 );
 
-$url = $wcep->get_request_url( $wcep -> apis['request_payment_info'], $data_to_insert );
+$url = $wcep->get_request_url( $wcep->apis['request_payment_info'], $data_to_insert, true);
+
 $wcep->log('[' . basename(__FILE__) . '] Requested URL: ' . $url);
 
-$contents = $wcep->get_contents($url);
+$contents = $wcep->get_contents($url, "notify");
 $wcep->log('[' . basename(__FILE__) . '] Requested Content: ' . $contents);
 
 $obj = simplexml_load_string($contents);

@@ -690,9 +690,16 @@ function woocommerce_gateway_easypay_split_init() {
                * @param   array $args List of Arguments
                * @return  string
                */
-              public function get_request_url($api)
+              public function get_request_url($api, $args = null, $notify = false)
               {
-                  return ($this->test ? $this->test_url : $this->live_url) . $api;
+                  if($notify === false) {
+                    return ($this->test ? $this->test_url : $this->live_url) . $api;
+                  } else if($notify === true) {
+                    return ($this->test ? $this->test_url : $this->live_url) .
+                        $api . '?' .
+                        http_build_query($args) .
+                        ( $this->code != '' ? '&s_code=' . $this->code : '');
+                  }
               }
 
               /**
@@ -701,27 +708,41 @@ function woocommerce_gateway_easypay_split_init() {
                * @param string $url
                * @return string
                */
-              public function get_contents($url, $post)
+              public function get_contents($url, $post = null)
               {
-                  $post = http_build_query($post);
+                  if($post !== "notify") {
+                    $post = http_build_query($post);
+                    if (function_exists('curl_init')) {
+                        $curl = curl_init();
+                        curl_setopt($curl, CURLOPT_URL, $url);
+                        curl_setopt($curl, CURLOPT_POST, 1);
+                        curl_setopt($curl, CURLOPT_POSTFIELDS, $post);
+                        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded'));
+                        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE); // Remove or comment later
+                        curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+                        $result = curl_exec($curl);
+                        curl_close($curl);
+
+                        return $result;
+
+                    } else {
+                        die();
+                    }
+                } else {
                   if (function_exists('curl_init')) {
-                      $curl = curl_init();
-                      curl_setopt($curl, CURLOPT_URL, $url);
-                      curl_setopt($curl, CURLOPT_POST, 1);
-                      curl_setopt($curl, CURLOPT_POSTFIELDS, $post);
-                      curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded'));
-                      curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
-                      curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
-                      $result = curl_exec($curl);
-                      //var_dump($result);
-                      curl_close($curl);
-                      //die;
-                      //
-                      return $result;
+                    $curl = curl_init();
+                    curl_setopt($curl, CURLOPT_URL, $url);
+                    curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+                    $result = curl_exec($curl);
+                    curl_close($curl);
+
+                    return $result;
 
                   } else {
-                      die();
+
+                    return file_get_contents($url);
                   }
+                }
               }
 
               /**
