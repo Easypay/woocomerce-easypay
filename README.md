@@ -1,4 +1,8 @@
 ## woocomerce-easypay
+### VISA Payments
+
+### Multibanco Payments
+
 ### Split Payments - *Marketplaces*
 
 This Woocommerce plugin allows for *marketplaces* in a basic way by associating product categories, as *brands*, with an **easypay sub-account** filiated to a configured **easypay master account**
