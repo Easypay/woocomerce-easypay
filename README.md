@@ -1,7 +1,46 @@
 ## woocomerce-easypay
-### VISA Payments
+### Credit Card Payments
+
+This Woocommerce plugin allows for credit card single payments, enabling a costumer to jump into our gateway for safe credit card authorization and later manual ou automatic values capture. It is required to have a production or sandbox **easypay account** in order to operate with this plugin.
+
+### To install the module:
+
+* Copy as a folder to the plugins dir, checking the proper file permissions
+
+or
+
+* Install the zipped folder with the Wordpress buit-in plugin installation tool
+
+*Note: It is required to have Woocommerce installed before activation.*
+
+* Activate the **WooCommerce Easypay Gateway Credit Card** in the plugins list
+
+### To configure the module:
+
+* Click into Woocommerce -> Settings -> Checkout -> **Easypay Credit Card** - And configure all **easypay account** data
+* Copy the URLs at the bottom of the configuration page into your easypay backoffice, webservices section. 
 
 ### Multibanco Payments
+
+This Woocommerce plugins allows for Multibanco order payment at your shop using easypay as a payment identifier provider. It is required to have a production or sandbox **easypay account** in order to operate with this plugin.
+
+
+### To install the module:
+
+* Copy as a folder to the plugins dir, checking the proper file permissions
+
+or
+
+* Install the zipped folder with the Wordpress buit-in plugin installation tool
+
+*Note: It is required to have Woocommerce installed before activation.*
+
+* Activate the **WooCommerce Easypay Gateway Multi Banco** in the plugins list
+
+### To configure the module:
+
+* Click into Woocommerce -> Settings -> Checkout -> **Easypay MB** - And configure all **easypay account** data
+* Copy the URL at the bottom of the configuration page into your easypay backoffice, webservices section. 
 
 ### Split Payments - *Marketplaces*
 
@@ -17,11 +56,12 @@ or
 
 *Note: It is required to have Woocommerce installed before activation.*
 
-* Activate the **WooCommerce Easypay Gateway Split Payments** in the plugin list
+* Activate the **WooCommerce Easypay Gateway Split Payments** in the plugins list
 
 ### To configure the module:
 
 * Click into Woocommerce -> Settings -> Checkout -> **Easypay Split** - And configure all easypay **master account** data
+* Copy the URLs at the bottom of the configuration page into your easypay backoffice, webservices section.
 
 * Click into Products -> Categories:
 	1. Create a category for each sub-account.
