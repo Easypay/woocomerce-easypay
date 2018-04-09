@@ -18,7 +18,7 @@ require_once $wpLoadFilePath;
 
 global $wpdb;
 
-$wcep = new WC_Gateway_Easypay_Split();
+$wcep = new WC_Gateway_Easypay_Split_MB();
 
 $data_to_insert = array(
     'ep_doc' => $_GET['ep_doc'],

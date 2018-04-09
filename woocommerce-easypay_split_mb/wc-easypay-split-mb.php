@@ -1,6 +1,6 @@
 <?php
 /**
-* Plugin Name: WooCommerce Easypay Gateway Split Payments
+* Plugin Name: WooCommerce Easypay Gateway Split Payments MB
 * Description: Easypay Payment Gateway for WooCommerce - Don't leave for tomorrow what you can receive today
 * Author: Easypay
 * Author URI: https://easypay.pt
@@ -16,10 +16,10 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 //Installation
 require_once 'core/install.php';
-register_activation_hook(__FILE__, 'wceasypay_activation_split');
+register_activation_hook(__FILE__, 'wceasypay_activation_split_mb');
 // Deactivate
 require_once 'core/uninstall.php';
-register_deactivation_hook(__FILE__, 'wceasypay_deactivation_split');
+register_deactivation_hook(__FILE__, 'wceasypay_deactivation_split_mb');
 
 // Form
 add_action('product_cat_add_form_fields', 'wh_taxonomy_add_new_meta_field', 10, 1);
@@ -121,16 +121,16 @@ function wh_save_taxonomy_custom_meta($term_id) {
 }
 
 //Plugin initialization
-add_action('plugins_loaded', 'woocommerce_gateway_easypay_split_init', 0);
+add_action('plugins_loaded', 'woocommerce_gateway_easypay_split_mb_init', 0);
 add_action('woocommerce_api_easypay', 'easypay_callback_handler');
 
 /**
  * WC Gateway Class - Easypay Split
  */
-function woocommerce_gateway_easypay_split_init() {
+function woocommerce_gateway_easypay_split_mb_init() {
 
     if (!class_exists('WC_Payment_Gateway')) {
-        add_action('admin_notices', 'wceasypay_woocommerce_notice_split');
+        add_action('admin_notices', 'wceasypay_woocommerce_notice_split_mb');
         return;
     }
 
@@ -139,7 +139,7 @@ function woocommerce_gateway_easypay_split_init() {
      */
     load_plugin_textdomain('wceasypay', false, dirname(plugin_basename(__FILE__)) . '/languages');
 
-    class WC_Gateway_Easypay_Split extends WC_Payment_Gateway {
+    class WC_Gateway_Easypay_Split_MB extends WC_Payment_Gateway {
 
               /**
                * Gateway's Constructor.
@@ -159,7 +159,7 @@ function woocommerce_gateway_easypay_split_init() {
                   $this->ahref    = '<a href="' . get_admin_url() . 'admin.php?'.
                                     'page=wc-settings&amp;'.
                                     'tab=checkout&amp;'.
-                                    'section=wc_gateway_easypay_split">';
+                                    'section=wc_gateway_easypay_split_mb">';
                   $this->a        = '</a>';
                   // Apis
                   $this->apis     = array(
@@ -174,10 +174,10 @@ function woocommerce_gateway_easypay_split_init() {
                   // -----------------------------------------------------------------
 
                   // Inherited Variables----------------------------------------------
-                  $this->id                   = 'easypay_split';
+                  $this->id                   = 'easypay_split_mb';
                   $this->icon                 = plugins_url('images/logo.png', __FILE__);
                   $this->has_fields           = false;
-                  $this->method_title         = __('Easypay Split', 'wceasypay');
+                  $this->method_title         = __('Easypay Split MB', 'wceasypay');
                   $this->method_description   = __('Don\'t leave for tomorrow what you can receive today', 'wceasypay');
                   // -----------------------------------------------------------------
 
@@ -259,7 +259,7 @@ function woocommerce_gateway_easypay_split_init() {
                */
               public function reference_in_mail($order, $sent_to_admin)
               {
-                  if($order->get_payment_method() == 'easypay_split') {
+                  if($order->get_payment_method() == 'easypay_split_mb') {
                       global $wpdb;
                       if (!$sent_to_admin) {
                           // Log
