@@ -1,6 +1,6 @@
 <?php
 /**
-* Plugin Name: WooCommerce Easypay Gateway Split Payments MB
+* Plugin Name: WooCommerce Easypay Gateway Split Payments CC
 * Description: Easypay Payment Gateway for WooCommerce - Don't leave for tomorrow what you can receive today
 * Author: Easypay
 * Author URI: https://easypay.pt
@@ -16,10 +16,10 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 //Installation
 require_once 'core/install.php';
-register_activation_hook(__FILE__, 'wceasypay_activation_split_mb');
+register_activation_hook(__FILE__, 'wceasypay_activation_split_cc');
 // Deactivate
 require_once 'core/uninstall.php';
-register_deactivation_hook(__FILE__, 'wceasypay_deactivation_split_mb');
+register_deactivation_hook(__FILE__, 'wceasypay_deactivation_split_cc');
 
 if ( !function_exists('wh_taxonomy_add_new_meta_field') && !function_exists('wh_taxonomy_edit_meta_field') ) {
   // Form
@@ -124,18 +124,17 @@ if ( !function_exists('wh_save_taxonomy_custom_meta') ) {
       update_term_meta($term_id, 'wh_meta_country', $wh_meta_country);
   }
 }
-
 //Plugin initialization
-add_action('plugins_loaded', 'woocommerce_gateway_easypay_split_mb_init', 0);
+add_action('plugins_loaded', 'woocommerce_gateway_easypay_split_cc_init', 0);
 add_action('woocommerce_api_easypay', 'easypay_callback_handler');
 
 /**
  * WC Gateway Class - Easypay Split
  */
-function woocommerce_gateway_easypay_split_mb_init() {
+function woocommerce_gateway_easypay_split_cc_init() {
 
     if (!class_exists('WC_Payment_Gateway')) {
-        add_action('admin_notices', 'wceasypay_woocommerce_notice_split_mb');
+        add_action('admin_notices', 'wceasypay_woocommerce_notice_split_cc');
         return;
     }
 
@@ -144,7 +143,7 @@ function woocommerce_gateway_easypay_split_mb_init() {
      */
     load_plugin_textdomain('wceasypay', false, dirname(plugin_basename(__FILE__)) . '/languages');
 
-    class WC_Gateway_Easypay_Split_MB extends WC_Payment_Gateway {
+    class WC_Gateway_Easypay_Split_CC extends WC_Payment_Gateway {
 
               /**
                * Gateway's Constructor.
@@ -164,7 +163,7 @@ function woocommerce_gateway_easypay_split_mb_init() {
                   $this->ahref    = '<a href="' . get_admin_url() . 'admin.php?'.
                                     'page=wc-settings&amp;'.
                                     'tab=checkout&amp;'.
-                                    'section=wc_gateway_easypay_split_mb">';
+                                    'section=wc_gateway_easypay_split_cc">';
                   $this->a        = '</a>';
                   // Apis
                   $this->apis     = array(
@@ -179,10 +178,10 @@ function woocommerce_gateway_easypay_split_mb_init() {
                   // -----------------------------------------------------------------
 
                   // Inherited Variables----------------------------------------------
-                  $this->id                   = 'easypay_split_mb';
+                  $this->id                   = 'easypay_split_cc';
                   $this->icon                 = plugins_url('images/logo.png', __FILE__);
                   $this->has_fields           = false;
-                  $this->method_title         = __('Easypay Split MB', 'wceasypay');
+                  $this->method_title         = __('Easypay Split CC', 'wceasypay');
                   $this->method_description   = __('Don\'t leave for tomorrow what you can receive today', 'wceasypay');
                   // -----------------------------------------------------------------
 
@@ -264,7 +263,7 @@ function woocommerce_gateway_easypay_split_mb_init() {
                */
               public function reference_in_mail($order, $sent_to_admin)
               {
-                  if($order->get_payment_method() == 'easypay_split_mb') {
+                  if($order->get_payment_method() == 'easypay_split_cc') {
                       global $wpdb;
                       if (!$sent_to_admin) {
                           // Log
@@ -975,13 +974,13 @@ function woocommerce_gateway_easypay_split_mb_init() {
      * @param   array $methods
      * @return  array
      */
-    function woocommerce_add_gateway_easypay_split_mb($methods)
+    function woocommerce_add_gateway_easypay_split_cc($methods)
     {
-        $methods[] = 'WC_Gateway_Easypay_Split_MB';
+        $methods[] = 'WC_Gateway_Easypay_Split_CC';
         return $methods;
     }
 
-    add_filter('woocommerce_payment_gateways', 'woocommerce_add_gateway_easypay_split_mb');
+    add_filter('woocommerce_payment_gateways', 'woocommerce_add_gateway_easypay_split_cc');
 
     /**
      * Checkout Fields Override
@@ -989,7 +988,7 @@ function woocommerce_gateway_easypay_split_mb_init() {
      * @param   array $fields
      * @return  array
      */
-    function custom_override_checkout_fields_split_mb($fields) {
+    function custom_override_checkout_fields_split_cc($fields) {
 
         $fields['billing']['billing_state']['required'] = false;
         $fields['shipping']['shipping_state']['required'] = false;
@@ -1009,7 +1008,7 @@ function woocommerce_gateway_easypay_split_mb_init() {
         return $fields;
     }
 
-    //add_filter('woocommerce_checkout_fields', 'custom_override_checkout_fields_split_mb');
+    //add_filter('woocommerce_checkout_fields', 'custom_override_checkout_fields_split_cc');
 
     /**
      * Order Billing Details NIF Override
@@ -1017,12 +1016,12 @@ function woocommerce_gateway_easypay_split_mb_init() {
      * @param   array $billing_data
      * @return  array
      */
-    function custom_override_order_billing_details_nif_split_mb($billing_data) {
+    function custom_override_order_billing_details_nif_split_cc($billing_data) {
         $billing_data['fiscal_number'] = array('label' => __('Fiscal Number', 'wceasypay'), 'show' => true);
         return $billing_data;
     }
 
-    #add_filter('woocommerce_admin_billing_fields', 'custom_override_order_billing_details_nif_split_mb');
+    #add_filter('woocommerce_admin_billing_fields', 'custom_override_order_billing_details_nif_split_cc');
 
     /**
      * Order Shipping Details NIF Override
@@ -1030,11 +1029,11 @@ function woocommerce_gateway_easypay_split_mb_init() {
      * @param   array $shipping_data
      * @return  array
      */
-    function custom_override_order_shipping_details_nif_split_mb($shipping_data) {
+    function custom_override_order_shipping_details_nif_split_cc($shipping_data) {
         $shipping_data['fiscal_number'] = array('label' => __('Fiscal Number', 'wceasypay'), 'show' => true);
         return $shipping_data;
     }
 
-    #add_filter('woocommerce_admin_shipping_fields', 'custom_override_order_shipping_details_nif_split_mb');
+    #add_filter('woocommerce_admin_shipping_fields', 'custom_override_order_shipping_details_nif_split_cc');
 
 } //END of function woocommerce_gateway_easypay_init
