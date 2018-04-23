@@ -248,6 +248,7 @@ function woocommerce_gateway_easypay_split_mb_init() {
                   $this->country          = $this->get_option('country');
                   $this->language         = $this->get_option('language');
                   $this->expiration       = $this->get_option('expiration');
+                  $this->genpercentage    = $this->get_option('genpercentage');
                   $this->ref_type         = 'auto';
                   // Payment Types
                   $this->use_multibanco   = true;
@@ -528,6 +529,14 @@ function woocommerce_gateway_easypay_split_mb_init() {
                           'description' => __('Log Easypay events such as API requests, the logs will be placed in <code>woocommerce/logs/easypay.txt</code>', 'wceasypay'),
                           'desc_tip' => true,
                       ),
+                      'genpercentage' => array(
+                           'title' => __('General SPLIT Var Percentage', 'wceasypay'),
+                           'type' => 'decimal',
+                           'label' => __('Insert a global percentage value between 1 and 99', 'wceasypay'),
+                           'description' => __('Only 1 to 99 percent accepted', 'wceasypay'),
+                           'default' => '25',
+                           'desc_tip' => true,
+                      ),
                   );
               }
 
@@ -615,6 +624,7 @@ function woocommerce_gateway_easypay_split_mb_init() {
                   global $increment;
                   global $row_totals_increment;
                   foreach($cart_contents as $cart_row) {
+
                     $increment += 1;
                     $temp_list = array();
                     $product = wc_get_product( $cart_row["product_id"] );
@@ -635,6 +645,12 @@ function woocommerce_gateway_easypay_split_mb_init() {
                     if($productCatMetaType == "var") {
 
                       $productCatMetaVar = get_term_meta($product->category_ids[0], 'wh_meta_var', true);
+
+                      // check if we are using the global value or the category value
+                      if(empty($productCatMetaVar) || $productCatMetaVar == '') {
+                        $productCatMetaVar = $this->genpercentage;
+                      }
+
                       $line_percentage = $cart_row["line_total"] * ($productCatMetaVar/100);
 
                       $line_value = $cart_row["line_total"] - $line_percentage;
