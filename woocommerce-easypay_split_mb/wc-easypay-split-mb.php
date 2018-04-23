@@ -52,6 +52,21 @@ if ( !function_exists('wh_taxonomy_add_new_meta_field') && !function_exists('wh_
           <input type="text" name="wh_meta_country" id="wh_meta_country">
           <p class="description"><?php _e('Insert country according to your easypay access data, example: PT', 'wh'); ?></p>
       </div>
+      <!-- Transaction Type -->
+      <div class="form-field">
+          <label for="wh_meta_type"><?php _e('Type', 'wh'); ?></label>
+          <select  name="wh_meta_type" id="wh_meta_type">
+            <option value="fixed">Fixed</option>
+            <option value="var">Var</option>
+          </select>
+          <p class="description"><?php _e('If fixed all values will be received as is. If var all values will subtract a percentage for the MarketPlace', 'wh'); ?></p>
+      </div>
+      <!-- Var Value -->
+      <div class="form-field">
+          <label for="wh_meta_var"><?php _e('Var', 'wh'); ?></label>
+          <input type="number" name="wh_meta_var" id="wh_meta_var" min="1" max="99">
+          <p class="description"><?php _e('Insert percentage for the variable transaction type, example: 25', 'wh'); ?></p>
+      </div>
       <?php
   }
 
@@ -67,6 +82,10 @@ if ( !function_exists('wh_taxonomy_add_new_meta_field') && !function_exists('wh_
       $wh_meta_entity = get_term_meta($term_id, 'wh_meta_entity', true);
       // Get Country
       $wh_meta_country = get_term_meta($term_id, 'wh_meta_country', true);
+      // Get Type
+      $wh_meta_type = get_term_meta($term_id, 'wh_meta_type', true);
+      // Get Var
+      $wh_meta_var = get_term_meta($term_id, 'wh_meta_var', true);
       ?>
       <!-- CLTID -->
       <tr class="form-field">
@@ -100,6 +119,25 @@ if ( !function_exists('wh_taxonomy_add_new_meta_field') && !function_exists('wh_
               <p class="description"><?php _e('Insert country according to your easypay access data, example: PT', 'wh'); ?></p>
           </td>
       </tr>
+      <!-- Transaction Type -->
+      <tr class="form-field">
+          <th scope="row" valign="top"><label for="wh_meta_type"><?php _e('Type', 'wh'); ?></label></th>
+          <td>
+            <select name="wh_meta_type" id="wh_meta_type">
+              <?php echo esc_attr($wh_meta_type) == "fixed" ?  '<option value="fixed" selected="selected">fixed</option>' :  '<option value="fixed">fixed</option>'; ?>
+              <?php echo esc_attr($wh_meta_type) == "var" ? '<option value="var" selected="selected">var</option>' :  '<option value="var">var</option>'; ?>
+            </select>
+            <p class="description"><?php _e('If fixed all values will be received as is. If var all values will subtract a percentage for the MarketPlace', 'wh'); ?></p>
+          </td>
+      </tr>
+      <!-- Var Value -->
+      <tr class="form-field">
+          <th scope="row" valign="top"><label for="wh_meta_var"><?php _e('Var', 'wh'); ?></label></th>
+          <td>
+            <input type="number" min="1" max="99" name="wh_meta_var" id="wh_meta_var" value="<?php echo esc_attr($wh_meta_var) ? esc_attr($wh_meta_var) : ''; ?>">
+            <p class="description"><?php _e('Insert percentage for the variable transaction type, example: 25', 'wh'); ?></p>
+          </td>
+      </tr>
       <?php
   }
 }
@@ -122,6 +160,13 @@ if ( !function_exists('wh_save_taxonomy_custom_meta') ) {
       // Save / Update Country
       $wh_meta_country = filter_input(INPUT_POST, 'wh_meta_country');
       update_term_meta($term_id, 'wh_meta_country', $wh_meta_country);
+      // Save / Update Type
+      $wh_meta_type = filter_input(INPUT_POST, 'wh_meta_type');
+      update_term_meta($term_id, 'wh_meta_type', $wh_meta_type);
+      // Save / Update Var
+      $wh_meta_var = filter_input(INPUT_POST, 'wh_meta_var');
+      update_term_meta($term_id, 'wh_meta_var', $wh_meta_var);
+
   }
 }
 
@@ -584,6 +629,35 @@ function woocommerce_gateway_easypay_split_mb_init() {
 
                     $productCatMetaCountry = get_term_meta($product->category_ids[0], 'wh_meta_country', true);
 
+                    $productCatMetaType = get_term_meta($product->category_ids[0], 'wh_meta_type', true);
+
+                    // Here will be done the fixed and var calculation
+                    if($productCatMetaType == "var") {
+
+                      $productCatMetaVar = get_term_meta($product->category_ids[0], 'wh_meta_var', true);
+                      $line_percentage = $cart_row["line_total"] * ($productCatMetaVar/100);
+
+                      $line_value = $cart_row["line_total"] - $line_percentage;
+
+                      // Fill the data with now the master later another one chosen for the matter
+                      $temp_list = array(
+                        'ep_user' => $this->user,
+                        'ep_partner' => $this->user,
+                        'ep_cin' =>     $this->cin,
+                        'ep_entity' =>  $this->entity,
+                        'ep_country' => $this->country,
+                        't_value_type' => 'fixed',
+                        't_value' => $line_percentage
+                      );
+
+                      // Add the data to a JSON object
+                      $json_obj[$increment] = $temp_list;
+                      $increment += 1;
+
+                    } else if($productCatMetaType == "fixed") {
+                      $line_value = $cart_row["line_total"];
+
+                    }
                     // Fill the data
                     $temp_list = array(
                       'ep_user' => $productCatMetaClient,
@@ -592,8 +666,9 @@ function woocommerce_gateway_easypay_split_mb_init() {
                       'ep_entity' =>  $productCatMetaEntity,
                       'ep_country' => $productCatMetaCountry,
                       't_value_type' => 'fixed',
-                      't_value' => $cart_row["line_total"]
+                      't_value' => $line_value
                     );
+
                     $row_totals_increment += $cart_row["line_total"];
                     // Add the data to a JSON object
                     $json_obj[$increment] = $temp_list;
