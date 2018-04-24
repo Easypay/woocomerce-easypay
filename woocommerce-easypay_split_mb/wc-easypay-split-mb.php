@@ -687,7 +687,7 @@ function woocommerce_gateway_easypay_split_mb_init() {
                         $productCatMetaVar = $this->genpercentage;
                       }
 
-                      $line_percentage = $cart_row["line_total"] * ($productCatMetaVar/100);
+                      $line_percentage = round($cart_row["line_total"] * ($productCatMetaVar/100), 2);
 
                       $line_value = $cart_row["line_total"] - $line_percentage;
 
