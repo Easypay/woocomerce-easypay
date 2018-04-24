@@ -249,10 +249,10 @@ function woocommerce_gateway_easypay_split_mb_init() {
                   $this->language         = $this->get_option('language');
                   $this->expiration       = $this->get_option('expiration');
                   $this->genpercentage    = $this->get_option('genpercentage');
-                  $this->genpercentage    = $this->get_option('mastercin');
-                  $this->genpercentage    = $this->get_option('masteruser');
-                  $this->genpercentage    = $this->get_option('masterentity');
-                  $this->genpercentage    = $this->get_option('mastercountry');
+                  $this->mastercin        = $this->get_option('mastercin');
+                  $this->masteruser       = $this->get_option('masteruser');
+                  $this->masterentity     = $this->get_option('masterentity');
+                  $this->mastercountry    = $this->get_option('mastercountry');
                   $this->ref_type         = 'auto';
                   // Payment Types
                   $this->use_multibanco   = true;
@@ -691,13 +691,13 @@ function woocommerce_gateway_easypay_split_mb_init() {
 
                       $line_value = $cart_row["line_total"] - $line_percentage;
 
-                      // Fill the data with now the master later another one chosen for the matter
+
                       $temp_list = array(
-                        'ep_user' => $this->user,
-                        'ep_partner' => $this->user,
-                        'ep_cin' =>     $this->cin,
-                        'ep_entity' =>  $this->entity,
-                        'ep_country' => $this->country,
+                        'ep_user' => $this->masteruser,
+                        'ep_partner' => $this->masteruser,
+                        'ep_cin' =>     $this->mastercin,
+                        'ep_entity' =>  $this->masterentity,
+                        'ep_country' => $this->mastercountry,
                         't_value_type' => 'fixed',
                         't_value' => $line_percentage
                       );
