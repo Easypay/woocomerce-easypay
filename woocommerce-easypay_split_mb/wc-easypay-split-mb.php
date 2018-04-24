@@ -249,6 +249,10 @@ function woocommerce_gateway_easypay_split_mb_init() {
                   $this->language         = $this->get_option('language');
                   $this->expiration       = $this->get_option('expiration');
                   $this->genpercentage    = $this->get_option('genpercentage');
+                  $this->genpercentage    = $this->get_option('mastercin');
+                  $this->genpercentage    = $this->get_option('masteruser');
+                  $this->genpercentage    = $this->get_option('masterentity');
+                  $this->genpercentage    = $this->get_option('mastercountry');
                   $this->ref_type         = 'auto';
                   // Payment Types
                   $this->use_multibanco   = true;
@@ -529,6 +533,11 @@ function woocommerce_gateway_easypay_split_mb_init() {
                           'description' => __('Log Easypay events such as API requests, the logs will be placed in <code>woocommerce/logs/easypay.txt</code>', 'wceasypay'),
                           'desc_tip' => true,
                       ),
+                      'varfieldstitle' => array(
+                          'title' => __('Var Fields', 'wceasypay'),
+                          'type' => 'title',
+                          'description' => '',
+                      ),
                       'genpercentage' => array(
                            'title' => __('General SPLIT Var Percentage', 'wceasypay'),
                            'type' => 'decimal',
@@ -536,6 +545,34 @@ function woocommerce_gateway_easypay_split_mb_init() {
                            'description' => __('Only 1 to 99 percent accepted', 'wceasypay'),
                            'default' => '25',
                            'desc_tip' => true,
+                      ),
+                      'mastercin' => array(
+                          'title' => __('Var Account CIN', 'wceasypay'),
+                          'type' => 'text',
+                          'description' => __('The Client Identification Number of your easypay account, that will recieve the percentage cuts', 'wceasypay'),
+                          'default' => '',
+                          'desc_tip' => true,
+                      ),
+                      'masteruser' => array(
+                          'title' => __('Var account User', 'wceasypay'),
+                          'type' => 'text',
+                          'description' => __('The USER of your easypay var account. That will recieve the percentage cuts', 'wceasypay'),
+                          'default' => '',
+                          'desc_tip' => true,
+                      ),
+                      'masterentity' => array(
+                          'title' => __('Var Account Entity', 'wceasypay'),
+                          'type' => 'text',
+                          'description' => __('The ENTITY of your easypay account. <br/>Please refer to our commercial department for more information.', 'wceasypay'),
+                          'default' => '',
+                          'desc_tip' => true,
+                      ),
+                      'mastercountry' => array(
+                          'title' => __('Var Account Country', 'wceasypay'),
+                          'type' => 'text',
+                          'description' => __('Example: PT.', 'wceasypay'),
+                          'default' => 'PT',
+                          'desc_tip' => true,
                       ),
                   );
               }
@@ -553,16 +590,15 @@ function woocommerce_gateway_easypay_split_mb_init() {
                   echo '<h3>' . __('Easypay standard', 'wceasypay') . '</h3>';
                   echo '<p>' . __('Easypay standard works by sending the user to Easypay to enter their payment information.', '') . '</p>';
                   echo '<table class="form-table">';
+
                   $this->generate_settings_html();
+
                   echo '<tr>';
                   echo '<td><h3>'.__('Easypay Configurations', 'wceasypay').'</h3></td>';
                   echo '<td><p>Configurations that you must perform on your Easypay account.<br/><strong>'.__('Go to "Webservices" > "URL Configuration"', 'wceasypay').'</strong></p></td>';
                   echo '</tr><tr>';
                   echo '<td><h4>'.__('Notification URL', 'wceasypay').'</h4></td>';
-                  echo '<td><input type="text" size="100" readonly value="'.$public_url . 'notification.php'.'"/></td>';
-                  echo '</tr><tr>';
-                  echo '<td><h3>'.__('Easypay Configurations', 'wceasypay').' '.__('On your server', 'wceasypay').'</h3></td>';
-                  echo '<td>'.__('For Credit Card payment check you must create a cron job, we sugest you config your cron job to call this file once a day.', 'wceasypay').'</td>';
+                  echo '<td><input type="text" size="100" readonly value="' . $public_url . 'notification.php'.'"/></td>';
                   echo '</tr>';
                   echo '</table>';
               }
@@ -912,23 +948,18 @@ function woocommerce_gateway_easypay_split_mb_init() {
                   global $woocommerce;
                   $template = '<div style="width: 220px; float: left; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color:#eee;">
                                   <!-- img src="http://store.easyp.eu/img/MB_bw-01.png" -->
-
                                   <div style="padding: 5px; padding-top: 10px; clear: both;">
                                       <span style="font-weight: bold;float: left;">%s:</span>
                                       <span style="color: #0088cc; float: right">%s (Easypay)</span>
                                   </div>
-
                                   <div style="padding: 5px;clear: both;">
                                       <span style="font-weight: bold;float: left;">%s:</span>
                                       <span style="color: #0088cc; float: right">%s</span>
                                   </div>
-
                                   <div style="padding: 5px; clear: both;">
                                       <span style="font-weight: bold;float: left;">%s:</span>
                                       <span style="color: #0088cc; float: right">%s &euro;</span>
                                   </div>
-
-
                               </div>
                               <div style="padding: 5px; clear: both;">
                                 <a class="button wc-backward" href="' . esc_url( apply_filters( 'woocommerce_return_to_shop_redirect', wc_get_page_permalink( 'shop' ) ) ) . '">' . __( 'Return to shop', 'wceasypay' ) . ' </a>
