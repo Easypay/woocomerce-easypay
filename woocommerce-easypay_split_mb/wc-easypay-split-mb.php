@@ -691,7 +691,6 @@ function woocommerce_gateway_easypay_split_mb_init() {
 
                       $line_value = $cart_row["line_total"] - $line_percentage;
 
-
                       $temp_list = array(
                         'ep_user' => $this->masteruser,
                         'ep_partner' => $this->masteruser,

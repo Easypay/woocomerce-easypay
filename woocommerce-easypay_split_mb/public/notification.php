@@ -22,7 +22,7 @@ $wcep = new WC_Gateway_Easypay_Split_MB();
 
 $data_to_insert = array(
     'ep_doc' => $_GET['ep_doc'],
-    'ep_cin' => $_GET['ep_cin'],
+    'ep_cin' => 'ep_cin' => $wcep->cin,
     'ep_user' => $_GET['ep_user']
 );
 

@@ -820,23 +820,18 @@ function woocommerce_gateway_easypay_split_cc_init() {
                   global $woocommerce;
                   $template = '<div style="width: 220px; float: left; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color:#eee;">
                                   <!-- img src="http://store.easyp.eu/img/MB_bw-01.png" -->
-
                                   <div style="padding: 5px; padding-top: 10px; clear: both;">
                                       <span style="font-weight: bold;float: left;">%s:</span>
                                       <span style="color: #0088cc; float: right">%s (Easypay)</span>
                                   </div>
-
                                   <div style="padding: 5px;clear: both;">
                                       <span style="font-weight: bold;float: left;">%s:</span>
                                       <span style="color: #0088cc; float: right">%s</span>
                                   </div>
-
                                   <div style="padding: 5px; clear: both;">
                                       <span style="font-weight: bold;float: left;">%s:</span>
                                       <span style="color: #0088cc; float: right">%s &euro;</span>
                                   </div>
-
-
                               </div>
                               <div style="padding: 5px; clear: both;">
                                 <a class="button wc-backward" href="' . esc_url( apply_filters( 'woocommerce_return_to_shop_redirect', wc_get_page_permalink( 'shop' ) ) ) . '">' . __( 'Return to shop', 'wceasypay' ) . ' </a>
