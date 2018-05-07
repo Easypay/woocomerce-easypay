@@ -13,6 +13,7 @@
  * @package Woocommerce-easypay-gateway-mbway
  * @category Gateway
  */
+
 // Exit if accessed directly
 if ( !defined( 'ABSPATH' ) ) exit;
 
@@ -100,9 +101,11 @@ function woocommerce_gateway_easypay_mbway_init() {
             $this->code             = $this->get_option('code');
             $this->country          = $this->get_option('country');
             $this->language         = $this->get_option('language');
+            $this->expiration       = $this->get_option('expiration');
             $this->ref_type         = 'auto';
             // Payment Types
-            $this->use_multibanco   = true;
+            $this->use_mbway        = true;
+            $this->use_multibanco   = false;
             $this->use_credit_card  = false;
             $this->use_boleto       = false;
             // Gateway Testing
@@ -252,7 +255,7 @@ function woocommerce_gateway_easypay_mbway_init() {
                 !empty($this->entity) &&
                 !empty($this->country) &&
                 !empty($this->language) &&
-                ($this->use_multibanco || $this->use_credit_card || $this->use_boleto) &&
+                ($this->use_multibanco || $this->use_credit_card || $this->use_boleto || $this->use_mbway) &&
                 $this->is_valid_for_use()) ? 'yes' : 'no';
         }
 
@@ -280,6 +283,10 @@ function woocommerce_gateway_easypay_mbway_init() {
             }
             if (!$this->is_valid_for_use()) {
                 add_action('admin_notices', array(&$this, 'error_invalid_currency'));
+            }
+            // Validate expiration
+            if ($this->expiration < 1 || $this->expiration > 93) {
+                add_action('admin_notices', array(&$this, 'error_invalid_expiration'));
             }
         }
 
@@ -352,6 +359,13 @@ function woocommerce_gateway_easypay_mbway_init() {
                     'description' => __('The language that the user should see on credit card gateway.', 'wceasypay'),
                     'default' => 'PT',
                     'desc_tip' => true,
+                ),
+                'expiration' => array(
+                     'title' => __('Expiration Date (11683 Entity) in Days', 'wceasypay'),
+                     'type' => 'decimal',
+                     'description' => __('Only 1 to 93 days accepted', 'wceasypay'),
+                     'default' => '1',
+                     'desc_tip' => true,
                 ),
                 'testing' => array(
                     'title' => __('Gateway Testing', 'wceasypay'),
@@ -448,8 +462,17 @@ function woocommerce_gateway_easypay_mbway_init() {
                 'o_description' => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
                 'o_obs'         => '',
                 'o_mobile'      => $order->get_billing_phone(),
-                'o_email'       => $order->get_billing_email()
+                'o_email'       => $order->get_billing_email(),
+                'ep_partner'    => ''
             );
+
+            if($this->entity == "11683") {
+              if($this->expiration >= 1 || $this->expiration <= 93){
+                  $args['ep_partner'] = (string)$this->user;
+                  $max_date=Date('Y-m-d', strtotime("+" . $this->expiration . " days"));
+                  $args['o_max_date'] = $max_date;
+              }
+            }
 
             $this->log('Arguments for order #' . $order->get_id() . ': ' . print_r($args, true));
 
@@ -474,8 +497,6 @@ function woocommerce_gateway_easypay_mbway_init() {
                 $note .= 'Entity: ' . $data['ep_entity'] . '; ' . PHP_EOL;
                 $note .= 'Value: ' . $data['ep_value'] . '; ' . PHP_EOL;
                 $note .= 'Reference: ' . $data['ep_reference'] . '; ' . PHP_EOL;
-                // In this point the order status is pending, so, only add a note
-                //add_order_note($note, $is_customer_note - default: 0)
                 $order->add_order_note($note, 0);
             }
 
@@ -509,6 +530,27 @@ function woocommerce_gateway_easypay_mbway_init() {
                 $result .= 'Reference: ' . $data['ep_reference'] . ';' . PHP_EOL;
                 $this->log($result);
             }
+            // Validate phone form field before this step in the onverride section
+            if(!empty($order->get_billing_phone())) {
+              echo $order->get_billing_phone();
+              die;
+            } else {
+              // Error?
+            }
+
+            $args_mbway = array(
+              'e' => $data['ep_entity'],
+              'r' => $data['ep_reference'],
+              'v' => $data['ep_value'],
+              'mbway' => 'yes',
+              'mbway_title' => 'Inserir Opção de titulo no admin?', // Inserir no admin esta decidido
+              'mbway_type' => 'authorization',
+              'mbway_phone_indicative' => '351', // Inserir override no checkout - assim como tornar o campo phone + indicativo obrigatorio
+              'mbway_phone' => '911234567',
+              'mbway_currency' => 'EUR',
+              't_key' => $order->get_id()
+            );
+            // Calls the 05AG API to create an mbway authorization
 
             // It's necessary these changes for send a email with an order in processing
             #$order->update_status('on-hold'); // pending->on-hold
@@ -593,7 +635,7 @@ function woocommerce_gateway_easypay_mbway_init() {
         {
             $html .= '<div style="float: left; text-align:center; border: 1px solid #ddd; border-radius: 5px; width: 240px; min-height: 70px; padding:10px;">';
             //$html .= '<img src="http://store.easyp.eu/img/easypay_logo_nobrands-01.png" style="height:40px; margin-bottom: 10px;" title="Se quer pagar uma referência multibanco utilize a easypay" alt="Se quer pagar uma referência multibanco utilize a easypay">';
-            if ($this->use_multibanco) {
+            if ($this->use_mbway) {
                 $html .= $this->get_mbbox_template($reference['ep_entity'], $reference['ep_reference'], $reference['ep_value']);
             }
 
@@ -707,7 +749,6 @@ function woocommerce_gateway_easypay_mbway_init() {
             return sprintf($template, esc_url($boleto_url), __('Pay Now', 'wceasypay'));
         }
 
-
         // Errors
         /**
          * Displays an error message on the top of admin panel
@@ -802,6 +843,21 @@ function woocommerce_gateway_easypay_mbway_init() {
         }
 
         /**
+         * Displays an error message on the top of admin panel
+         */
+        public function error_invalid_expiration()
+        {
+            $msg = __(
+                      '<strong>Warning:</strong> Please choose an expiration number of days between 1 and 93',
+                      'wceasypay'
+                      );
+
+            $msgFinal = sprintf($msg);
+
+            echo sprintf($this->error, $msgFinal);
+        }
+
+        /**
          * Log/Debug handler
          *
          * @param string $message
@@ -833,53 +889,42 @@ function woocommerce_gateway_easypay_mbway_init() {
      * @param   array $fields
      * @return  array
      */
-    function custom_override_checkout_fields_mbway($fields) {
-        $fields['billing']['billing_state']['required'] = false;
-        $fields['shipping']['shipping_state']['required'] = false;
+     // Ensure required billing phone
+     // Try to apply mask to field
+     add_filter( 'woocommerce_checkout_fields' , 'custom_override_checkout_fields' );
 
-        $nif_field = array(
-            'label' => __('Fiscal Number', 'wceasypay'),
-            'placeholder' => _x('Fiscal Number', 'placeholder', 'wceasypay'),
-            'required' => false,
-            'class' => array('form-row-wide'),
-            'clear' => true
-        );
+     function custom_override_checkout_fields( $fields ) {
 
-        $fields['billing']['billing_fiscal_number'] = $nif_field;
-        $fields['shipping']['shipping_fiscal_number'] = $nif_field;
+          $fields['billing']['billing_phone'] = array(
+            'label'     => __('MBWay Phone (+351 912 921 881)', 'woocommerce'),
+            'placeholder'   => _x('+351 912 921 881', 'placeholder', 'woocommerce'),
+            'required'  => true,
+            'class'     => array('form-row-wide'),
+            'clear'     => true
+          );
 
-        return $fields;
-    }
+          return $fields;
+     }
+     // Validate phone field with our own rules
+     add_action('woocommerce_checkout_process', 'wh_phoneValidateCheckoutFields');
 
-    #add_filter('woocommerce_checkout_fields', 'custom_override_checkout_fields');
+      function wh_phoneValidateCheckoutFields() {
+          $billing_phone = filter_input(INPUT_POST, 'billing_phone');
 
-    /**
-     * Order Billing Details NIF Override
-     *
-     * @param   array $billing_data
-     * @return  array
+          if (strlen(trim(preg_replace('/^[6789]\d{9}$/', '', $billing_phone))) > 0) {
+              wc_add_notice(__('Invalid <strong>Phone Number</strong>, please check your input.'), 'error');
+          }
+      }
+
+     /**
+     * Display phone field value on the order edit page
      */
-    function custom_override_order_billing_details_nif_mbway($billing_data) {
-        $billing_data['fiscal_number'] = array('label' => __('Fiscal Number', 'wceasypay'), 'show' => true);
-        return $billing_data;
+
+    add_action( 'woocommerce_admin_order_data_after_shipping_address', 'my_custom_checkout_field_display_admin_order_meta', 10, 1 );
+
+    function my_custom_checkout_field_display_admin_order_meta($order){
+        echo '<p><strong>'.__('MBWay Transaction Phone Number').':</strong> ' . get_post_meta( $order->get_id(), '_billing_phone', true ) . '</p>';
     }
-
-    #add_filter('woocommerce_admin_billing_fields', 'custom_override_order_billing_details_nif');
-
-    /**
-     * Order Shipping Details NIF Override
-     *
-     * @param   array $shipping_data
-     * @return  array
-     */
-    function custom_override_order_shipping_details_nif_mbway($shipping_data) {
-        $shipping_data['fiscal_number'] = array('label' => __('Fiscal Number', 'wceasypay'), 'show' => true);
-        return $shipping_data;
-    }
-
-    #add_filter('woocommerce_admin_shipping_fields', 'custom_override_order_shipping_details_nif');
-
-
 
 } //END of function woocommerce_gateway_easypay_init
 

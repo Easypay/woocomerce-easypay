@@ -7,7 +7,7 @@ $cenas = array(
 
 file_put_contents('temp.log', print_r($cenas, true), FILE_APPEND);
 
-file_put_contents('temp.log', ">>>>>>>", FILE_APPEND);
+file_put_contents('temp.log', PHP_EOL . ">>>>>>>" . PHP_EOL, FILE_APPEND);
 
 $explodedFilePath = explode('wp-content', __FILE__);
 $wpLoadFilePath   = reset($explodedFilePath) . '/wp-load.php';
