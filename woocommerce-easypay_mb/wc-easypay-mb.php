@@ -103,6 +103,7 @@ function woocommerce_gateway_easypay_mb_init() {
             $this->code             = $this->get_option('code');
             $this->country          = $this->get_option('country');
             $this->language         = $this->get_option('language');
+            $this->expiration       = $this->get_option('expiration');
             $this->ref_type         = 'auto';
             // Payment Types
             $this->use_multibanco   = true;
@@ -288,6 +289,10 @@ function woocommerce_gateway_easypay_mb_init() {
             if (!$this->is_valid_for_use()) {
                 add_action('admin_notices', array(&$this, 'error_invalid_currency'));
             }
+            // Validate expiration
+            if ($this->expiration < 1 || $this->expiration > 93) {
+                add_action('admin_notices', array(&$this, 'error_invalid_expiration'));
+            }
         }
 
         /**
@@ -359,6 +364,13 @@ function woocommerce_gateway_easypay_mb_init() {
                     'description' => __('The language that the user should see on credit card gateway.', 'wceasypay'),
                     'default' => 'PT',
                     'desc_tip' => true,
+                ),
+                'expiration' => array(
+                     'title' => __('Expiration Date (11683 Entity) in Days', 'wceasypay'),
+                     'type' => 'decimal',
+                     'description' => __('Only 1 to 93 days accepted', 'wceasypay'),
+                     'default' => '1',
+                     'desc_tip' => true,
                 ),
                 'testing' => array(
                     'title' => __('Gateway Testing', 'wceasypay'),
@@ -449,8 +461,17 @@ function woocommerce_gateway_easypay_mb_init() {
                 'o_description' => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
                 'o_obs'         => '',
                 'o_mobile'      => $order->get_billing_phone(),
-                'o_email'       => $order->get_billing_email()
+                'o_email'       => $order->get_billing_email(),
+                'ep_partner'    => ''
             );
+
+            if($this->entity == "11683") {
+              if($this->expiration >= 1 || $this->expiration <= 93){
+                  $args['ep_partner'] = (string)$this->user;
+                  $max_date=Date('Y-m-d', strtotime("+" . $this->expiration . " days"));
+                  $args['o_max_date'] = $max_date;
+              }
+            }
 
             $this->log('Arguments for order #' . $order->get_id() . ': ' . print_r($args, true));
 
@@ -801,6 +822,22 @@ function woocommerce_gateway_easypay_mb_init() {
 
             echo sprintf($this->error, $msgFinal);
         }
+
+        /**
+         * Displays an error message on the top of admin panel
+         */
+        public function error_invalid_expiration()
+        {
+            $msg = __(
+                      '<strong>Warning:</strong> Please choose an expiration number of days between 1 and 93',
+                      'wceasypay'
+                      );
+
+            $msgFinal = sprintf($msg);
+
+            echo sprintf($this->error, $msgFinal);
+        }
+
 
         /**
          * Log/Debug handler
