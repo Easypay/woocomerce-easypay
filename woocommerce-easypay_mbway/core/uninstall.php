@@ -11,5 +11,5 @@ function wceasypay_deactivation_mbway() {
 
     #global $wpdb;
     #$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}easypay_notifications" ) or die("Could not delete table!");
-    #$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}easypay_transaction_keys" ) or die("Could not delete table!");
+    #$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}easypay_transaction_keys_mbway" ) or die("Could not delete table!");
 }

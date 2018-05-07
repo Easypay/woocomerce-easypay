@@ -13,12 +13,20 @@ function wceasypay_activation_mbway() {
 	global $wpdb, $wceasypay_db_version;
 
 	$charset_collate = $wpdb->get_charset_collate();
-	$sql = "CREATE TABLE IF NOT EXISTS ".$wpdb->prefix."easypay_transaction_keys (
-							`key` int(11) NOT NULL auto_increment,
-							`t_key` varchar(255) default NULL,
-							`k` varchar(255) default NULL,
-							PRIMARY KEY (`key`)
+	$sql = "CREATE TABLE IF NOT EXISTS ".$wpdb->prefix."easypay_transaction_keys_mbway (
+							`id` int(11) NOT NULL auto_increment,
+							`username` varchar(255) default NULL,
+							`cin` varchar(255) default NULL,
+							`entity` varchar(255) default NULL,
+							`reference` varchar(255) default NULL,
+							`key` varchar(255) default NULL,
+							`type` varchar(255) default NULL,
+							`status` varchar(255) default NULL,
+							`last_message` varchar(255) default NULL,
+							`token` varchar(255) default NULL,
+							PRIMARY KEY (`id`)
 					)  {$charset_collate};";
+
 	$sql_2 = "CREATE TABLE IF NOT EXISTS ".$wpdb->prefix."easypay_notifications (
 							`ep_key` int(11) NOT NULL auto_increment,
 							`ep_doc` varchar(50) default NULL,
