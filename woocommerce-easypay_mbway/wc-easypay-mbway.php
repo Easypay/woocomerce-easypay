@@ -102,6 +102,7 @@ function woocommerce_gateway_easypay_mbway_init() {
             $this->country          = $this->get_option('country');
             $this->language         = $this->get_option('language');
             $this->expiration       = $this->get_option('expiration');
+            $this->mbway_title      = $this->get_option('mbway_title');
             $this->ref_type         = 'auto';
             // Payment Types
             $this->use_mbway        = true;
@@ -288,6 +289,10 @@ function woocommerce_gateway_easypay_mbway_init() {
             if ($this->expiration < 1 || $this->expiration > 93) {
                 add_action('admin_notices', array(&$this, 'error_invalid_expiration'));
             }
+            // Validate mbway_title
+            if (empty($this->mbway_title)) {
+                add_action('admin_notices', array(&$this, 'error_invalid_mbway_title'));
+            }
         }
 
         /**
@@ -365,6 +370,13 @@ function woocommerce_gateway_easypay_mbway_init() {
                      'type' => 'decimal',
                      'description' => __('Only 1 to 93 days accepted', 'wceasypay'),
                      'default' => '1',
+                     'desc_tip' => true,
+                ),
+                'mbway_title' => array(
+                     'title' => __('Mbway Title for Mbway Transactions', 'wceasypay'),
+                     'type' => 'text',
+                     'description' => __('A Title Is Required', 'wceasypay'),
+                     'default' => 'MBWAY SHOP',
                      'desc_tip' => true,
                 ),
                 'testing' => array(
@@ -543,10 +555,10 @@ function woocommerce_gateway_easypay_mbway_init() {
               'r' => $data['ep_reference'],
               'v' => $data['ep_value'],
               'mbway' => 'yes',
-              'mbway_title' => 'Inserir Opção de titulo no admin?', // Inserir no admin esta decidido
+              'mbway_title' => $this->mbway_title, // adicionar o campo à lista de erros do admin em baixo
               'mbway_type' => 'authorization',
               'mbway_phone_indicative' => '351', // Inserir override no checkout - assim como tornar o campo phone + indicativo obrigatorio
-              'mbway_phone' => '911234567',
+              'mbway_phone' => '911234567', // em cima já tenho o get_billing_phone que já deve vir validado
               'mbway_currency' => 'EUR',
               't_key' => $order->get_id()
             );
@@ -858,6 +870,21 @@ function woocommerce_gateway_easypay_mbway_init() {
         }
 
         /**
+         * Displays an error message on the top of admin panel
+         */
+        public function error_invalid_mbway_title()
+        {
+            $msg = __(
+                      '<strong>Warning:</strong> Please insert a valid mbway title',
+                      'wceasypay'
+                      );
+
+            $msgFinal = sprintf($msg);
+
+            echo sprintf($this->error, $msgFinal);
+        }
+
+        /**
          * Log/Debug handler
          *
          * @param string $message
@@ -890,16 +917,16 @@ function woocommerce_gateway_easypay_mbway_init() {
      * @return  array
      */
      // Ensure required billing phone
-     // Try to apply mask to field
+
      add_filter( 'woocommerce_checkout_fields' , 'custom_override_checkout_fields' );
 
      function custom_override_checkout_fields( $fields ) {
 
           $fields['billing']['billing_phone'] = array(
-            'label'     => __('MBWay Phone (+351 912 921 881)', 'woocommerce'),
-            'placeholder'   => _x('+351 912 921 881', 'placeholder', 'woocommerce'),
+            'label'     => __('MBWay Phone (+351912921881)', 'woocommerce'),
+            'placeholder'   => _x('+351000111000', 'placeholder', 'woocommerce'),
             'required'  => true,
-            'class'     => array('form-row-wide'),
+            'class'     => array('billing-phone, form-row-wide'),
             'clear'     => true
           );
 
@@ -908,13 +935,13 @@ function woocommerce_gateway_easypay_mbway_init() {
      // Validate phone field with our own rules
      add_action('woocommerce_checkout_process', 'wh_phoneValidateCheckoutFields');
 
-      function wh_phoneValidateCheckoutFields() {
-          $billing_phone = filter_input(INPUT_POST, 'billing_phone');
+    function wh_phoneValidateCheckoutFields() {
+        $billing_phone = filter_input(INPUT_POST, 'billing_phone');
 
-          if (strlen(trim(preg_replace('/^[6789]\d{9}$/', '', $billing_phone))) > 0) {
-              wc_add_notice(__('Invalid <strong>Phone Number</strong>, please check your input.'), 'error');
-          }
-      }
+        if (strlen(trim(preg_replace('/^[+]\d{13}$/', '', $billing_phone))) > 0) {
+            wc_add_notice(__('Invalid <strong>Phone Number</strong>, please check your input.'), 'error');
+        }
+    }
 
      /**
      * Display phone field value on the order edit page
