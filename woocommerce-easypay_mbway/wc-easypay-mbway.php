@@ -544,8 +544,9 @@ function woocommerce_gateway_easypay_mbway_init() {
             }
             // Validate phone form field before this step in the onverride section
             if(!empty($order->get_billing_phone())) {
-              echo $order->get_billing_phone();
-              die;
+              $raw_phone = trim($order->get_billing_phone(), '+');
+              $country_code = substr_replace($raw_phone, '', 2, -1);
+              $phone_number = substr_replace($raw_phone, '', 0, 3);
             } else {
               // Error?
             }
@@ -557,8 +558,8 @@ function woocommerce_gateway_easypay_mbway_init() {
               'mbway' => 'yes',
               'mbway_title' => $this->mbway_title, // adicionar o campo à lista de erros do admin em baixo
               'mbway_type' => 'authorization',
-              'mbway_phone_indicative' => '351', // Inserir override no checkout - assim como tornar o campo phone + indicativo obrigatorio
-              'mbway_phone' => '911234567', // em cima já tenho o get_billing_phone que já deve vir validado
+              'mbway_phone_indicative' => $country_code, // Inserir override no checkout - assim como tornar o campo phone + indicativo obrigatorio
+              'mbway_phone' => $phone_number, // em cima já tenho o get_billing_phone que já deve vir validado
               'mbway_currency' => 'EUR',
               't_key' => $order->get_id()
             );
@@ -937,8 +938,8 @@ function woocommerce_gateway_easypay_mbway_init() {
 
     function wh_phoneValidateCheckoutFields() {
         $billing_phone = filter_input(INPUT_POST, 'billing_phone');
-
-        if (strlen(trim(preg_replace('/^[+]\d{13}$/', '', $billing_phone))) > 0) {
+        // Lets compare with a regex expression
+        if (strlen(trim(preg_replace('/^[+]\d{12}$/', '', $billing_phone))) > 0) {
             wc_add_notice(__('Invalid <strong>Phone Number</strong>, please check your input.'), 'error');
         }
     }
