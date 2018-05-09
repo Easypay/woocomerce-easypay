@@ -533,7 +533,6 @@ function woocommerce_gateway_easypay_mbway_init() {
                 $result .= 'Value: ' . $data['ep_value'] . ';' . PHP_EOL;
                 $result .= 'Reference: ' . $data['ep_reference'] . ';' . PHP_EOL;
                 $this->log($result);
-                #die("Error: I couldn't insert the reference in the database!");
             } else {
                 $result = 'New data inserted in database:' . PHP_EOL;
                 $result .= 'Order ID: ' . $order->get_id() . ';' . PHP_EOL;
@@ -556,20 +555,63 @@ function woocommerce_gateway_easypay_mbway_init() {
               'r' => $data['ep_reference'],
               'v' => $data['ep_value'],
               'mbway' => 'yes',
-              'mbway_title' => $this->mbway_title, // adicionar o campo à lista de erros do admin em baixo
+              'mbway_title' => $this->mbway_title,
               'mbway_type' => 'authorization',
-              'mbway_phone_indicative' => $country_code, // Inserir override no checkout - assim como tornar o campo phone + indicativo obrigatorio
-              'mbway_phone' => $phone_number, // em cima já tenho o get_billing_phone que já deve vir validado
+              'mbway_phone_indicative' => $country_code,
+              'mbway_phone' => $phone_number,
               'mbway_currency' => 'EUR',
               't_key' => $order->get_id()
             );
             // Calls the 05AG API to create an mbway authorization
+            // http://test.easypay.pt/_s/api_easypay_05AG.php?e=10611&r=679300400&v=1.20&mbway=yes&mbway_title=TestesEPWP&mbway_type=authorization&mbway_phone_indicative=351&mbway_phone=911234567&mbway_currency=EUR&t_key=1&s_code=d0846a2cbda2819540920acc1b61c603
 
+            $this->log('Arguments for MBWay Auth order #' . $order->get_id() . ': ' . print_r($args_mbway, true));
+
+            $mbway_url = $this->get_request_url($this->apis['request_payment'], $args_mbway);
+
+            $this->log('Request MBWay URL #' . $order->get_id() . ': ' . $mbway_url);
+            $mbway_contents = $this->get_contents($mbway_url);
+
+            $mbway_obj = simplexml_load_string($mbway_contents);
+            $mbway_data = json_decode(json_encode($mbway_obj), true);
+
+            if (!$wpdb->insert(
+                $wpdb->prefix . 'easypay_transaction_keys_mbway',
+                array(
+                    'username'     => $this->user,
+                    'cin'          => $this->cin,
+                    'entity'       => $mbway_data['e'],
+                    'reference'    => $mbway_data['r'],
+                    'key'          => $order->get_id(),
+                    'type'         => $mbway_data['mbway_type'],
+                    'status'       => $mbway_data['ep_status'],
+                    'last_message' => $mbway_data['ep_message'],
+                    'token'        => $mbway_data['ep_k1']
+                )
+            )) {
+                $result = 'Error while inserting the new generated MBWay Auth. in database:' . PHP_EOL;
+                $result .= 'Order ID: ' . $order->get_id() . ';' . PHP_EOL;
+                $result .= 'Entity: ' . $data['ep_entity'] . ';' . PHP_EOL;
+                $result .= 'Value: ' . $data['ep_value'] . ';' . PHP_EOL;
+                $result .= 'Reference: ' . $data['ep_reference'] . ';' . PHP_EOL;
+                $this->log($result);
+            } else {
+                $result = 'New MBWay Auth. data inserted in database:' . PHP_EOL;
+                $result .= 'Order ID: ' . $order->get_id() . ';' . PHP_EOL;
+                $result .= 'Entity: ' . $data['ep_entity'] . ';' . PHP_EOL;
+                $result .= 'Value: ' . $data['ep_value'] . ';' . PHP_EOL;
+                $result .= 'Reference: ' . $data['ep_reference'] . ';' . PHP_EOL;
+                $this->log($result);
+            }
+            die;
             // It's necessary these changes for send a email with an order in processing
             #$order->update_status('on-hold'); // pending->on-hold
             #$order->update_status('pending'); // on-hold->pending
             $this->payment_on_hold( $order, $reason = '' ); // reduces stock
-                        // Send Email
+
+
+            // Send Email
+            // Podiamos passar o email para o mbway-fwd, já que só nesse momento vai fazer sentido, talvez...
             add_action(
                 'mail_the_guy',
                 array($this, 'reference_in_mail'),
@@ -577,6 +619,15 @@ function woocommerce_gateway_easypay_mbway_init() {
                 2
             );
             do_action('mail_the_guy', $order, $data );
+
+            // Podiamos colocar outra página tipo: Vai receber um email assim que aprovar a transacção?! Ou optar por uma cena ninja qualquer TIPO um ciclo JS no browser
+            // Para ver se o pagamento já tinha sido recebido no mbway-fwd!!! E Caso o cliente escolhesse clicar num botão para cancelar e regressar,
+            // Caso passasse muito tempo
+            // Cancelava a encomenda e já não reduzia o stock
+            /*
+              Por um file à escuta sem ser o fwd que recebe a not. da easypay. mas que vai ver o estado do id da encomenda que eu lhe der como paramentro e vai responder o estado da encomenda ao AJAX em cada ciclo
+            */
+
 
             return $this->get_reference_html($data);
         }
