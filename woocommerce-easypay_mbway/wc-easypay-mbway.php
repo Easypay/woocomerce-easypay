@@ -592,35 +592,6 @@ function woocommerce_gateway_easypay_mbway_init() {
                 $order->add_order_note($note, 0);
             }
 
-            if (!$wpdb->insert(
-                $wpdb->prefix . 'easypay_transaction_keys_mbway',
-                array(
-                    'username'     => $this->user,
-                    'cin'          => $this->cin,
-                    'entity'       => $mbway_data['e'],
-                    'reference'    => $mbway_data['r'],
-                    'key'          => $order->get_id(),
-                    'type'         => $mbway_data['mbway_type'],
-                    'status'       => $mbway_data['ep_status'],
-                    'last_message' => $mbway_data['ep_message'],
-                    'token'        => $mbway_data['ep_k1']
-                )
-            )) {
-                $result = 'Error while inserting the new generated MBWay Auth. in database:' . PHP_EOL;
-                $result .= 'Order ID: ' . $order->get_id() . ';' . PHP_EOL;
-                $result .= 'Entity: ' . $data['ep_entity'] . ';' . PHP_EOL;
-                $result .= 'Value: ' . $data['ep_value'] . ';' . PHP_EOL;
-                $result .= 'Reference: ' . $data['ep_reference'] . ';' . PHP_EOL;
-                $this->log($result);
-            } else {
-                $result = 'New MBWay Auth. data inserted in database:' . PHP_EOL;
-                $result .= 'Order ID: ' . $order->get_id() . ';' . PHP_EOL;
-                $result .= 'Entity: ' . $data['ep_entity'] . ';' . PHP_EOL;
-                $result .= 'Value: ' . $data['ep_value'] . ';' . PHP_EOL;
-                $result .= 'Reference: ' . $data['ep_reference'] . ';' . PHP_EOL;
-                $this->log($result);
-            }
-
             // It's necessary these changes for send a email with an order in processing
             #$order->update_status('on-hold'); // pending->on-hold
             #$order->update_status('pending'); // on-hold->pending
