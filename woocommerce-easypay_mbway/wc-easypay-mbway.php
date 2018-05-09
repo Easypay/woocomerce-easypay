@@ -556,13 +556,14 @@ function woocommerce_gateway_easypay_mbway_init() {
               'v' => $data['ep_value'],
               'mbway' => 'yes',
               'mbway_title' => $this->mbway_title,
-              'mbway_type' => 'authorization',
+              'mbway_type' => 'purchase',
               'mbway_phone_indicative' => $country_code,
               'mbway_phone' => $phone_number,
               'mbway_currency' => 'EUR',
               't_key' => $order->get_id()
             );
-            // Calls the 05AG API to create an mbway authorization
+
+            // Call the 05AG API to create an mbway authorization
             // http://test.easypay.pt/_s/api_easypay_05AG.php?e=10611&r=679300400&v=1.20&mbway=yes&mbway_title=TestesEPWP&mbway_type=authorization&mbway_phone_indicative=351&mbway_phone=911234567&mbway_currency=EUR&t_key=1&s_code=d0846a2cbda2819540920acc1b61c603
 
             $this->log('Arguments for MBWay Auth order #' . $order->get_id() . ': ' . print_r($args_mbway, true));
@@ -574,6 +575,22 @@ function woocommerce_gateway_easypay_mbway_init() {
 
             $mbway_obj = simplexml_load_string($mbway_contents);
             $mbway_data = json_decode(json_encode($mbway_obj), true);
+
+            if (!$mbway_data) {
+                $this->log('Error while requesting MBWay Auth. 1 #' . $order->get_id() . ' [' . $mbway_contents . ']');
+                return $this->error_btn_order($order, 'Not enough data.');
+            }
+            if ($mbway_data['ep_status'] != 'accepted') {
+                $this->log('Error while requesting MBWay Auth. 2 #' . $order->get_id() . ' [' . $mbway_data['ep_message'] . ']');
+                return $this->error_btn_order($order, $mbway_data['ep_message']);
+            } else {
+                $this->log('MBWay Auth. created #' . $order->get_id() . ' @' . $mbway_data['r'] . ']');
+                $note = __('Awaiting for reference payment.', 'wceasypay') . PHP_EOL;
+                $note .= 'Entity: ' . $mbway_data['e'] . '; ' . PHP_EOL;
+                $note .= 'Value: ' .  $mbway_data['v'] . '; ' . PHP_EOL;
+                $note .= 'Reference: ' . $mbway_data['r'] . '; ' . PHP_EOL;
+                $order->add_order_note($note, 0);
+            }
 
             if (!$wpdb->insert(
                 $wpdb->prefix . 'easypay_transaction_keys_mbway',
@@ -603,7 +620,7 @@ function woocommerce_gateway_easypay_mbway_init() {
                 $result .= 'Reference: ' . $data['ep_reference'] . ';' . PHP_EOL;
                 $this->log($result);
             }
-            die;
+
             // It's necessary these changes for send a email with an order in processing
             #$order->update_status('on-hold'); // pending->on-hold
             #$order->update_status('pending'); // on-hold->pending
@@ -975,7 +992,7 @@ function woocommerce_gateway_easypay_mbway_init() {
      function custom_override_checkout_fields( $fields ) {
 
           $fields['billing']['billing_phone'] = array(
-            'label'     => __('MBWay Phone (+351912921881)', 'woocommerce'),
+            'label'     => __('Phone', 'woocommerce'),
             'placeholder'   => _x('+351000111000', 'placeholder', 'woocommerce'),
             'required'  => true,
             'class'     => array('billing-phone, form-row-wide'),
