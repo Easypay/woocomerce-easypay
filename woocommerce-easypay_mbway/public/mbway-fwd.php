@@ -26,7 +26,7 @@ $json_payload = json_decode(file_get_contents('php://input'));
 
 // #1 - Update
 
-$wpdb->update(
+if (!$wpdb->update(
 	$wpdb->prefix . 'easypay_transaction_keys_mbway',
 	array(
 		'username'       => $json_payload->username,
@@ -36,13 +36,13 @@ $wpdb->update(
     'key'            => $json_payload->key,
     'type'           => $json_payload->type,
     'status'         => $json_payload->status,
-    'status_message' => $json_payload->status_message,
+    'last_message'   => $json_payload->status_message,
     'token'          => $json_payload->token
 	),
 	array( 'key' => $json_payload->key ),
 	array(
-		'%s',	// value1
-		'%s',	// value2
+		'%s',
+		'%s',
     '%s',
     '%s',
     '%s',
@@ -52,7 +52,10 @@ $wpdb->update(
     '%s'
 	),
 	array( '%s' )
-);
+)) {
+  file_put_contents('temp.log', 'Não consegui inserir!' , FILE_APPEND);
+
+}
 
 // #2 - Change Order Status
 
