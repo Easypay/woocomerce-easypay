@@ -592,6 +592,9 @@ function woocommerce_gateway_easypay_mbway_init() {
                 $order->add_order_note($note, 0);
             }
 
+            // AJAX requests cycle phase
+
+
             // It's necessary these changes for send a email with an order in processing
             #$order->update_status('on-hold'); // pending->on-hold
             #$order->update_status('pending'); // on-hold->pending

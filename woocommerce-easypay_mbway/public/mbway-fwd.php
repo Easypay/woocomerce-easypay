@@ -1,14 +1,4 @@
 <?php
-// Debug
-$cenas = array(
-        'get' => print_r($_GET, true),
-        'post' => print_r($_POST, true),
-        'raw body' => file_get_contents('php://input')
-        );
-
-file_put_contents('temp.log', print_r($cenas, true), FILE_APPEND);
-
-file_put_contents('temp.log', PHP_EOL . ">>>>>>>" . PHP_EOL, FILE_APPEND);
 
 $explodedFilePath = explode('wp-content', __FILE__);
 $wpLoadFilePath   = reset($explodedFilePath) . '/wp-load.php';
@@ -41,9 +31,6 @@ if (!$wpdb->insert(
     'token'          => $json_payload->token
 	)
 )) {
-  file_put_contents('temp.log', $json_payload->key , FILE_APPEND);
+  // Error
 
 }
-
-// Output
-file_put_contents('temp.log', print_r($json_payload, true), FILE_APPEND);
