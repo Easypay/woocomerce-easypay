@@ -29,6 +29,39 @@ add_action('plugins_loaded', 'woocommerce_gateway_easypay_mbway_init', 0);
 add_action('woocommerce_api_easypay', 'easypay_callback_handler');
 
 /**
+ * Unhook and remove WooCommerce default emails.
+ */
+add_action( 'woocommerce_email', 'unhook_those_pesky_emails_mbway' );
+
+function unhook_those_pesky_emails_mbway( $email_class ) {
+
+    /**
+     * Hooks for sending emails during store events
+     **/
+    remove_action( 'woocommerce_low_stock_notification', array( $email_class, 'low_stock' ) );
+    remove_action( 'woocommerce_no_stock_notification', array( $email_class, 'no_stock' ) );
+    remove_action( 'woocommerce_product_on_backorder_notification', array( $email_class, 'backorder' ) );
+
+    // New order emails
+    remove_action( 'woocommerce_order_status_pending_to_processing_notification', array( $email_class->emails['WC_Email_New_Order'], 'trigger' ) );
+    remove_action( 'woocommerce_order_status_pending_to_completed_notification', array( $email_class->emails['WC_Email_New_Order'], 'trigger' ) );
+    remove_action( 'woocommerce_order_status_pending_to_on-hold_notification', array( $email_class->emails['WC_Email_New_Order'], 'trigger' ) );
+    remove_action( 'woocommerce_order_status_failed_to_processing_notification', array( $email_class->emails['WC_Email_New_Order'], 'trigger' ) );
+    remove_action( 'woocommerce_order_status_failed_to_completed_notification', array( $email_class->emails['WC_Email_New_Order'], 'trigger' ) );
+    remove_action( 'woocommerce_order_status_failed_to_on-hold_notification', array( $email_class->emails['WC_Email_New_Order'], 'trigger' ) );
+
+    // Processing order emails
+    remove_action( 'woocommerce_order_status_pending_to_processing_notification', array( $email_class->emails['WC_Email_Customer_Processing_Order'], 'trigger' ) );
+    remove_action( 'woocommerce_order_status_pending_to_on-hold_notification', array( $email_class->emails['WC_Email_Customer_Processing_Order'], 'trigger' ) );
+
+    // Completed order emails
+    remove_action( 'woocommerce_order_status_completed_notification', array( $email_class->emails['WC_Email_Customer_Completed_Order'], 'trigger' ) );
+
+    // Note emails
+    remove_action( 'woocommerce_new_customer_note_notification', array( $email_class->emails['WC_Email_Customer_Note'], 'trigger' ) );
+}
+
+/**
  * WC Gateway Class - Easypay MB
  */
 function woocommerce_gateway_easypay_mbway_init() {
@@ -159,6 +192,7 @@ function woocommerce_gateway_easypay_mbway_init() {
             wc_reduce_stock_levels($order->get_id());
             WC()->cart->empty_cart();
 	    }
+
 
          /**
          * Put the reference, entity and value in the email.
@@ -578,31 +612,20 @@ function woocommerce_gateway_easypay_mbway_init() {
 
             if (!$mbway_data) {
                 $this->log('Error while requesting MBWay Auth. 1 #' . $order->get_id() . ' [' . $mbway_contents . ']');
-                return $this->error_btn_order($order, 'Not enough data.');
             }
             if ($mbway_data['ep_status'] != 'accepted') {
                 $this->log('Error while requesting MBWay Auth. 2 #' . $order->get_id() . ' [' . $mbway_data['ep_message'] . ']');
-                return $this->error_btn_order($order, $mbway_data['ep_message']);
             } else {
                 $this->log('MBWay Auth. created #' . $order->get_id() . ' @' . $mbway_data['r'] . ']');
-                $note = __('Awaiting for reference payment.', 'wceasypay') . PHP_EOL;
-                $note .= 'Entity: ' . $mbway_data['e'] . '; ' . PHP_EOL;
-                $note .= 'Value: ' .  $mbway_data['v'] . '; ' . PHP_EOL;
-                $note .= 'Reference: ' . $mbway_data['r'] . '; ' . PHP_EOL;
-                $order->add_order_note($note, 0);
             }
-
-            // AJAX requests cycle phase
-
 
             // It's necessary these changes for send a email with an order in processing
             #$order->update_status('on-hold'); // pending->on-hold
             #$order->update_status('pending'); // on-hold->pending
-            $this->payment_on_hold( $order, $reason = '' ); // reduces stock
-
+            // $this->payment_on_hold( $order, $reason = '' ); // reduces stock
 
             // Send Email
-            // Podiamos passar o email para o mbway-fwd, já que só nesse momento vai fazer sentido, talvez...
+            /*
             add_action(
                 'mail_the_guy',
                 array($this, 'reference_in_mail'),
@@ -610,6 +633,8 @@ function woocommerce_gateway_easypay_mbway_init() {
                 2
             );
             do_action('mail_the_guy', $order, $data );
+            */
+            // $this->payment_on_hold( $order, $reason = '' );
 
             // Podiamos colocar outra página tipo: Vai receber um email assim que aprovar a transacção?! Ou optar por uma cena ninja qualquer TIPO um ciclo JS no browser
             // Para ver se o pagamento já tinha sido recebido no mbway-fwd!!! E Caso o cliente escolhesse clicar num botão para cancelar e regressar,
