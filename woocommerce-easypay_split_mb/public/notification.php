@@ -22,7 +22,7 @@ $wcep = new WC_Gateway_Easypay_Split_MB();
 
 $data_to_insert = array(
     'ep_doc' => $_GET['ep_doc'],
-    'ep_cin' => 'ep_cin' => $wcep->cin,
+    'ep_cin' => $wcep->cin,
     'ep_user' => $_GET['ep_user']
 );
 
@@ -37,7 +37,7 @@ $obj = simplexml_load_string($contents);
 $data = json_decode(json_encode($obj), true);
 
 $temp['select'] = sprintf( "SELECT ep_key, ep_status FROM %seasypay_notifications WHERE ep_reference = '%s'", $wpdb -> prefix, $data['ep_reference'] );
-$temp['mesage'] = 'document generated';
+$temp['message'] = 'document generated';
 $temp['status'] = 'ok0';
 
 $result = $wpdb->get_results( $temp['select'], ARRAY_A );
@@ -49,8 +49,8 @@ if (!$result) {
 }
 
 //Once it has an entry on database, we check the status to see if needs further actions
-if ( $result['ep_status'] == 'processed' ) {
-	$temp['mesage'] = 'document already processed';
+if ( $result[0]['ep_status'] == 'processed' ) {
+	$temp['message'] = 'document already processed';
 	$temp['ep_status'] = 'ok0';
 } else {
 	$set = array(
@@ -84,9 +84,9 @@ header('Content-type: text/xml; charset="ISO-8859-1"');
 <?= '<?xml version="1.0" encoding="ISO-8859-1"?>' ?>
 <getautoMB_key>
   <ep_status><?= $temp['status'] ?></ep_status>
-  <ep_message><?= $temp['mesage'] ?></ep_message>
+  <ep_message><?= $temp['message'] ?></ep_message>
   <ep_cin><?= $_GET['ep_cin'] ?></ep_cin>
   <ep_user><?= $_GET['ep_user'] ?></ep_user>
   <ep_doc><?= $_GET['ep_doc'] ?></ep_doc>
-  <ep_key><?= $result['ep_key'] ?></ep_key>
+  <ep_key><?= $result[0]['ep_key'] ?></ep_key>
 </getautoMB_key>
