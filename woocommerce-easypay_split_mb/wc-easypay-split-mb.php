@@ -21,6 +21,8 @@ register_activation_hook(__FILE__, 'wceasypay_activation_split_mb');
 require_once 'core/uninstall.php';
 register_deactivation_hook(__FILE__, 'wceasypay_deactivation_split_mb');
 
+
+// Begin of Splitting Stuff
 if ( !function_exists('wh_taxonomy_add_new_meta_field') && !function_exists('wh_taxonomy_edit_meta_field') ) {
   // Form
   add_action('product_cat_add_form_fields', 'wh_taxonomy_add_new_meta_field', 10, 1);
@@ -174,6 +176,8 @@ if ( !function_exists('wh_save_taxonomy_custom_meta') ) {
 add_action('plugins_loaded', 'woocommerce_gateway_easypay_split_mb_init', 0);
 add_action('woocommerce_api_easypay', 'easypay_callback_handler');
 
+// End of Splitting
+
 /**
  * WC Gateway Class - Easypay Split
  */
@@ -253,6 +257,11 @@ function woocommerce_gateway_easypay_split_mb_init() {
                   $this->masteruser       = $this->get_option('masteruser');
                   $this->masterentity     = $this->get_option('masterentity');
                   $this->mastercountry    = $this->get_option('mastercountry');
+                  // remainder fees
+                  $this->remaindercin     = $this->get_option('remaindercin');
+                  $this->remainderuser    = $this->get_option('remainderuser');
+                  $this->remainderentity  = $this->get_option('remainderentity');
+                  $this->remaindercountry = $this->get_option('remaindercountry');
                   $this->ref_type         = 'auto';
                   // Payment Types
                   $this->use_multibanco   = true;
@@ -534,7 +543,7 @@ function woocommerce_gateway_easypay_split_mb_init() {
                           'desc_tip' => true,
                       ),
                       'varfieldstitle' => array(
-                          'title' => __('Var Fields', 'wceasypay'),
+                          'title' => __('Var Values:', 'wceasypay'),
                           'type' => 'title',
                           'description' => '',
                       ),
@@ -568,6 +577,39 @@ function woocommerce_gateway_easypay_split_mb_init() {
                           'desc_tip' => true,
                       ),
                       'mastercountry' => array(
+                          'title' => __('Var Account Country', 'wceasypay'),
+                          'type' => 'text',
+                          'description' => __('Example: PT.', 'wceasypay'),
+                          'default' => 'PT',
+                          'desc_tip' => true,
+                      ),
+                      'remainderfieldstitle' => array(
+                          'title' => __('Post Fees And Others Account:', 'wceasypay'),
+                          'type' => 'title',
+                          'description' => '',
+                      ),
+                      'remaindercin' => array(
+                          'title' => __('Var Account CIN', 'wceasypay'),
+                          'type' => 'text',
+                          'description' => __('The Client Identification Number of your easypay account, that will recieve post', 'wceasypay'),
+                          'default' => '',
+                          'desc_tip' => true,
+                      ),
+                      'remainderuser' => array(
+                          'title' => __('Var account User', 'wceasypay'),
+                          'type' => 'text',
+                          'description' => __('The USER of your easypay var account. That will recieve the post fees', 'wceasypay'),
+                          'default' => '',
+                          'desc_tip' => true,
+                      ),
+                      'remainderentity' => array(
+                          'title' => __('Var Account Entity', 'wceasypay'),
+                          'type' => 'text',
+                          'description' => __('The ENTITY of your easypay account. <br/>Please refer to our commercial department for more information.', 'wceasypay'),
+                          'default' => '',
+                          'desc_tip' => true,
+                      ),
+                      'remaindercountry' => array(
                           'title' => __('Var Account Country', 'wceasypay'),
                           'type' => 'text',
                           'description' => __('Example: PT.', 'wceasypay'),
@@ -653,6 +695,7 @@ function woocommerce_gateway_easypay_split_mb_init() {
                     }
                   }
 
+                  // Begin of Splitting
                   $cart = WC()->cart;
                   $cart_contents = $cart->get_cart_contents();
                   // Init the JSON array
@@ -725,15 +768,15 @@ function woocommerce_gateway_easypay_split_mb_init() {
                     $json_obj[$increment] = $temp_list;
 
                   }
-                  // Lets add the expenses to the master account
+                  // Lets add the expenses to the remainder account
                   $row_totals_increment = $order->get_total() - $row_totals_increment;
                   $increment += 1;
                   $temp_list = array(
-                    'ep_user' => $this->user,
+                    'ep_user' => $this->remainderuser,
                     'ep_partner' => $this->user,
-                    'ep_cin' =>     $this->cin,
-                    'ep_entity' =>  $this->entity,
-                    'ep_country' => $this->country,
+                    'ep_cin' =>     $this->remaindercin,
+                    'ep_entity' =>  $this->remainderentity,
+                    'ep_country' => $this->remaindercountry,
                     't_value_type' => 'fixed',
                     't_value' => $row_totals_increment
                   );
@@ -743,6 +786,8 @@ function woocommerce_gateway_easypay_split_mb_init() {
                   // Add to args data
                   $args["ep_split"] = "normal";
                   $args["split_json"] = $json_data;
+
+                  // End of Splitting
 
                   $this->code != '' ? $args["s_code"] = $this->code : '';
                   $this->log('Arguments for order #' . $order->get_id() . ': ' . print_r($args, true));
