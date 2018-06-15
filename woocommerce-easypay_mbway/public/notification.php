@@ -27,7 +27,7 @@ require_once $wpLoadFilePath;
 
 global $wpdb;
 
-$wcep = new WC_Gateway_Easypay_MB();
+$wcep = new WC_Gateway_Easypay_MBWay();
 
 $data_to_insert = array(
     'ep_doc' => $_GET['ep_doc'],
@@ -35,7 +35,7 @@ $data_to_insert = array(
     'ep_user' => $_GET['ep_user']
 );
 
-$url = $wcep->get_request_url( $wcep -> apis['request_payment_info'], $data_to_insert );
+$url = $wcep->get_request_url( $wcep->apis['request_payment_info'], $data_to_insert );
 $wcep->log('[' . basename(__FILE__) . '] Requested URL: ' . $url);
 
 $contents = $wcep->get_contents($url);
@@ -44,7 +44,7 @@ $wcep->log('[' . basename(__FILE__) . '] Requested Content: ' . $contents);
 $obj = simplexml_load_string($contents);
 $data = json_decode(json_encode($obj), true);
 
-$temp['select'] = sprintf( "SELECT ep_key, ep_status FROM %seasypay_notifications WHERE ep_reference = '%s'", $wpdb -> prefix, $data['ep_reference'] );
+$temp['select'] = sprintf( "SELECT ep_key, ep_status FROM %seasypay_notifications WHERE ep_reference = '%s'", $wpdb->prefix, $data['ep_reference'] );
 $temp['message'] = 'document generated';
 $temp['status'] = 'ok0';
 
@@ -56,7 +56,6 @@ if (!$result) {
 	$temp['status'] = 'err1';
 }
 
-
 //Once it has an entry on database, we check the status to see if needs further actions
 if ( $result[0]['ep_status'] == 'processed' ) {
 	$temp['message'] = 'document already processed';
@@ -66,25 +65,27 @@ if ( $result[0]['ep_status'] == 'processed' ) {
         'ep_doc' => $_GET['ep_doc'],
         'ep_cin' => $_GET['ep_cin'],
         'ep_user' =>$_GET['ep_user'],
-	    'ep_status' => 'processed',
-	    'ep_entity' => $data['ep_entity'],
-	    'ep_reference' => $data['ep_reference'],
-	    'ep_value' => $data['ep_value'],
-	    'ep_date' => $data['ep_date'],
-	    'ep_payment_type' => $data['ep_payment_type'],
-	    'ep_value_fixed' => $data['ep_value_fixed'],
-	    'ep_value_var' => $data['ep_value_var'],
-	    'ep_value_tax' => $data['ep_value_tax'],
-	    'ep_value_transf' => $data['ep_value_transf'],
-	    'ep_date_transf' => $data['ep_date_transf'],
-	    't_key' => $data['t_key']
+        'ep_status' => 'processed',
+        'ep_entity' => $data['ep_entity'],
+        'ep_reference' => $data['ep_reference'],
+        'ep_value' => $data['ep_value'],
+        'ep_date' => $data['ep_date'],
+        'ep_payment_type' => $data['ep_payment_type'],
+        'ep_value_fixed' => $data['ep_value_fixed'],
+        'ep_value_var' => $data['ep_value_var'],
+        'ep_value_tax' => $data['ep_value_tax'],
+        'ep_value_transf' => $data['ep_value_transf'],
+        'ep_date_transf' => $data['ep_date_transf'],
+        't_key' => $data['t_key']
 	);
 
 	$wcep -> log('[' . basename(__FILE__) . '] Notification Data: ' . print_r($data_to_insert, true) . print_r($set, true));
 	$wpdb->update($wpdb->prefix . 'easypay_notifications', $set, array('ep_reference' => $data['ep_reference']));
 
 	$order = new WC_Order($data['t_key']);
-	$order->update_status('completed', 'Payment completed');
+
+    $order->update_status('on-hold', 'Received Payment');
+
 }
 
 header('Content-type: text/xml; charset="ISO-8859-1"');

@@ -1,6 +1,6 @@
 <?php
 /**
-* Plugin Name: WooCommerce Easypay Gateway Split Payments
+* Plugin Name: WooCommerce Easypay Gateway Split Payments CC
 * Description: Easypay Payment Gateway for WooCommerce - Don't leave for tomorrow what you can receive today
 * Author: Easypay
 * Author URI: https://easypay.pt
@@ -16,121 +16,125 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 //Installation
 require_once 'core/install.php';
-register_activation_hook(__FILE__, 'wceasypay_activation_split');
+register_activation_hook(__FILE__, 'wceasypay_activation_split_cc');
 // Deactivate
 require_once 'core/uninstall.php';
-register_deactivation_hook(__FILE__, 'wceasypay_deactivation_split');
+register_deactivation_hook(__FILE__, 'wceasypay_deactivation_split_cc');
 
-// Form
-add_action('product_cat_add_form_fields', 'wh_taxonomy_add_new_meta_field', 10, 1);
-add_action('product_cat_edit_form_fields', 'wh_taxonomy_edit_meta_field', 10, 1);
-//Product Cat Create page
-function wh_taxonomy_add_new_meta_field() {
-    ?>
-    <!-- CLTID -->
-    <div class="form-field">
-        <label for="wh_meta_clientid"><?php _e('Client ID (easypay)', 'wh'); ?></label>
-        <input type="text" name="wh_meta_clientid" id="wh_meta_clientid">
-        <p class="description"><?php _e('Insert your client id with easypay, example: EXEMP010203', 'wh'); ?></p>
-    </div>
-    <!-- CIN -->
-    <div class="form-field">
-        <label for="wh_meta_cin"><?php _e('CIN', 'wh'); ?></label>
-        <input type="text" name="wh_meta_cin" id="wh_meta_cin">
-        <p class="description"><?php _e('Insert your CIN number with easypay, example: 9998', 'wh'); ?></p>
-    </div>
-    <!-- ENTITY -->
-    <div class="form-field">
-        <label for="wh_meta_entity"><?php _e('Entity', 'wh'); ?></label>
-        <input type="text" name="wh_meta_entity" id="wh_meta_cin">
-        <p class="description"><?php _e('Insert your entity with easypay, example: 10611', 'wh'); ?></p>
-    </div>
-    <!-- COUNTRY -->
-    <div class="form-field">
-        <label for="wh_meta_country"><?php _e('Country', 'wh'); ?></label>
-        <input type="text" name="wh_meta_country" id="wh_meta_country">
-        <p class="description"><?php _e('Insert country according to your easypay access data, example: PT', 'wh'); ?></p>
-    </div>
-    <?php
+if ( !function_exists('wh_taxonomy_add_new_meta_field') && !function_exists('wh_taxonomy_edit_meta_field') ) {
+  // Form
+  add_action('product_cat_add_form_fields', 'wh_taxonomy_add_new_meta_field', 10, 1);
+  add_action('product_cat_edit_form_fields', 'wh_taxonomy_edit_meta_field', 10, 1);
+  //Product Cat Create page
+  function wh_taxonomy_add_new_meta_field() {
+      ?>
+      <!-- CLTID -->
+      <div class="form-field">
+          <label for="wh_meta_clientid"><?php _e('Client ID (easypay)', 'wh'); ?></label>
+          <input type="text" name="wh_meta_clientid" id="wh_meta_clientid">
+          <p class="description"><?php _e('Insert your client id with easypay, example: EXEMP010203', 'wh'); ?></p>
+      </div>
+      <!-- CIN -->
+      <div class="form-field">
+          <label for="wh_meta_cin"><?php _e('CIN', 'wh'); ?></label>
+          <input type="text" name="wh_meta_cin" id="wh_meta_cin">
+          <p class="description"><?php _e('Insert your CIN number with easypay, example: 9998', 'wh'); ?></p>
+      </div>
+      <!-- ENTITY -->
+      <div class="form-field">
+          <label for="wh_meta_entity"><?php _e('Entity', 'wh'); ?></label>
+          <input type="text" name="wh_meta_entity" id="wh_meta_cin">
+          <p class="description"><?php _e('Insert your entity with easypay, example: 10611', 'wh'); ?></p>
+      </div>
+      <!-- COUNTRY -->
+      <div class="form-field">
+          <label for="wh_meta_country"><?php _e('Country', 'wh'); ?></label>
+          <input type="text" name="wh_meta_country" id="wh_meta_country">
+          <p class="description"><?php _e('Insert country according to your easypay access data, example: PT', 'wh'); ?></p>
+      </div>
+      <?php
+  }
+
+  //Product Cat Edit page
+  function wh_taxonomy_edit_meta_field($term) {
+      //getting term ID
+      $term_id = $term->term_id;
+      // Get Client ID
+      $wh_meta_clientid = get_term_meta($term_id, 'wh_meta_clientid', true);
+      // Get CIN
+      $wh_meta_cin = get_term_meta($term_id, 'wh_meta_cin', true);
+      // Get Entity
+      $wh_meta_entity = get_term_meta($term_id, 'wh_meta_entity', true);
+      // Get Country
+      $wh_meta_country = get_term_meta($term_id, 'wh_meta_country', true);
+      ?>
+      <!-- CLTID -->
+      <tr class="form-field">
+          <th scope="row" valign="top"><label for="wh_meta_clientid"><?php _e('Client ID (easypay)', 'wh'); ?></label></th>
+          <td>
+              <input type="text" name="wh_meta_clientid" id="wh_meta_clientid" value="<?php echo esc_attr($wh_meta_clientid) ? esc_attr($wh_meta_clientid) : ''; ?>">
+              <p class="description"><?php _e('Insert your client id with easypay, example: EXEMP010203', 'wh'); ?></p>
+          </td>
+      </tr>
+      <!-- CIN -->
+      <tr class="form-field">
+          <th scope="row" valign="top"><label for="wh_meta_cin"><?php _e('CIN', 'wh'); ?></label></th>
+          <td>
+              <input type="text" name="wh_meta_cin" id="wh_meta_cin" value="<?php echo esc_attr($wh_meta_cin) ? esc_attr($wh_meta_cin) : ''; ?>">
+              <p class="description"><?php _e('Insert your CIN number with easypay, example: 9998', 'wh'); ?></p>
+          </td>
+      </tr>
+      <!-- Entity -->
+      <tr class="form-field">
+          <th scope="row" valign="top"><label for="wh_meta_entity"><?php _e('Entity', 'wh'); ?></label></th>
+          <td>
+              <input type="text" name="wh_meta_entity" id="wh_meta_entity" value="<?php echo esc_attr($wh_meta_entity) ? esc_attr($wh_meta_entity) : ''; ?>">
+              <p class="description"><?php _e('Insert your entity with easypay, example: 10611', 'wh'); ?></p>
+          </td>
+      </tr>
+      <!-- Country -->
+      <tr class="form-field">
+          <th scope="row" valign="top"><label for="wh_meta_country"><?php _e('Country', 'wh'); ?></label></th>
+          <td>
+              <input type="text" name="wh_meta_country" id="wh_meta_country" value="<?php echo esc_attr($wh_meta_country) ? esc_attr($wh_meta_country) : ''; ?>">
+              <p class="description"><?php _e('Insert country according to your easypay access data, example: PT', 'wh'); ?></p>
+          </td>
+      </tr>
+      <?php
+  }
 }
 
-//Product Cat Edit page
-function wh_taxonomy_edit_meta_field($term) {
-    //getting term ID
-    $term_id = $term->term_id;
-    // Get Client ID
-    $wh_meta_clientid = get_term_meta($term_id, 'wh_meta_clientid', true);
-    // Get CIN
-    $wh_meta_cin = get_term_meta($term_id, 'wh_meta_cin', true);
-    // Get Entity
-    $wh_meta_entity = get_term_meta($term_id, 'wh_meta_entity', true);
-    // Get Country
-    $wh_meta_country = get_term_meta($term_id, 'wh_meta_country', true);
-    ?>
-    <!-- CLTID -->
-    <tr class="form-field">
-        <th scope="row" valign="top"><label for="wh_meta_clientid"><?php _e('Client ID (easypay)', 'wh'); ?></label></th>
-        <td>
-            <input type="text" name="wh_meta_clientid" id="wh_meta_clientid" value="<?php echo esc_attr($wh_meta_clientid) ? esc_attr($wh_meta_clientid) : ''; ?>">
-            <p class="description"><?php _e('Insert your client id with easypay, example: EXEMP010203', 'wh'); ?></p>
-        </td>
-    </tr>
-    <!-- CIN -->
-    <tr class="form-field">
-        <th scope="row" valign="top"><label for="wh_meta_cin"><?php _e('CIN', 'wh'); ?></label></th>
-        <td>
-            <input type="text" name="wh_meta_cin" id="wh_meta_cin" value="<?php echo esc_attr($wh_meta_cin) ? esc_attr($wh_meta_cin) : ''; ?>">
-            <p class="description"><?php _e('Insert your CIN number with easypay, example: 9998', 'wh'); ?></p>
-        </td>
-    </tr>
-    <!-- Entity -->
-    <tr class="form-field">
-        <th scope="row" valign="top"><label for="wh_meta_entity"><?php _e('Entity', 'wh'); ?></label></th>
-        <td>
-            <input type="text" name="wh_meta_entity" id="wh_meta_entity" value="<?php echo esc_attr($wh_meta_entity) ? esc_attr($wh_meta_entity) : ''; ?>">
-            <p class="description"><?php _e('Insert your entity with easypay, example: 10611', 'wh'); ?></p>
-        </td>
-    </tr>
-    <!-- Country -->
-    <tr class="form-field">
-        <th scope="row" valign="top"><label for="wh_meta_country"><?php _e('Country', 'wh'); ?></label></th>
-        <td>
-            <input type="text" name="wh_meta_country" id="wh_meta_country" value="<?php echo esc_attr($wh_meta_country) ? esc_attr($wh_meta_country) : ''; ?>">
-            <p class="description"><?php _e('Insert country according to your easypay access data, example: PT', 'wh'); ?></p>
-        </td>
-    </tr>
-    <?php
-}
+if ( !function_exists('wh_save_taxonomy_custom_meta') ) {
 
-add_action('edited_product_cat', 'wh_save_taxonomy_custom_meta', 10, 1);
-add_action('create_product_cat', 'wh_save_taxonomy_custom_meta', 10, 1);
-// Save extra taxonomy fields callback function.
-function wh_save_taxonomy_custom_meta($term_id) {
-    // Save / Update Client ID
-    $wh_meta_clientid = filter_input(INPUT_POST, 'wh_meta_clientid');
-    update_term_meta($term_id, 'wh_meta_clientid', $wh_meta_clientid);
-    // Save / Update CIN
-    $wh_meta_cin = filter_input(INPUT_POST, 'wh_meta_cin');
-    update_term_meta($term_id, 'wh_meta_cin', $wh_meta_cin);
-    // Save / Update Entity
-    $wh_meta_entity = filter_input(INPUT_POST, 'wh_meta_entity');
-    update_term_meta($term_id, 'wh_meta_entity', $wh_meta_entity);
-    // Save / Update Country
-    $wh_meta_country = filter_input(INPUT_POST, 'wh_meta_country');
-    update_term_meta($term_id, 'wh_meta_country', $wh_meta_country);
+  add_action('edited_product_cat', 'wh_save_taxonomy_custom_meta', 10, 1);
+  add_action('create_product_cat', 'wh_save_taxonomy_custom_meta', 10, 1);
+  // Save extra taxonomy fields callback function.
+  function wh_save_taxonomy_custom_meta($term_id) {
+      // Save / Update Client ID
+      $wh_meta_clientid = filter_input(INPUT_POST, 'wh_meta_clientid');
+      update_term_meta($term_id, 'wh_meta_clientid', $wh_meta_clientid);
+      // Save / Update CIN
+      $wh_meta_cin = filter_input(INPUT_POST, 'wh_meta_cin');
+      update_term_meta($term_id, 'wh_meta_cin', $wh_meta_cin);
+      // Save / Update Entity
+      $wh_meta_entity = filter_input(INPUT_POST, 'wh_meta_entity');
+      update_term_meta($term_id, 'wh_meta_entity', $wh_meta_entity);
+      // Save / Update Country
+      $wh_meta_country = filter_input(INPUT_POST, 'wh_meta_country');
+      update_term_meta($term_id, 'wh_meta_country', $wh_meta_country);
+  }
 }
-
 //Plugin initialization
-add_action('plugins_loaded', 'woocommerce_gateway_easypay_split_init', 0);
+add_action('plugins_loaded', 'woocommerce_gateway_easypay_split_cc_init', 0);
 add_action('woocommerce_api_easypay', 'easypay_callback_handler');
 
 /**
  * WC Gateway Class - Easypay Split
  */
-function woocommerce_gateway_easypay_split_init() {
+function woocommerce_gateway_easypay_split_cc_init() {
 
     if (!class_exists('WC_Payment_Gateway')) {
-        add_action('admin_notices', 'wceasypay_woocommerce_notice_split');
+        add_action('admin_notices', 'wceasypay_woocommerce_notice_split_cc');
         return;
     }
 
@@ -139,7 +143,7 @@ function woocommerce_gateway_easypay_split_init() {
      */
     load_plugin_textdomain('wceasypay', false, dirname(plugin_basename(__FILE__)) . '/languages');
 
-    class WC_Gateway_Easypay_Split extends WC_Payment_Gateway {
+    class WC_Gateway_Easypay_Split_CC extends WC_Payment_Gateway {
 
               /**
                * Gateway's Constructor.
@@ -159,7 +163,7 @@ function woocommerce_gateway_easypay_split_init() {
                   $this->ahref    = '<a href="' . get_admin_url() . 'admin.php?'.
                                     'page=wc-settings&amp;'.
                                     'tab=checkout&amp;'.
-                                    'section=wc_gateway_easypay_split">';
+                                    'section=wc_gateway_easypay_split_cc">';
                   $this->a        = '</a>';
                   // Apis
                   $this->apis     = array(
@@ -174,10 +178,10 @@ function woocommerce_gateway_easypay_split_init() {
                   // -----------------------------------------------------------------
 
                   // Inherited Variables----------------------------------------------
-                  $this->id                   = 'easypay_split';
+                  $this->id                   = 'easypay_split_cc';
                   $this->icon                 = plugins_url('images/logo.png', __FILE__);
                   $this->has_fields           = false;
-                  $this->method_title         = __('Easypay Split', 'wceasypay');
+                  $this->method_title         = __('Easypay Split CC', 'wceasypay');
                   $this->method_description   = __('Don\'t leave for tomorrow what you can receive today', 'wceasypay');
                   // -----------------------------------------------------------------
 
@@ -259,7 +263,7 @@ function woocommerce_gateway_easypay_split_init() {
                */
               public function reference_in_mail($order, $sent_to_admin)
               {
-                  if($order->get_payment_method() == 'easypay_split') {
+                  if($order->get_payment_method() == 'easypay_split_cc') {
                       global $wpdb;
                       if (!$sent_to_admin) {
                           // Log
@@ -816,23 +820,18 @@ function woocommerce_gateway_easypay_split_init() {
                   global $woocommerce;
                   $template = '<div style="width: 220px; float: left; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color:#eee;">
                                   <!-- img src="http://store.easyp.eu/img/MB_bw-01.png" -->
-
                                   <div style="padding: 5px; padding-top: 10px; clear: both;">
                                       <span style="font-weight: bold;float: left;">%s:</span>
                                       <span style="color: #0088cc; float: right">%s (Easypay)</span>
                                   </div>
-
                                   <div style="padding: 5px;clear: both;">
                                       <span style="font-weight: bold;float: left;">%s:</span>
                                       <span style="color: #0088cc; float: right">%s</span>
                                   </div>
-
                                   <div style="padding: 5px; clear: both;">
                                       <span style="font-weight: bold;float: left;">%s:</span>
                                       <span style="color: #0088cc; float: right">%s &euro;</span>
                                   </div>
-
-
                               </div>
                               <div style="padding: 5px; clear: both;">
                                 <a class="button wc-backward" href="' . esc_url( apply_filters( 'woocommerce_return_to_shop_redirect', wc_get_page_permalink( 'shop' ) ) ) . '">' . __( 'Return to shop', 'wceasypay' ) . ' </a>
@@ -970,13 +969,13 @@ function woocommerce_gateway_easypay_split_init() {
      * @param   array $methods
      * @return  array
      */
-    function woocommerce_add_gateway_easypay_split($methods)
+    function woocommerce_add_gateway_easypay_split_cc($methods)
     {
-        $methods[] = 'WC_Gateway_Easypay_Split';
+        $methods[] = 'WC_Gateway_Easypay_Split_CC';
         return $methods;
     }
 
-    add_filter('woocommerce_payment_gateways', 'woocommerce_add_gateway_easypay_split');
+    add_filter('woocommerce_payment_gateways', 'woocommerce_add_gateway_easypay_split_cc');
 
     /**
      * Checkout Fields Override
@@ -984,7 +983,7 @@ function woocommerce_gateway_easypay_split_init() {
      * @param   array $fields
      * @return  array
      */
-    function custom_override_checkout_fields_split($fields) {
+    function custom_override_checkout_fields_split_cc($fields) {
 
         $fields['billing']['billing_state']['required'] = false;
         $fields['shipping']['shipping_state']['required'] = false;
@@ -1004,7 +1003,7 @@ function woocommerce_gateway_easypay_split_init() {
         return $fields;
     }
 
-    //add_filter('woocommerce_checkout_fields', 'custom_override_checkout_fields_split');
+    //add_filter('woocommerce_checkout_fields', 'custom_override_checkout_fields_split_cc');
 
     /**
      * Order Billing Details NIF Override
@@ -1012,12 +1011,12 @@ function woocommerce_gateway_easypay_split_init() {
      * @param   array $billing_data
      * @return  array
      */
-    function custom_override_order_billing_details_nif($billing_data) {
+    function custom_override_order_billing_details_nif_split_cc($billing_data) {
         $billing_data['fiscal_number'] = array('label' => __('Fiscal Number', 'wceasypay'), 'show' => true);
         return $billing_data;
     }
 
-    #add_filter('woocommerce_admin_billing_fields', 'custom_override_order_billing_details_nif');
+    #add_filter('woocommerce_admin_billing_fields', 'custom_override_order_billing_details_nif_split_cc');
 
     /**
      * Order Shipping Details NIF Override
@@ -1025,11 +1024,11 @@ function woocommerce_gateway_easypay_split_init() {
      * @param   array $shipping_data
      * @return  array
      */
-    function custom_override_order_shipping_details_nif($shipping_data) {
+    function custom_override_order_shipping_details_nif_split_cc($shipping_data) {
         $shipping_data['fiscal_number'] = array('label' => __('Fiscal Number', 'wceasypay'), 'show' => true);
         return $shipping_data;
     }
 
-    #add_filter('woocommerce_admin_shipping_fields', 'custom_override_order_shipping_details_nif');
+    #add_filter('woocommerce_admin_shipping_fields', 'custom_override_order_shipping_details_nif_split_cc');
 
 } //END of function woocommerce_gateway_easypay_init

@@ -8,13 +8,13 @@ global $wceasypay_db_version;
 $wceasypay_db_version = '0.2';
 
 //Create EasyPay tables
-function wceasypay_activation_split() {
+function wceasypay_activation_split_mb() {
 
 	global $wpdb, $wceasypay_db_version;
 
 	$charset_collate = $wpdb->get_charset_collate();
 
-	$sql = "CREATE TABLE IF NOT EXISTS ".$wpdb->prefix."easypay_split (
+	$sql = "CREATE TABLE IF NOT EXISTS ".$wpdb->prefix."easypay_split_mb (
 						`id` int(11) NOT NULL auto_increment,
 						`ep_user` varchar(15) default NULL,
 						`ep_partner` varchar(15) default NULL,

@@ -1,42 +1,73 @@
 <?php
 
 /**
- * Plugin Name: WooCommerce Easypay Gateway Multi Banco
+ * Plugin Name: WooCommerce Easypay Gateway MBWay
  * Description: Easypay Payment Gateway for WooCommerce - Don't leave for tomorrow what you can receive today
  * Version: 1.00 - Beta
  * Author: Easypay
  * Author URI: https://easypay.pt
- * Requires at least: 3.5
- * Tested up to: 3.8.1
  *
  * Text Domain: wceasypay
  * Domain Path: /languages/
  *
- * @package Woocommerce-easypay-gateway-mb
+ * @package Woocommerce-easypay-gateway-mbway
  * @category Gateway
- * @author André Filipe
  */
+
 // Exit if accessed directly
 if ( !defined( 'ABSPATH' ) ) exit;
 
 //Installation
 require_once 'core/install.php';
-register_activation_hook(__FILE__, 'wceasypay_activation_mb');
+register_activation_hook(__FILE__, 'wceasypay_activation_mbway');
 # Deactivate
 require_once 'core/uninstall.php';
-register_deactivation_hook(__FILE__, 'wceasypay_deactivation_mb');
+register_deactivation_hook(__FILE__, 'wceasypay_deactivation_mbway');
 
 //Plugin initialization
-add_action('plugins_loaded', 'woocommerce_gateway_easypay_mb_init', 0);
+add_action('plugins_loaded', 'woocommerce_gateway_easypay_mbway_init', 0);
 add_action('woocommerce_api_easypay', 'easypay_callback_handler');
+
+/**
+ * Unhook and remove WooCommerce default emails.
+ */
+add_action( 'woocommerce_email', 'unhook_those_pesky_emails_mbway' );
+
+function unhook_those_pesky_emails_mbway( $email_class ) {
+
+    /**
+     * Hooks for sending emails during store events
+     **/
+    remove_action( 'woocommerce_low_stock_notification', array( $email_class, 'low_stock' ) );
+    remove_action( 'woocommerce_no_stock_notification', array( $email_class, 'no_stock' ) );
+    remove_action( 'woocommerce_product_on_backorder_notification', array( $email_class, 'backorder' ) );
+
+    // New order emails
+    remove_action( 'woocommerce_order_status_pending_to_processing_notification', array( $email_class->emails['WC_Email_New_Order'], 'trigger' ) );
+    remove_action( 'woocommerce_order_status_pending_to_completed_notification', array( $email_class->emails['WC_Email_New_Order'], 'trigger' ) );
+    remove_action( 'woocommerce_order_status_pending_to_on-hold_notification', array( $email_class->emails['WC_Email_New_Order'], 'trigger' ) );
+    remove_action( 'woocommerce_order_status_failed_to_processing_notification', array( $email_class->emails['WC_Email_New_Order'], 'trigger' ) );
+    remove_action( 'woocommerce_order_status_failed_to_completed_notification', array( $email_class->emails['WC_Email_New_Order'], 'trigger' ) );
+    remove_action( 'woocommerce_order_status_failed_to_on-hold_notification', array( $email_class->emails['WC_Email_New_Order'], 'trigger' ) );
+
+    // Processing order emails
+    remove_action( 'woocommerce_order_status_pending_to_processing_notification', array( $email_class->emails['WC_Email_Customer_Processing_Order'], 'trigger' ) );
+    remove_action( 'woocommerce_order_status_pending_to_on-hold_notification', array( $email_class->emails['WC_Email_Customer_Processing_Order'], 'trigger' ) );
+
+    // Completed order emails
+    remove_action( 'woocommerce_order_status_completed_notification', array( $email_class->emails['WC_Email_Customer_Completed_Order'], 'trigger' ) );
+
+    // Note emails
+    remove_action( 'woocommerce_new_customer_note_notification', array( $email_class->emails['WC_Email_Customer_Note'], 'trigger' ) );
+}
 
 /**
  * WC Gateway Class - Easypay MB
  */
-function woocommerce_gateway_easypay_mb_init() {
+function woocommerce_gateway_easypay_mbway_init() {
 
     if (!class_exists('WC_Payment_Gateway')) {
-        add_action('admin_notices', 'wceasypay_woocommerce_notice_mb');
+        add_action('admin_notices', 'wceasypay_woocommerce_notice_mbway');
         return;
     }
 
@@ -45,14 +76,13 @@ function woocommerce_gateway_easypay_mb_init() {
      */
     load_plugin_textdomain('wceasypay', false, dirname(plugin_basename(__FILE__)) . '/languages');
 
-    class WC_Gateway_Easypay_MB extends WC_Payment_Gateway {
+    class WC_Gateway_Easypay_MBWay extends WC_Payment_Gateway {
 
         /**
          * Gateway's Constructor.
          *
          * One of the Woocommerce required functions
          */
-
         public function __construct()
         {
             // Variable to acess other woocommerce variables and functions
@@ -65,7 +95,7 @@ function woocommerce_gateway_easypay_mb_init() {
             $this->ahref    = '<a href="' . get_admin_url() . 'admin.php?'.
                               'page=wc-settings&amp;'.
                               'tab=checkout&amp;'.
-                              'section=wc_gateway_easypay_mb">';
+                              'section=wc_gateway_easypay_mbway">';
             $this->a        = '</a>';
             // Apis
             $this->apis     = array(
@@ -80,10 +110,10 @@ function woocommerce_gateway_easypay_mb_init() {
             // -----------------------------------------------------------------
 
             // Inherited Variables----------------------------------------------
-            $this->id                   = 'easypay_mb';
+            $this->id                   = 'easypay_mbway';
             $this->icon                 = plugins_url('images/logo.png', __FILE__);
             $this->has_fields           = false;
-            $this->method_title         = __('Easypay MB', 'wceasypay');
+            $this->method_title         = __('Easypay MBWay', 'wceasypay');
             $this->method_description   = __('Don\'t leave for tomorrow what you can receive today', 'wceasypay');
             // -----------------------------------------------------------------
 
@@ -104,11 +134,10 @@ function woocommerce_gateway_easypay_mb_init() {
             $this->country          = $this->get_option('country');
             $this->language         = $this->get_option('language');
             $this->expiration       = $this->get_option('expiration');
+            $this->mbway_title      = $this->get_option('mbway_title');
             $this->ref_type         = 'auto';
             // Payment Types
-            $this->use_multibanco   = true;
-            $this->use_credit_card  = false;
-            $this->use_boleto       = false;
+            $this->use_mbway        = true;
             // Gateway Testing
             $this->test             = $this->get_option('test') == 'yes';
             $this->logs             = $this->get_option('logs') == 'yes';
@@ -123,12 +152,15 @@ function woocommerce_gateway_easypay_mb_init() {
                 $this->logger = new WC_Logger();
             }
 
+            // MBWay Error Flag
+            $this->mbway_error = false;
+            $this->mbway_message = null;
+
             // Load the settings (see admin_options in this class)
             add_action(
                 'woocommerce_update_options_payment_gateways_' . $this->id,
                 array($this, 'process_admin_options')
             );
-
             // Action for receipt page (see function in this class)
             /*
             add_action(
@@ -149,20 +181,21 @@ function woocommerce_gateway_easypay_mb_init() {
                 3
             );
 
+        } /* END of constructor */
 
-
-
-        } //END of constructor
-
-        /*
-        * Begin of custom order operations
-        */
-
+        /**
+         * Custom order checkout operation
+         *
+         * @param   $order
+         * @param   $reason
+         * @return  void
+         */
         protected function payment_on_hold( $order, $reason = '' ) {
             $order->update_status( 'on-hold', $reason );
             wc_reduce_stock_levels($order->get_id());
             WC()->cart->empty_cart();
 	    }
+
 
          /**
          * Put the reference, entity and value in the email.
@@ -174,7 +207,7 @@ function woocommerce_gateway_easypay_mb_init() {
          */
         public function reference_in_mail($order, $sent_to_admin)
         {
-            if($order->get_payment_method() == 'easypay_mb') {
+            if($order->get_payment_method() == 'easypay_mbway') {
                 global $wpdb;
                 if (!$sent_to_admin) {
                     // Log
@@ -260,8 +293,7 @@ function woocommerce_gateway_easypay_mb_init() {
                 !empty($this->entity) &&
                 !empty($this->country) &&
                 !empty($this->language) &&
-                ($this->use_multibanco || $this->use_credit_card || $this->use_boleto) &&
-                $this->is_valid_for_use()) ? 'yes' : 'no';
+                $this->use_mbway && $this->is_valid_for_use()) ? 'yes' : 'no';
         }
 
         /**
@@ -293,6 +325,10 @@ function woocommerce_gateway_easypay_mb_init() {
             if ($this->expiration < 1 || $this->expiration > 93) {
                 add_action('admin_notices', array(&$this, 'error_invalid_expiration'));
             }
+            // Validate mbway_title
+            if (empty($this->mbway_title)) {
+                add_action('admin_notices', array(&$this, 'error_invalid_mbway_title'));
+            }
         }
 
         /**
@@ -315,7 +351,7 @@ function woocommerce_gateway_easypay_mb_init() {
                     'title' => __('Title', 'wceasypay'),
                     'type' => 'text',
                     'description' => __('This controls the title which the user sees during checkout.', 'wceasypay'),
-                    'default' => __('Easypay MB', 'wceasypay'),
+                    'default' => __('Easypay MBWay', 'wceasypay'),
                     'desc_tip' => true,
                 ),
                 'description' => array(
@@ -372,6 +408,13 @@ function woocommerce_gateway_easypay_mb_init() {
                      'default' => '1',
                      'desc_tip' => true,
                 ),
+                'mbway_title' => array(
+                     'title' => __('Mbway Title for Mbway Transactions', 'wceasypay'),
+                     'type' => 'text',
+                     'description' => __('A Title Is Required', 'wceasypay'),
+                     'default' => 'MBWAY SHOP',
+                     'desc_tip' => true,
+                ),
                 'testing' => array(
                     'title' => __('Gateway Testing', 'wceasypay'),
                     'type' => 'title',
@@ -413,10 +456,16 @@ function woocommerce_gateway_easypay_mb_init() {
             echo '<tr>';
             echo '<td><h3>'.__('Easypay Configurations', 'wceasypay').'</h3></td>';
             echo '<td><p>Configurations that you must perform on your Easypay account.<br/><strong>'.__('Go to "Webservices" > "URL Configuration"', 'wceasypay').'</strong></p></td>';
-            echo '</tr><tr>';
+            echo '</tr>';
+            echo '<tr>';
+            echo '<td><h4>'.__('MBWay FWD URL', 'wceasypay').'</h4></td>';
+            echo '<td><input type="text" size="100" readonly value="'.$public_url . 'mbway-fwd.php'.'"/></td>';
+            echo '</tr>';
+            echo '<tr>';
             echo '<td><h4>'.__('Notification URL', 'wceasypay').'</h4></td>';
             echo '<td><input type="text" size="100" readonly value="'.$public_url . 'notification.php'.'"/></td>';
-            echo '</tr><tr>';
+            echo '</tr>';
+            echo '<tr>';
             echo '<td><h3>'.__('Easypay Configurations', 'wceasypay').' '.__('On your server', 'wceasypay').'</h3></td>';
             echo '<td>'.__('For Credit Card payment check you must create a cron job, we sugest you config your cron job to call this file once a day.', 'wceasypay').'</td>';
             echo '</tr>';
@@ -496,17 +545,10 @@ function woocommerce_gateway_easypay_mb_init() {
                 $note .= 'Entity: ' . $data['ep_entity'] . '; ' . PHP_EOL;
                 $note .= 'Value: ' . $data['ep_value'] . '; ' . PHP_EOL;
                 $note .= 'Reference: ' . $data['ep_reference'] . '; ' . PHP_EOL;
-                // In this point the order status is pending, so, only add a note
-                //add_order_note($note, $is_customer_note - default: 0)
                 $order->add_order_note($note, 0);
             }
 
             // Create a new row in database:
-            //      Table wp_easypay_notifications
-            // The row without ep_doc, ep_status with 'pending' and t_key with
-            // a number (order_id) was generated by the next code.
-            // This row is used for show this data in email.
-            // This below function returns false or the number of affected rows.
             if (!$wpdb->insert(
                 $wpdb->prefix . 'easypay_notifications',
                 array(
@@ -522,7 +564,6 @@ function woocommerce_gateway_easypay_mb_init() {
                 $result .= 'Value: ' . $data['ep_value'] . ';' . PHP_EOL;
                 $result .= 'Reference: ' . $data['ep_reference'] . ';' . PHP_EOL;
                 $this->log($result);
-                #die("Error: I couldn't insert the reference in the database!");
             } else {
                 $result = 'New data inserted in database:' . PHP_EOL;
                 $result .= 'Order ID: ' . $order->get_id() . ';' . PHP_EOL;
@@ -531,22 +572,55 @@ function woocommerce_gateway_easypay_mb_init() {
                 $result .= 'Reference: ' . $data['ep_reference'] . ';' . PHP_EOL;
                 $this->log($result);
             }
+            // Validate phone form field before this step in the onverride section
+            if(!empty($order->get_billing_phone())) {
+              $raw_phone = trim($order->get_billing_phone(), '+');
+              $country_code = substr_replace($raw_phone, '', 2, -1);
+              $phone_number = substr_replace($raw_phone, '', 0, 3);
+            } else {
+              // Error?
+            }
 
-            // It's necessary these changes for send a email with an order in processing
-            #$order->update_status('on-hold'); // pending->on-hold
-            #$order->update_status('pending'); // on-hold->pending
-            $this->payment_on_hold( $order, $reason = '' ); // reduces stock
-                        // Send Email
-            add_action(
-                'mail_the_guy',
-                array($this, 'reference_in_mail'),
-                10,
-                2
+            $args_mbway = array(
+              'e' => $data['ep_entity'],
+              'r' => $data['ep_reference'],
+              'v' => $data['ep_value'],
+              'mbway' => 'yes',
+              'mbway_title' => $this->mbway_title,
+              'mbway_type' => 'purchase',
+              'mbway_phone_indicative' => $country_code,
+              'mbway_phone' => $phone_number,
+              'mbway_currency' => 'EUR',
+              't_key' => $order->get_id()
             );
-            do_action('mail_the_guy', $order, $data );
 
-            return $this->get_reference_html($data);
+            $this->log('Arguments for MBWay Auth order #' . $order->get_id() . ': ' . print_r($args_mbway, true));
+
+            $mbway_url = $this->get_request_url($this->apis['request_payment'], $args_mbway);
+
+            $this->log('Request MBWay URL #' . $order->get_id() . ': ' . $mbway_url);
+            $mbway_contents = $this->get_contents($mbway_url);
+
+            $mbway_obj = simplexml_load_string($mbway_contents);
+            $mbway_data = json_decode(json_encode($mbway_obj), true);
+
+            if (!$mbway_data) {
+                $this->log('Error while requesting MBWay Auth. 1 #' . $order->get_id() . ' [' . $mbway_contents . ']');
+                $this->mbway_error = true;
+                $this->mbway_message = "Error Creating Purchase";
+            }
+            if ($mbway_data['ep_status'] != 'accepted') {
+                $this->log('Error while requesting MBWay Auth. 2 #' . $order->get_id() . ' [' . $mbway_data['ep_message'] . ']');
+                $this->mbway_error = true;
+                $this->mbway_message = "Transaction Declined";
+            } else {
+                $this->log('MBWay Auth. created #' . $order->get_id() . ' @' . $mbway_data['r'] . ']');
+                $this->mbway_message = "Please confirm the purchase on your phone. We will send an email after confirmation";
+            }
+
+            return $this->get_reference_html($data, array('status' => $this->mbway_error, 'message' => $this->mbway_message), $order);
         }
+
         /**
          * Builds a resquest url
          *
@@ -607,19 +681,32 @@ function woocommerce_gateway_easypay_mb_init() {
          * Returns the Checkout HTML code
          *
          * @param   array $reference
+         * @param   array $mbway_status
+         * @param   array $order
          * @param   string $html
          * @return  string
          */
-
-        private function get_reference_html($reference, $html = '')
+        private function get_reference_html($reference, $mbway_status, $order, $html = '')
         {
-            $html .= '<div style="float: left; text-align:center; border: 1px solid #ddd; border-radius: 5px; width: 240px; min-height: 70px; padding:10px;">';
-            //$html .= '<img src="http://store.easyp.eu/img/easypay_logo_nobrands-01.png" style="height:40px; margin-bottom: 10px;" title="Se quer pagar uma referência multibanco utilize a easypay" alt="Se quer pagar uma referência multibanco utilize a easypay">';
-            if ($this->use_multibanco) {
-                $html .= $this->get_mbbox_template($reference['ep_entity'], $reference['ep_reference'], $reference['ep_value']);
-            }
+            if(!$mbway_status['status']) {
+                $html .= '<div style="float: left; text-align:center; border: 1px solid #ddd; border-radius: 5px; width: 240px; min-height: 70px; padding:10px;">';
 
-            return $html . '</div>';
+                if ($this->use_mbway) {
+                    $html .= $this->get_mbbox_template($reference['ep_entity'], $reference['ep_reference'], $reference['ep_value'], $mbway_status['message']);
+                }
+
+                return $html . '</div>';
+            } else {
+                $html .= '<div style="float: left; text-align:center; border: 1px solid #ddd; border-radius: 5px; width: 240px; min-height: 70px; padding:10px;">';
+
+                if ($this->use_mbway) {
+                    $html .= $this->get_error_template($mbway_status['message']);
+                }
+
+                $order->update_status( 'failed', $mbway_status['message'] );
+
+                return $html . '</div>';
+            }
         }
 
         /**
@@ -653,18 +740,41 @@ function woocommerce_gateway_easypay_mb_init() {
             return in_array(get_woocommerce_currency(), array('EUR'));
         }
 
-        //Templates
+        /**
+         * Returns the Easypay MB Box
+         * @param string   $message
+         */
+        private function get_error_template($message) {
+            $template = '<div style="width: 220px; float: left; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color:#eee;">
+                            <div style="padding: 5px; padding-top: 10px; clear: both;">
+                                <span style="font-weight: bold;float: left;">%s:</span>
+                            </div>
+                            <div style="padding: 5px; clear: both;">
+                                <a class="button wc-backward" href="' . esc_url( apply_filters( 'woocommerce_return_to_shop_redirect', wc_get_page_permalink( 'shop' ) ) ) . '">' . __( 'Return to shop', 'wceasypay' ) . ' </a>
+                            </div>
+                         </div>';
+            return sprintf($template, $message);
+        }
+
         /**
          * Returns the Easypay MB Box
          * @param integer   $reference
          * @param integer   $entity
          * @param double    $value
+         * @param string    $message
          * @return string
          */
-        private function get_mbbox_template($entity, $reference, $value)
+        private function get_mbbox_template($entity, $reference, $value, $message = '')
         {
             $template = '<div style="width: 220px; float: left; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color:#eee;">
                             <!-- img src="http://store.easyp.eu/img/MB_bw-01.png" -->
+                            <div style="padding: 5px; padding-top: 10px; clear: both;">
+                                <span style="float: left;">%s:</span>
+                            </div>
+                            
+                            <div style="padding: 5px; padding-top: 10px; clear: both;">
+                                <span style="float: left;">%s:</span>
+                            </div>
 
                             <div style="padding: 5px; padding-top: 10px; clear: both;">
                                 <span style="font-weight: bold;float: left;">%s:</span>
@@ -687,46 +797,8 @@ function woocommerce_gateway_easypay_mb_init() {
                           <a class="button wc-backward" href="' . esc_url( apply_filters( 'woocommerce_return_to_shop_redirect', wc_get_page_permalink( 'shop' ) ) ) . '">' . __( 'Return to shop', 'wceasypay' ) . ' </a>
                         </div>';
 
-
-            return sprintf($template, __('Entity', 'wceasypay'), $entity, __('Reference', 'wceasypay'), wordwrap($reference, 3, ' ', true), __('Value', 'wceasypay'), $value);
-        }
-
-        /**
-         * Returns the Easypay Visa Box
-         * @param string $visa_url
-         * @return string
-         */
-        private function get_visa_template($visa_url)
-        {
-            $template = '<div style="margin-top: 10px; width: 220px; float: left; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color:#eee;">
-                            <img src="http://store.easyp.eu/img/visa_mc_bw-01.png">
-
-                            <div style="padding: 5px; padding-top: 10px; clear: both;">
-                                <a href="%s" style="color: #0088cc; text-decoration: none;">%s!</a>
-                            </div>
-
-                        </div>';
-
-            return sprintf($template, esc_url($visa_url), __('Pay Now', 'wceasypay'));
-        }
-
-        /**
-         * Returns the Easypay Boleto Box
-         * @param string $boleto_url
-         * @return string
-         */
-        private function get_boleto_template($boleto_url)
-        {
-            $template = '<div style="margin-top: 10px; width: 220px; float: left; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color:#eee;">
-                            <img src="http://store.easyp.eu/img/bb_bw-01.png">
-
-                            <div style="padding: 5px; padding-top: 10px; clear: both;">
-                                <a href="%s" style="color: #0088cc; text-decoration: none;">%s!</a>
-                            </div>
-
-                        </div>';
-
-            return sprintf($template, esc_url($boleto_url), __('Pay Now', 'wceasypay'));
+            $echo_to_translate = "You can check the payment identifier details below";
+            return sprintf($template, $message, $echo_to_translate, __('Entity', 'wceasypay'), $entity, __('Reference', 'wceasypay'), wordwrap($reference, 3, ' ', true), __('Value', 'wceasypay'), $value);
         }
 
 
@@ -838,6 +910,20 @@ function woocommerce_gateway_easypay_mb_init() {
             echo sprintf($this->error, $msgFinal);
         }
 
+        /**
+         * Displays an error message on the top of admin panel
+         */
+        public function error_invalid_mbway_title()
+        {
+            $msg = __(
+                      '<strong>Warning:</strong> Please insert a valid mbway title',
+                      'wceasypay'
+                      );
+
+            $msgFinal = sprintf($msg);
+
+            echo sprintf($this->error, $msgFinal);
+        }
 
         /**
          * Log/Debug handler
@@ -857,13 +943,13 @@ function woocommerce_gateway_easypay_mb_init() {
      * @param   array $methods
      * @return  array
      */
-    function woocommerce_add_gateway_easypay_mb($methods)
+    function woocommerce_add_gateway_easypay_mbway($methods)
     {
-        $methods[] = 'WC_Gateway_Easypay_MB';
+        $methods[] = 'WC_Gateway_Easypay_MBWay';
         return $methods;
     }
 
-    add_filter('woocommerce_payment_gateways', 'woocommerce_add_gateway_easypay_mb');
+    add_filter('woocommerce_payment_gateways', 'woocommerce_add_gateway_easypay_mbway');
 
     /**
      * Checkout Fields Override
@@ -871,53 +957,42 @@ function woocommerce_gateway_easypay_mb_init() {
      * @param   array $fields
      * @return  array
      */
-    function custom_override_checkout_fields_mb($fields) {
-        $fields['billing']['billing_state']['required'] = false;
-        $fields['shipping']['shipping_state']['required'] = false;
+     // Ensure required billing phone
 
-        $nif_field = array(
-            'label' => __('Fiscal Number', 'wceasypay'),
-            'placeholder' => _x('Fiscal Number', 'placeholder', 'wceasypay'),
-            'required' => false,
-            'class' => array('form-row-wide'),
-            'clear' => true
-        );
+     add_filter( 'woocommerce_checkout_fields' , 'custom_override_checkout_fields' );
 
-        $fields['billing']['billing_fiscal_number'] = $nif_field;
-        $fields['shipping']['shipping_fiscal_number'] = $nif_field;
+     function custom_override_checkout_fields( $fields ) {
 
-        return $fields;
+          $fields['billing']['billing_phone'] = array(
+            'label'     => __('Phone', 'woocommerce'),
+            'placeholder'   => _x('+351000111000', 'placeholder', 'woocommerce'),
+            'required'  => true,
+            'class'     => array('billing-phone, form-row-wide'),
+            'clear'     => true
+          );
+
+          return $fields;
+     }
+     // Validate phone field with our own rules
+     add_action('woocommerce_checkout_process', 'wh_phoneValidateCheckoutFields');
+
+    function wh_phoneValidateCheckoutFields() {
+        $billing_phone = filter_input(INPUT_POST, 'billing_phone');
+        // Lets compare with a regex expression
+        if (strlen(trim(preg_replace('/^[+]\d{12}$/', '', $billing_phone))) > 0) {
+            wc_add_notice(__('Invalid <strong>Phone Number</strong>, please check your input.'), 'error');
+        }
     }
 
-    #add_filter('woocommerce_checkout_fields', 'custom_override_checkout_fields');
-
-    /**
-     * Order Billing Details NIF Override
-     *
-     * @param   array $billing_data
-     * @return  array
+     /**
+     * Display phone field value on the order edit page
      */
-    function custom_override_order_billing_details_nif($billing_data) {
-        $billing_data['fiscal_number'] = array('label' => __('Fiscal Number', 'wceasypay'), 'show' => true);
-        return $billing_data;
+
+    add_action( 'woocommerce_admin_order_data_after_shipping_address', 'my_custom_checkout_field_display_admin_order_meta', 10, 1 );
+
+    function my_custom_checkout_field_display_admin_order_meta($order){
+        echo '<p><strong>'.__('MBWay Transaction Phone Number').':</strong> ' . get_post_meta( $order->get_id(), '_billing_phone', true ) . '</p>';
     }
-
-    #add_filter('woocommerce_admin_billing_fields', 'custom_override_order_billing_details_nif');
-
-    /**
-     * Order Shipping Details NIF Override
-     *
-     * @param   array $shipping_data
-     * @return  array
-     */
-    function custom_override_order_shipping_details_nif($shipping_data) {
-        $shipping_data['fiscal_number'] = array('label' => __('Fiscal Number', 'wceasypay'), 'show' => true);
-        return $shipping_data;
-    }
-
-    #add_filter('woocommerce_admin_shipping_fields', 'custom_override_order_shipping_details_nif');
-
-
 
 } //END of function woocommerce_gateway_easypay_init
 
@@ -926,6 +1001,6 @@ function woocommerce_gateway_easypay_mb_init() {
  *
  * Request to user that Easypay Plugin needs the last vresion of WooCommerce
  */
-function wceasypay_woocommerce_notice_mb() {
+function wceasypay_woocommerce_notice_mbway() {
     echo '<div class="error"><p>' . __('WooCommerce Easypay Gateway depends on the last version of <a href="http://wordpress.org/extend/plugins/woocommerce/">WooCommerce</a> to work!', 'wceasypay') . '</p></div>';
 }
