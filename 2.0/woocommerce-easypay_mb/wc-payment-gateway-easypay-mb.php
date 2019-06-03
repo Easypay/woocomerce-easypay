@@ -279,6 +279,11 @@ function woocommerce_gateway_easypay_mb_init()
             if (!$this->is_valid_for_use()) {
                 add_action('admin_notices', array(&$this, 'error_invalid_currency'));
             }
+
+            // Validate expiration
+            if ($this->expiration < 1 || $this->expiration > 93) {
+                add_action('admin_notices', array(&$this, 'error_invalid_expiration'));
+            }
         }
 
         /**
@@ -348,8 +353,15 @@ function woocommerce_gateway_easypay_mb_init()
                     'title'       => __('Language', 'wceasypay'),
                     'type'        => 'text',
                     'description' => __('The language that the user should see on credit card gateway.', 'wceasypay'),
-                    'default'     => 'PT',
-                    'desc_tip'    => true,
+                    'default' => 'PT',
+                    'desc_tip' => true,
+                ),
+                'expiration' => array(
+                     'title' => __('Expiration in Days', 'wceasypay'),
+                     'type' => 'decimal',
+                     'description' => __('Only 1 to 93 days accepted', 'wceasypay'),
+                     'default' => '1',
+                     'desc_tip' => true,
                 ),
                 'testing'     => array(
                     'title'       => __('Gateway Testing', 'wceasypay'),
@@ -440,14 +452,61 @@ function woocommerce_gateway_easypay_mb_init()
                 'o_description' => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
                 'o_obs'         => '',
                 'o_mobile'      => $order->get_billing_phone(),
-                'o_email'       => $order->get_billing_email()
+                'o_email'       => $order->get_billing_email(),
+                'ep_partner'    => ''
             );
 
+            if($this->entity == "11683") {
+              if($this->expiration >= 1 || $this->expiration <= 93){
+                  $args['ep_partner'] = (string)$this->user;
+                  $max_date=Date('Y-m-d', strtotime("+" . $this->expiration . " days"));
+                  $args['o_max_date'] = $max_date;
+              }
+            }
+
+            /*
             $this->log('Arguments for order #' . $order->get_id() . ': ' . print_r($args, true));
 
             $url = $this->get_request_url($this->apis['request_reference'], $args);
 
             $this->log('Request URL #' . $order->get_id() . ': ' . $url);
+            */
+
+            // start to build the body with the ref data
+            $body = [
+                "key" => "$order->get_id()",
+                "method" => "{$this->method}",
+                "type"	=> "sale",
+                "value"	=> floatval($order->get_total()),
+                "currency"	=> "$this->currency",
+                "expiration_time" =>"2018-12-31 12:00",
+                "capture" => [
+                    "transaction_key" => "Transaction Key Example",
+                    "descriptive" => "Descriptive Example",
+                    "capture_date" => "2018-12-31",
+                    "account" => [
+                        "id" => "22ea3cc9-424b-489a-91b7-8955f643dc93",
+                    ],
+                ],
+                "customer" => [
+                    "name" => "Customer Example",
+                    "email" => "customer@example.com",
+                    "key" => "Key Example",
+                    "phone_indicative" => "+351",
+                    "phone" => "911234567",
+                    "fiscal_number" =>"PT123456789",
+                ],
+                "sdd_mandate" => [
+                    "name" => "Name Example",
+                    "email" => "sdd_email@example.com",
+                    "account_holder" => "Account Holder Example",
+                    "key" => "SDD Key Example",
+                    "iban" => "PT50002700000001234567833",
+                    "phone" => "911234567",
+                    "max_num_debits" =>"12",
+                ],
+            ];
+
             $contents = $this->get_contents($url);
 
             $obj = simplexml_load_string($contents);
