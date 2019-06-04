@@ -50,7 +50,6 @@ function woocommerce_gateway_easypay_mb_init()
 
     class WC_Gateway_Easypay_MB extends WC_Payment_Gateway
     {
-
         /**
          * Gateway's Constructor.
          *
@@ -59,17 +58,15 @@ function woocommerce_gateway_easypay_mb_init()
 
         public function __construct()
         {
-            // Variable to acess other woocommerce variables and functions
+            // Variable to access other woocommerce variables and functions
             global $woocommerce, $data;
-            # Auto capture var
-            global $autoCapture;
             // Class Variables -------------------------------------------------
             // Error
             $this->error = '<div class="error"><p>%s</p></div>';
             $this->ahref = '<a href="' . get_admin_url() . 'admin.php?' .
                 'page=wc-settings&amp;' .
                 'tab=checkout&amp;' .
-                'section=wc_gateway_easypay_mb">';
+                'section=wc_payment_gateway_easypay_mb">';
             $this->a = '</a>';
 
             // 2.0 API EndPoint
@@ -95,7 +92,8 @@ function woocommerce_gateway_easypay_mb_init()
             $this->title = $this->get_option('title');
             $this->description = $this->get_option('description');
             $this->currency = 'EUR';
-            $this->expiration_time = $this->get_option('expiration_time'); // aka 11683 kind of call, refactor
+            $this->expiration_time = $this->get_option('expiration');
+            $this->expiration_enable = $this->get_option('expiration_enable');
             $this->method = "mb";
             // Auth Stuff
             $this->account_id = $this->get_option('account_id');
@@ -238,19 +236,15 @@ function woocommerce_gateway_easypay_mb_init()
         }
 
         /**
-         * Check if the settings are correts
+         * Check if the settings are correct
          *
          * @return bool
          */
         private function gateway_enabled()
         {
             return (($this->get_option('enabled') == 'yes') &&
-                !empty($this->cin) &&
-                !empty($this->user) &&
-                !empty($this->entity) &&
-                !empty($this->country) &&
-                !empty($this->language) &&
-                ($this->use_multibanco || $this->use_credit_card || $this->use_boleto) &&
+                !empty($this->account_id) &&
+                !empty($this->api_key) &&
                 $this->is_valid_for_use()) ? 'yes' : 'no';
         }
 
@@ -261,26 +255,15 @@ function woocommerce_gateway_easypay_mb_init()
          */
         private function gateway_validation()
         {
-            if (empty($this->cin)) {
-                add_action('admin_notices', array(&$this, 'error_missing_cin'));
+            if (empty($this->account_id)) {
+                add_action('admin_notices', array(&$this, 'error_missing_account_id'));
             }
-            if (empty($this->user)) {
-                add_action('admin_notices', array(&$this, 'error_missing_user'));
-            }
-            if (empty($this->entity)) {
-                add_action('admin_notices', array(&$this, 'error_missing_entity'));
-            }
-            if (empty($this->country)) {
-                add_action('admin_notices', array(&$this, 'error_missing_country'));
-            }
-            if (empty($this->language)) {
-                add_action('admin_notices', array(&$this, 'error_missing_lang'));
+            if (empty($this->api_key)) {
+                add_action('admin_notices', array(&$this, 'error_missing_api_key'));
             }
             if (!$this->is_valid_for_use()) {
                 add_action('admin_notices', array(&$this, 'error_invalid_currency'));
             }
-
-            // Validate expiration
             if ($this->expiration < 1 || $this->expiration > 93) {
                 add_action('admin_notices', array(&$this, 'error_invalid_expiration'));
             }
@@ -314,47 +297,19 @@ function woocommerce_gateway_easypay_mb_init()
                     'type'    => 'textarea',
                     'default' => __('Don\'t leave for tomorrow what you can receive today', 'wceasypay')
                 ),
-                'cin'         => array(
-                    'title'       => __('CIN', 'wceasypay'),
+                'account_id'         => array(
+                    'title'       => __('Account ID', 'wceasypay'),
                     'type'        => 'text',
-                    'description' => __('The Client Identification Number of your easypay account.', 'wceasypay'),
+                    'description' => __('The Account ID You Generated at Easypay Backoffice', 'wceasypay'),
                     'default'     => '',
                     'desc_tip'    => true,
                 ),
-                'user'        => array(
-                    'title'       => __('User', 'wceasypay'),
+                'api_key'        => array(
+                    'title'       => __('API Key', 'wceasypay'),
                     'type'        => 'text',
-                    'description' => __('The USER of your easypay account.', 'wceasypay'),
+                    'description' => __('The API Key You Generated at Easypay Backoffice', 'wceasypay'),
                     'default'     => '',
                     'desc_tip'    => true,
-                ),
-                'entity'      => array(
-                    'title'       => __('Entity', 'wceasypay'),
-                    'type'        => 'text',
-                    'description' => __('The ENTITY of your easypay account. <br/>Please refer to our commercial department for more information.', 'wceasypay'),
-                    'default'     => '',
-                    'desc_tip'    => true,
-                ),
-                'code'        => array(
-                    'title'       => __('Code', 'wceasypay'),
-                    'type'        => 'text',
-                    'description' => __('Security Token, use this only if you have validation by code instead of validation by IP.', 'wceasypay'),
-                    'default'     => '',
-                    'desc_tip'    => true,
-                ),
-                'country'     => array(
-                    'title'       => __('Country', 'wceasypay'),
-                    'type'        => 'text',
-                    'description' => __('Must be always PT.', 'wceasypay'),
-                    'default'     => 'PT',
-                    'desc_tip'    => true,
-                ),
-                'language'    => array(
-                    'title'       => __('Language', 'wceasypay'),
-                    'type'        => 'text',
-                    'description' => __('The language that the user should see on credit card gateway.', 'wceasypay'),
-                    'default' => 'PT',
-                    'desc_tip' => true,
                 ),
                 'expiration' => array(
                      'title' => __('Expiration in Days', 'wceasypay'),
@@ -362,6 +317,13 @@ function woocommerce_gateway_easypay_mb_init()
                      'description' => __('Only 1 to 93 days accepted', 'wceasypay'),
                      'default' => '1',
                      'desc_tip' => true,
+                ),
+                'expiration_enable' => array(
+                    'title' => __('Enable Expiration for MB References', 'wceasypay'),
+                    'type' => 'checkbox',
+                    'description' => __('Enable This Option to Activate Reference Expiration Time', 'wceasypay'),
+                    'default' => 'no',
+                    'desc_tip' => true,
                 ),
                 'testing'     => array(
                     'title'       => __('Gateway Testing', 'wceasypay'),
@@ -452,62 +414,40 @@ function woocommerce_gateway_easypay_mb_init()
                 'o_description' => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
                 'o_obs'         => '',
                 'o_mobile'      => $order->get_billing_phone(),
-                'o_email'       => $order->get_billing_email(),
-                'ep_partner'    => ''
+                'o_email'       => $order->get_billing_email()
             );
 
-            if($this->entity == "11683") {
-              if($this->expiration >= 1 || $this->expiration <= 93){
-                  $args['ep_partner'] = (string)$this->user;
-                  $max_date=Date('Y-m-d', strtotime("+" . $this->expiration . " days"));
-                  $args['o_max_date'] = $max_date;
+            if($this->expiration_enable == 'yes') {
+              if($this->expiration_time >= 1 || $this->expiration_time <= 93){
+                  $max_date = Date('Y-m-d h:m', strtotime("+" . $this->expiration_time . " days"));
               }
             }
-
-            /*
-            $this->log('Arguments for order #' . $order->get_id() . ': ' . print_r($args, true));
-
-            $url = $this->get_request_url($this->apis['request_reference'], $args);
-
-            $this->log('Request URL #' . $order->get_id() . ': ' . $url);
-            */
 
             // start to build the body with the ref data
             $body = [
                 "key" => "$order->get_id()",
                 "method" => "{$this->method}",
-                "type"	=> "sale",
                 "value"	=> floatval($order->get_total()),
                 "currency"	=> "$this->currency",
-                "expiration_time" =>"2018-12-31 12:00",
-                "capture" => [
-                    "transaction_key" => "Transaction Key Example",
-                    "descriptive" => "Descriptive Example",
-                    "capture_date" => "2018-12-31",
-                    "account" => [
-                        "id" => "22ea3cc9-424b-489a-91b7-8955f643dc93",
-                    ],
-                ],
+                "expiration_time" =>"{$max_date}",
                 "customer" => [
-                    "name" => "Customer Example",
-                    "email" => "customer@example.com",
-                    "key" => "Key Example",
+                    "name" => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
+                    "email" => $order->get_billing_email(),
+                    "key" => $order->get_id(),
                     "phone_indicative" => "+351",
-                    "phone" => "911234567",
-                    "fiscal_number" =>"PT123456789",
+                    "phone" => $order->get_billing_phone(),
+                    // "fiscal_number" =>"PT123456789",
                 ],
-                "sdd_mandate" => [
-                    "name" => "Name Example",
-                    "email" => "sdd_email@example.com",
-                    "account_holder" => "Account Holder Example",
-                    "key" => "SDD Key Example",
-                    "iban" => "PT50002700000001234567833",
-                    "phone" => "911234567",
-                    "max_num_debits" =>"12",
-                ],
-            ];
+            ]; // Commented the fiscal number since the special nif field is commented also
 
-            $contents = $this->get_contents($url);
+            $this->log('Payload for order #' . $order->get_id() . ': ' . print_r(json_encode($body), true));
+            /*
+            $url = $this->get_request_url($this->apis['request_reference'], $args);
+
+            $this->log('Request URL #' . $order->get_id() . ': ' . $url);
+            */
+
+            $contents = $this->get_contents($body);
 
             $obj = simplexml_load_string($contents);
             $data = json_decode(json_encode($obj), true);
@@ -525,17 +465,10 @@ function woocommerce_gateway_easypay_mb_init()
                 $note .= 'Entity: ' . $data['ep_entity'] . '; ' . PHP_EOL;
                 $note .= 'Value: ' . $data['ep_value'] . '; ' . PHP_EOL;
                 $note .= 'Reference: ' . $data['ep_reference'] . '; ' . PHP_EOL;
-                // In this point the order status is pending, so, only add a note
-                //add_order_note($note, $is_customer_note - default: 0)
+
                 $order->add_order_note($note, 0);
             }
 
-            // Create a new row in database:
-            //      Table wp_easypay_notifications
-            // The row without ep_doc, ep_status with 'pending' and t_key with
-            // a number (order_id) was generated by the next code.
-            // This row is used for show this data in email.
-            // This below function returns false or the number of affected rows.
             if (!$wpdb->insert(
                 $wpdb->prefix . 'easypay_notifications',
                 array(
@@ -561,10 +494,9 @@ function woocommerce_gateway_easypay_mb_init()
                 $this->log($result);
             }
 
-            // It's necessary these changes for send a email with an order in processing
-            #$order->update_status('on-hold'); // pending->on-hold
-            #$order->update_status('pending'); // on-hold->pending
-            $this->payment_on_hold($order, $reason = ''); // reduces stock
+            // reduces stock
+            $this->payment_on_hold($order, $reason = '');
+
             // Send Email
             add_action(
                 'mail_the_guy',
@@ -577,11 +509,10 @@ function woocommerce_gateway_easypay_mb_init()
             return $this->get_reference_html($data);
         }
 
-
         /**
          * Returns a string from a link via cUrl
          *
-         * @param string $url
+         * @param array $payload
          * @return string
          */
         public function get_contents($payload)
@@ -724,54 +655,15 @@ function woocommerce_gateway_easypay_mb_init()
             return sprintf($template, __('Entity', 'wceasypay'), $entity, __('Reference', 'wceasypay'), wordwrap($reference, 3, ' ', true), __('Value', 'wceasypay'), $value);
         }
 
-        /**
-         * Returns the Easypay Visa Box
-         * @param string $visa_url
-         * @return string
-         */
-        private function get_visa_template($visa_url)
-        {
-            $template = '<div style="margin-top: 10px; width: 220px; float: left; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color:#eee;">
-                            <img src="http://store.easyp.eu/img/visa_mc_bw-01.png">
-
-                            <div style="padding: 5px; padding-top: 10px; clear: both;">
-                                <a href="%s" style="color: #0088cc; text-decoration: none;">%s!</a>
-                            </div>
-
-                        </div>';
-
-            return sprintf($template, esc_url($visa_url), __('Pay Now', 'wceasypay'));
-        }
-
-        /**
-         * Returns the Easypay Boleto Box
-         * @param string $boleto_url
-         * @return string
-         */
-        private function get_boleto_template($boleto_url)
-        {
-            $template = '<div style="margin-top: 10px; width: 220px; float: left; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color:#eee;">
-                            <img src="http://store.easyp.eu/img/bb_bw-01.png">
-
-                            <div style="padding: 5px; padding-top: 10px; clear: both;">
-                                <a href="%s" style="color: #0088cc; text-decoration: none;">%s!</a>
-                            </div>
-
-                        </div>';
-
-            return sprintf($template, esc_url($boleto_url), __('Pay Now', 'wceasypay'));
-        }
-
-
         // Errors
 
         /**
          * Displays an error message on the top of admin panel
          */
-        public function error_missing_cin()
+        public function error_missing_api_key()
         {
             $msg = __(
-                '<strong>Easypay Gateway Disabled</strong> Missing CIN. %sClick here to configure.%s',
+                '<strong>Easypay Gateway Disabled</strong> Missing API Key. %sClick here to configure.%s',
                 'wceasypay'
             );
 
@@ -783,55 +675,10 @@ function woocommerce_gateway_easypay_mb_init()
         /**
          * Displays an error message on the top of admin panel
          */
-        public function error_missing_user()
+        public function error_missing_account_id()
         {
             $msg = __(
-                '<strong>Easypay Gateway Disabled</strong> Missing USER. %sClick here to configure.%s',
-                'wceasypay'
-            );
-
-            $msgFinal = sprintf($msg, $this->ahref, $this->a);
-
-            echo sprintf($this->error, $msgFinal);
-        }
-
-        /**
-         * Displays an error message on the top of admin panel
-         */
-        public function error_missing_entity()
-        {
-            $msg = __(
-                '<strong>Easypay Gateway Disabled</strong> Missing ENTITY. %sClick here to configure.%s',
-                'wceasypay'
-            );
-
-            $msgFinal = sprintf($msg, $this->ahref, $this->a);
-
-            echo sprintf($this->error, $msgFinal);
-        }
-
-        /**
-         * Displays an error message on the top of admin panel
-         */
-        public function error_missing_country()
-        {
-            $msg = __(
-                '<strong>Easypay Gateway Disabled</strong> Missing COUNTRY. %sClick here to configure.%s',
-                'wceasypay'
-            );
-
-            $msgFinal = sprintf($msg, $this->ahref, $this->a);
-
-            echo sprintf($this->error, $msgFinal);
-        }
-
-        /**
-         * Displays an error message on the top of admin panel
-         */
-        public function error_missing_lang()
-        {
-            $msg = __(
-                '<strong>Easypay Gateway Disabled</strong> Missing LANGUAGE. %sClick here to configure.%s',
+                '<strong>Easypay Gateway Disabled</strong> Missing Account ID. %sClick here to configure.%s',
                 'wceasypay'
             );
 
