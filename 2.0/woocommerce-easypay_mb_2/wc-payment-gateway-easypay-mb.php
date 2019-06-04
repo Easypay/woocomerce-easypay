@@ -409,15 +409,15 @@ function woocommerce_gateway_easypay_mb_2_init()
 
             // start to build the body with the ref data
             $body = [
-                "key" => "$order->get_id()",
-                "method" => "{$this->method}",
+                "key" => "'" . $order->get_id() . "'",
+                "method" => $this->method,
                 "value"	=> floatval($order->get_total()),
-                "currency"	=> "$this->currency",
-                "expiration_time" =>"{$max_date}",
+                "currency"	=> $this->currency,
+                "expiration_time" =>$max_date,
                 "customer" => [
                     "name" => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
                     "email" => $order->get_billing_email(),
-                    "key" => $order->get_id(),
+                    "key" => "'" . $order->get_id() . "'",
                     "phone_indicative" => "+351",
                     "phone" => $order->get_billing_phone(),
                     // "fiscal_number" =>"PT123456789",
@@ -429,16 +429,17 @@ function woocommerce_gateway_easypay_mb_2_init()
             $contents = $this->get_contents($body);
 
             $obj = simplexml_load_string($contents);
-            // We don't need to encode if we get a json
-            $data = json_decode(json_encode($obj), true);
 
+            $data = json_decode($obj, true);
+            /*
             if (!$data) {
                 $this->log('Error while requesting reference 1 #' . $order->get_id() . ' [' . $contents . ']');
                 return $this->error_btn_order($order, 'Not enough data.');
             }
-            if ($data['ep_status'] != 'ok0') {
-                $this->log('Error while requesting reference 2 #' . $order->get_id() . ' [' . $data['ep_message'] . ']');
-                return $this->error_btn_order($order, $data['ep_message']);
+            */
+            if ($data['status'] != 'ok') {
+                $this->log('Error while requesting reference 2 #' . $order->get_id() . ' [' . $data['messages'] . ']');
+                return $this->error_btn_order($order, $data['messages']);
             } else {
                 $this->log('Reference created #' . $order->get_id() . ' @' . $data['ep_reference'] . ']');
                 $note = __('Awaiting for reference payment.', 'wceasypay') . PHP_EOL;
@@ -523,7 +524,7 @@ function woocommerce_gateway_easypay_mb_2_init()
                 return $response;
 
             } else {
-                return file_get_contents($url);
+                die; // add something later
             }
         }
 
