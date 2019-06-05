@@ -413,7 +413,6 @@ function woocommerce_gateway_easypay_mb_2_init()
                 "method" => $this->method,
                 "value"	=> floatval($order->get_total()),
                 "currency"	=> $this->currency,
-                "expiration_time" =>$max_date,
                 "customer" => [
                     "name" => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
                     "email" => $order->get_billing_email(),
@@ -424,28 +423,30 @@ function woocommerce_gateway_easypay_mb_2_init()
                 ],
             ]; // Commented the fiscal number since the special nif field is commented also
 
+            if(isset($max_date)) {
+                $body["expiration_time"] = $max_date;
+            }
+
             $this->log('Payload for order #' . $order->get_id() . ': ' . print_r(json_encode($body), true));
 
-            $contents = $this->get_contents($body);
+            $data = $this->get_contents($body);
 
-            $obj = simplexml_load_string($contents);
-
-            $data = json_decode($obj, true);
             /*
             if (!$data) {
                 $this->log('Error while requesting reference 1 #' . $order->get_id() . ' [' . $contents . ']');
                 return $this->error_btn_order($order, 'Not enough data.');
             }
             */
+
             if ($data['status'] != 'ok') {
-                $this->log('Error while requesting reference 2 #' . $order->get_id() . ' [' . $data['messages'] . ']');
-                return $this->error_btn_order($order, $data['messages']);
+                $this->log('Error while requesting reference 2 #' . $order->get_id() . ' [' . $data['message'][0] . ']');
+                return $this->error_btn_order($order, $data['message'][0]);
             } else {
-                $this->log('Reference created #' . $order->get_id() . ' @' . $data['ep_reference'] . ']');
+                $this->log('Reference created #' . $order->get_id() . ' @' . $data['method']['reference'] . ']');
                 $note = __('Awaiting for reference payment.', 'wceasypay') . PHP_EOL;
-                $note .= 'Entity: ' . $data['ep_entity'] . '; ' . PHP_EOL;
-                $note .= 'Value: ' . $data['ep_value'] . '; ' . PHP_EOL;
-                $note .= 'Reference: ' . $data['ep_reference'] . '; ' . PHP_EOL;
+                $note .= 'Entity: ' . $data['method']['entity'] . '; ' . PHP_EOL;
+                $note .= 'Value: ' . $order->get_total() . '; ' . PHP_EOL;
+                $note .= 'Reference: ' . $data['method']['reference'] . '; ' . PHP_EOL;
 
                 $order->add_order_note($note, 0);
             }
@@ -453,25 +454,25 @@ function woocommerce_gateway_easypay_mb_2_init()
             if (!$wpdb->insert(
                 $wpdb->prefix . 'easypay_notifications',
                 array(
-                    'ep_entity'    => $data['ep_entity'],
-                    'ep_value'     => $data['ep_value'],
-                    'ep_reference' => $data['ep_reference'],
+                    'ep_entity'    => $data['method']['entity'],
+                    'ep_value'     => $order->get_total(),
+                    'ep_reference' => $data['method']['reference'],
                     't_key'        => $order->get_id(),
                 )
             )) {
                 $result = 'Error while inserting the new generated reference in database:' . PHP_EOL;
                 $result .= 'Order ID: ' . $order->get_id() . ';' . PHP_EOL;
-                $result .= 'Entity: ' . $data['ep_entity'] . ';' . PHP_EOL;
-                $result .= 'Value: ' . $data['ep_value'] . ';' . PHP_EOL;
-                $result .= 'Reference: ' . $data['ep_reference'] . ';' . PHP_EOL;
+                $result .= 'Entity: ' . $data['method']['entity'] . ';' . PHP_EOL;
+                $result .= 'Value: ' . $order->get_total() . ';' . PHP_EOL;
+                $result .= 'Reference: ' . $data['method']['reference'] . ';' . PHP_EOL;
                 $this->log($result);
 
             } else {
                 $result = 'New data inserted in database:' . PHP_EOL;
                 $result .= 'Order ID: ' . $order->get_id() . ';' . PHP_EOL;
-                $result .= 'Entity: ' . $data['ep_entity'] . ';' . PHP_EOL;
-                $result .= 'Value: ' . $data['ep_value'] . ';' . PHP_EOL;
-                $result .= 'Reference: ' . $data['ep_reference'] . ';' . PHP_EOL;
+                $result .= 'Entity: ' . $data['method']['entity'] . ';' . PHP_EOL;
+                $result .= 'Value: ' . $order->get_total() . ';' . PHP_EOL;
+                $result .= 'Reference: ' . $data['method']['reference'] . ';' . PHP_EOL;
                 $this->log($result);
             }
 
@@ -487,7 +488,9 @@ function woocommerce_gateway_easypay_mb_2_init()
             );
             do_action('mail_the_guy', $order, $data);
 
-            return $this->get_reference_html($data);
+            $value = $order->get_total();
+
+            return $this->get_reference_html($data, $value);
         }
 
         /**
@@ -551,18 +554,15 @@ function woocommerce_gateway_easypay_mb_2_init()
          * Returns the Checkout HTML code
          *
          * @param array $reference
-         * @param string $html
+         * @param string $value
          * @return  string
          */
 
-        private function get_reference_html($reference, $html = '')
+        private function get_reference_html($reference, $value)
         {
-            $html .= '<div style="float: left; text-align:center; border: 1px solid #ddd; border-radius: 5px; width: 240px; min-height: 70px; padding:10px;">';
+            $html = '<div style="float: left; text-align:center; border: 1px solid #ddd; border-radius: 5px; width: 240px; min-height: 70px; padding:10px;">';
             //$html .= '<img src="http://store.easyp.eu/img/easypay_logo_nobrands-01.png" style="height:40px; margin-bottom: 10px;" title="Se quer pagar uma referência multibanco utilize a easypay" alt="Se quer pagar uma referência multibanco utilize a easypay">';
-            if ($this->use_multibanco) {
-                $html .= $this->get_mbbox_template($reference['ep_entity'], $reference['ep_reference'], $reference['ep_value']);
-            }
-
+            $html .= $this->get_mbbox_template($reference['method']['entity'], $reference['method']['reference'], $value);
             return $html . '</div>';
         }
 
