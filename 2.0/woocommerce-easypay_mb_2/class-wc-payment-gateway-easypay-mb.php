@@ -496,7 +496,7 @@ function woocommerce_gateway_easypay_mb_2_init()
 
             $value = $order->get_total();
 
-            return $this->get_reference_html($data, $value);
+            return $request->get_reference_html($data, $value);
         }
 
         /**
@@ -518,21 +518,6 @@ function woocommerce_gateway_easypay_mb_2_init()
             return $html;
         }
 
-        /**
-         * Returns the Checkout HTML code
-         *
-         * @param array $reference
-         * @param string $value
-         * @return  string
-         */
-
-        private function get_reference_html($reference, $value)
-        {
-            $html = '<div style="float: left; text-align:center; border: 1px solid #ddd; border-radius: 5px; width: 240px; min-height: 70px; padding:10px;">';
-            //$html .= '<img src="http://store.easyp.eu/img/easypay_logo_nobrands-01.png" style="height:40px; margin-bottom: 10px;" title="Se quer pagar uma referência multibanco utilize a easypay" alt="Se quer pagar uma referência multibanco utilize a easypay">';
-            $html .= $this->get_mbbox_template($reference['method']['entity'], $reference['method']['reference'], $value);
-            return $html . '</div>';
-        }
 
         /**
          * Process the payment and return the result.
@@ -563,43 +548,6 @@ function woocommerce_gateway_easypay_mb_2_init()
         private function is_valid_for_use()
         {
             return in_array(get_woocommerce_currency(), array('EUR'));
-        }
-
-        /**
-         * Returns the Easypay MB Box
-         * @param integer $reference
-         * @param integer $entity
-         * @param double $value
-         * @return string
-         */
-        private function get_mbbox_template($entity, $reference, $value)
-        {
-            $template = '<div style="width: 220px; float: left; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color:#eee;">
-                            <!-- img src="http://store.easyp.eu/img/MB_bw-01.png" -->
-
-                            <div style="padding: 5px; padding-top: 10px; clear: both;">
-                                <span style="font-weight: bold;float: left;">%s:</span>
-                                <span style="color: #0088cc; float: right">%s (Easypay)</span>
-                            </div>
-
-                            <div style="padding: 5px;clear: both;">
-                                <span style="font-weight: bold;float: left;">%s:</span>
-                                <span style="color: #0088cc; float: right">%s</span>
-                            </div>
-
-                            <div style="padding: 5px; clear: both;">
-                                <span style="font-weight: bold;float: left;">%s:</span>
-                                <span style="color: #0088cc; float: right">%s &euro;</span>
-                            </div>
-
-
-                        </div>
-                        <div style="padding: 5px; clear: both;">
-                          <a class="button wc-backward" href="' . esc_url(apply_filters('woocommerce_return_to_shop_redirect', wc_get_page_permalink('shop'))) . '">' . __('Return to shop', 'wceasypay') . ' </a>
-                        </div>';
-
-
-            return sprintf($template, __('Entity', 'wceasypay'), $entity, __('Reference', 'wceasypay'), wordwrap($reference, 3, ' ', true), __('Value', 'wceasypay'), $value);
         }
 
         // Errors
