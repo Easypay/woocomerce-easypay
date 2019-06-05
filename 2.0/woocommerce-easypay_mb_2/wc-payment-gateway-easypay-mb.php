@@ -431,15 +431,8 @@ function woocommerce_gateway_easypay_mb_2_init()
 
             $data = $this->get_contents($body);
 
-            /*
-            if (!$data) {
-                $this->log('Error while requesting reference 1 #' . $order->get_id() . ' [' . $contents . ']');
-                return $this->error_btn_order($order, 'Not enough data.');
-            }
-            */
-
             if ($data['status'] != 'ok') {
-                $this->log('Error while requesting reference 2 #' . $order->get_id() . ' [' . $data['message'][0] . ']');
+                $this->log('Error while requesting reference #' . $order->get_id() . ' [' . $data['message'][0] . ']');
                 return $this->error_btn_order($order, $data['message'][0]);
             } else {
                 $this->log('Reference created #' . $order->get_id() . ' @' . $data['method']['reference'] . ']');
