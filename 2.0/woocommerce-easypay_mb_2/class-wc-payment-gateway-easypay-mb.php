@@ -429,7 +429,20 @@ function woocommerce_gateway_easypay_mb_2_init()
 
             $this->log('Payload for order #' . $order->get_id() . ': ' . print_r(json_encode($body), true));
 
-            $data = $this->get_contents($body);
+            include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-easypay-request.php';
+
+            $url = $this->test ? $this->test_url : $this->live_url;
+
+            $auth = [
+                    "test" => $this->test,
+                    "url" => $url,
+                    "account_id" => $this->account_id,
+                    "api_key" => $this->api_key,
+            ];
+
+            $request = new WC_Gateway_Easypay_Request($auth);
+
+            $data = $request->get_contents($body);
 
             if ($data['status'] != 'ok') {
                 $this->log('Error while requesting reference #' . $order->get_id() . ' [' . $data['message'][0] . ']');
@@ -484,44 +497,6 @@ function woocommerce_gateway_easypay_mb_2_init()
             $value = $order->get_total();
 
             return $this->get_reference_html($data, $value);
-        }
-
-        /**
-         * Returns a string from a link via cUrl
-         *
-         * @param array $payload
-         * @return string
-         */
-        public function get_contents($payload)
-        {
-            $url = $this->test ? $this->test_url : $this->live_url;
-            if (function_exists('curl_init')) {
-                $headers = [
-                    "AccountId: {$this->account_id}",
-                    "ApiKey: {$this->api_key}",
-                    'Content-Type: application/json',
-                ];
-
-                $curlOpts = [
-                    CURLOPT_URL => $url,
-                    CURLOPT_RETURNTRANSFER => true,
-                    CURLOPT_POST => 1,
-                    CURLOPT_TIMEOUT => 60,
-                    CURLOPT_POSTFIELDS => json_encode($payload),
-                    CURLOPT_HTTPHEADER => $headers,
-                ];
-
-                $curl = curl_init();
-                curl_setopt_array($curl, $curlOpts);
-                $response_body = curl_exec($curl);
-                curl_close($curl);
-                $response = json_decode($response_body, true);
-
-                return $response;
-
-            } else {
-                die; // add something later
-            }
         }
 
         /**
