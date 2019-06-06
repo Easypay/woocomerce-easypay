@@ -150,6 +150,17 @@ function woocommerce_gateway_easypay_mb_2_init()
             WC()->cart->empty_cart();
         }
 
+        /*
+         * Give Auth
+         */
+        public function easypay_api_auth() {
+            $api_auth['url'] = $this->test ? $this->test_url : $this->live_url;
+            $api_auth['account_id'] = $this->account_id;
+            $api_auth['api_key'] = $this->api_key;
+
+            return $api_auth;
+        }
+
         /**
          * Put the reference, entity and value in the email.
          *
@@ -434,10 +445,10 @@ function woocommerce_gateway_easypay_mb_2_init()
             $url = $this->test ? $this->test_url : $this->live_url;
 
             $auth = [
-                    "test" => $this->test,
                     "url" => $url,
                     "account_id" => $this->account_id,
                     "api_key" => $this->api_key,
+                    "method" => 'POST',
             ];
 
             $request = new WC_Gateway_Easypay_Request($auth);
