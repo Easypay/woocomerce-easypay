@@ -35,4 +35,16 @@ $id = $data['id'];
 
 $response = $request->get_contents($id);
 
+$temp = [];
+
+$select = sprintf( "SELECT ep_key, ep_status FROM %seasypay_notifications WHERE ep_reference = '%s'", $wpdb->prefix, $response["method"]["reference"]);
+
+$query = $wpdb->get_results( $select, ARRAY_A );
+
+if (!$query) {
+    $wcep -> log('[' . basename(__FILE__) . '] Error selecting data from database');
+    $temp['message'] = 'error selecting data from database';
+    $temp['status'] = 'err1';
+}
+
 print_r($response);
