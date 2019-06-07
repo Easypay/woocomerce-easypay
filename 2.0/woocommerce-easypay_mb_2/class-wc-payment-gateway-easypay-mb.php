@@ -379,10 +379,7 @@ function woocommerce_gateway_easypay_mb_2_init()
             echo '<td><p>Configurations that you must perform on your Easypay account.<br/><strong>' . __('Go to "Webservices" > "URL Configuration"', 'wceasypay') . '</strong></p></td>';
             echo '</tr><tr>';
             echo '<td><h4>' . __('Notification URL', 'wceasypay') . '</h4></td>';
-            echo '<td><input type="text" size="100" readonly value="' . $public_url . 'generic_notification.php' . '"/></td>';
-            echo '</tr><tr>';
-            echo '<td><h3>' . __('Easypay Configurations', 'wceasypay') . ' ' . __('On your server', 'wceasypay') . '</h3></td>';
-            echo '<td>' . __('For Credit Card payment check you must create a cron job, we sugest you config your cron job to call this file once a day.', 'wceasypay') . '</td>';
+            echo '<td><input type="text" size="100" readonly value="' . $public_url . 'generic.php' . '"/></td>';
             echo '</tr>';
             echo '</table>';
         }
