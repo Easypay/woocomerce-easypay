@@ -420,14 +420,14 @@ function woocommerce_gateway_easypay_mb_2_init()
 
             // start to build the body with the ref data
             $body = [
-                "key" => "'" . $order->get_id() . "'",
+                "key" => (string)$order->get_id(),
                 "method" => $this->method,
                 "value"	=> floatval($order->get_total()),
                 "currency"	=> $this->currency,
                 "customer" => [
                     "name" => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
                     "email" => $order->get_billing_email(),
-                    "key" => "'" . $order->get_id() . "'",
+                    "key" => (string)$order->get_id(),
                     "phone_indicative" => "+351",
                     "phone" => $order->get_billing_phone(),
                     // "fiscal_number" =>"PT123456789",
@@ -469,7 +469,7 @@ function woocommerce_gateway_easypay_mb_2_init()
             }
 
             if (!$wpdb->insert(
-                $wpdb->prefix . 'easypay_notifications',
+                $wpdb->prefix . 'easypay_notifications_2',
                 array(
                     'ep_entity'    => $data['method']['entity'],
                     'ep_value'     => $order->get_total(),

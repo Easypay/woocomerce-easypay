@@ -37,7 +37,7 @@ $response = $request->get_contents($id);
 
 $temp = [];
 
-$select = sprintf( "SELECT ep_key, ep_status FROM %seasypay_notifications WHERE ep_reference = '%s'", $wpdb->prefix, $response["method"]["reference"]);
+$select = sprintf( "SELECT ep_key, ep_status, t_key FROM %seasypay_notifications_2 WHERE ep_reference = '%s'", $wpdb->prefix, $response['method']['reference']);
 
 $query = $wpdb->get_results( $select, ARRAY_A );
 
@@ -47,4 +47,25 @@ if (!$query) {
     $temp['status'] = 'err1';
 }
 
-print_r($response);
+if ( $query[0]['ep_status'] == 'processed' ) {
+    $temp['message'] = 'document already processed';
+    $temp['ep_status'] = 'ok0';
+} else {
+    $set = array(
+        'ep_status' => 'processed',
+        'ep_entity' => $response['method']['entity'],
+        'ep_reference' => $response['method']['reference'],
+        'ep_value' => $response['value'],
+        'ep_payment_type' => $response['method']['type'],
+        't_key' => $response['key'],
+    );
+
+    $wpdb->update($wpdb->prefix . 'easypay_notifications_2', $set, array('ep_reference' => $response['method']['reference']));
+
+    $order = new WC_Order($query[0]['t_key']);
+
+    $order->update_status('completed', 'Payment completed');
+
+    print_r($set);
+}
+
