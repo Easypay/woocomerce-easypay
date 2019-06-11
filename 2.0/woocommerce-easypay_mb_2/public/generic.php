@@ -50,6 +50,7 @@ if (!$query) {
 if ( $query[0]['ep_status'] == 'processed' ) {
     $temp['message'] = 'document already processed';
     $temp['ep_status'] = 'ok0';
+
 } else {
     $set = array(
         'ep_status' => 'processed',

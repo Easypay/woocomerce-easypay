@@ -10,4 +10,5 @@ function wceasypay_deactivation_mb_2() {
     delete_option( $option_name );
 
     delete_site_option( $option_name );
+
 }
