@@ -24,24 +24,24 @@ if (!defined('ABSPATH')) {
 
 // Install
 require_once 'core/install.php';
-register_activation_hook(__FILE__, 'wceasypay_activation_mb_2');
+register_activation_hook(__FILE__, 'wceasypay_activation_cc_2');
 
 // Uninstall
 require_once 'core/uninstall.php';
-register_deactivation_hook(__FILE__, 'wceasypay_deactivation_mb_2');
+register_deactivation_hook(__FILE__, 'wceasypay_deactivation_cc_2');
 
 //Plugin initialization
-add_action('plugins_loaded', 'woocommerce_gateway_easypay_mb_2_init', 0);
+add_action('plugins_loaded', 'woocommerce_gateway_easypay_cc_2_init', 0);
 add_action('woocommerce_api_easypay', 'easypay_callback_handler');
 
 /**
  * WC Gateway Class - Easypay MB API 2.0
  */
-function woocommerce_gateway_easypay_mb_2_init()
+function woocommerce_gateway_easypay_cc_2_init()
 {
 
     if (!class_exists('WC_Payment_Gateway')) {
-        add_action('admin_notices', 'wceasypay_woocommerce_notice_mb_2');
+        add_action('admin_notices', 'wceasypay_woocommerce_notice_cc_2');
         return;
     }
 
@@ -50,7 +50,7 @@ function woocommerce_gateway_easypay_mb_2_init()
      */
     load_plugin_textdomain('wceasypay', false, dirname(plugin_basename(__FILE__)) . '/languages');
 
-    class WC_Gateway_Easypay_MB_2 extends WC_Payment_Gateway
+    class WC_Gateway_Easypay_CC_2 extends WC_Payment_Gateway
     {
         /**
          * Gateway's Constructor.
@@ -66,7 +66,7 @@ function woocommerce_gateway_easypay_mb_2_init()
             $this->ahref = '<a href="' . get_admin_url() . 'admin.php?' .
                 'page=wc-settings&amp;' .
                 'tab=checkout&amp;' .
-                'section=wc_payment_gateway_easypay_mb_2">';
+                'section=wc_payment_gateway_easypay_cc_2">';
             $this->a = '</a>';
 
             // 2.0 API EndPoint
@@ -75,7 +75,7 @@ function woocommerce_gateway_easypay_mb_2_init()
             // -----------------------------------------------------------------
 
             // Inherited Variables----------------------------------------------
-            $this->id = 'easypay_mb_2';
+            $this->id = 'easypay_cc_2';
             $this->icon = plugins_url('images/logo.png', __FILE__);
             $this->has_fields = false;
             $this->method_title = __('Easypay MB', 'wceasypay');
@@ -171,7 +171,7 @@ function woocommerce_gateway_easypay_mb_2_init()
          */
         public function reference_in_mail($order, $sent_to_admin)
         {
-            if ($order->get_payment_method() == 'easypay_mb') {
+            if ($order->get_payment_method() == 'easypay_cc') {
                 global $wpdb;
                 if (!$sent_to_admin) {
                     // Log
@@ -300,7 +300,7 @@ function woocommerce_gateway_easypay_mb_2_init()
                     'title'       => __('Title', 'wceasypay'),
                     'type'        => 'text',
                     'description' => __('This controls the title which the user sees during checkout.', 'wceasypay'),
-                    'default'     => __('Easypay MB', 'wceasypay'),
+                    'default'     => __('Easypay CC', 'wceasypay'),
                     'desc_tip'    => true,
                 ),
                 'description' => array(
@@ -330,7 +330,7 @@ function woocommerce_gateway_easypay_mb_2_init()
                      'desc_tip' => true,
                 ),
                 'expiration_enable' => array(
-                    'title' => __('Enable Expiration for MB References', 'wceasypay'),
+                    'title' => __('Enable Expiration for CC References', 'wceasypay'),
                     'type' => 'checkbox',
                     'description' => __('Enable This Option to Activate Reference Expiration Time', 'wceasypay'),
                     'default' => 'no',
@@ -625,13 +625,13 @@ function woocommerce_gateway_easypay_mb_2_init()
      * @param array $methods
      * @return  array
      */
-    function woocommerce_add_gateway_easypay_mb_2($methods)
+    function woocommerce_add_gateway_easypay_cc_2($methods)
     {
-        $methods[] = 'WC_Gateway_Easypay_MB_2';
+        $methods[] = 'WC_Gateway_Easypay_CC_2';
         return $methods;
     }
 
-    add_filter('woocommerce_payment_gateways', 'woocommerce_add_gateway_easypay_mb_2');
+    add_filter('woocommerce_payment_gateways', 'woocommerce_add_gateway_easypay_cc_2');
 
     /**
      * Checkout Fields Override
@@ -639,7 +639,7 @@ function woocommerce_gateway_easypay_mb_2_init()
      * @param array $fields
      * @return  array
      */
-    function custom_override_checkout_fields_mb_2($fields)
+    function custom_override_checkout_fields_cc_2($fields)
     {
         $fields['billing']['billing_state']['required'] = false;
         $fields['shipping']['shipping_state']['required'] = false;
@@ -689,14 +689,14 @@ function woocommerce_gateway_easypay_mb_2_init()
     #add_filter('woocommerce_admin_shipping_fields', 'custom_override_order_shipping_details_nif_2');
 
 
-} //END of function woocommerce_gateway_easypay_mb_2_init
+} //END of function woocommerce_gateway_easypay_cc_2_init
 
 /**
  * WooCommerce Gateway Fallback Notice
  *
  * Request to user that Easypay Plugin needs the last vresion of WooCommerce
  */
-function wceasypay_woocommerce_notice_mb_2()
+function wceasypay_woocommerce_notice_cc_2()
 {
     echo '<div class="error"><p>' . __('WooCommerce Easypay Gateway depends on the last version of <a href="http://wordpress.org/extend/plugins/woocommerce/">WooCommerce</a> to work!', 'wceasypay') . '</p></div>';
 }
