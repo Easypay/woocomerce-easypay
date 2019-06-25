@@ -6,13 +6,13 @@
  * Version: 2.00
  * Author: Easypay
  * Author URI: https://easypay.pt
- * Requires at least: 3.6
- * Tested up to: 3.6.4
+ * Requires at least: 3.5
+ * Tested up to: 3.8.1
  *
  * Text Domain: wceasypay
  * Domain Path: /languages/
  *
- * @package Woocommerce-easypay-gateway-mb-2
+ * @package Woocommerce-easypay-gateway-mb
  * @category Gateway
  * @author Easypay
  */
@@ -131,10 +131,10 @@ function woocommerce_gateway_easypay_mb_2_init()
 
             // Send Email
             add_action(
-                'woocommerce_email_after_order_table',
-                array($this, 'reference_in_mail_2'),
-                20,
-                5
+                'woocommerce_email_after_order_table_2',
+                array($this, 'reference_in_mail'),
+                10,
+                3
             );
             // -----------------------------------------------------------------
 
@@ -166,55 +166,72 @@ function woocommerce_gateway_easypay_mb_2_init()
          *
          * @param   $order
          * @param   $sent_to_admin
+         * @param   $plain_text
+         * @return  void
          */
-        public function reference_in_mail_2($order, $sent_to_admin, $plain_text, $email)
+        public function reference_in_mail($order, $sent_to_admin)
         {
-            if ($order->get_payment_method() == 'easypay_mb_2') {
+            if ($order->get_payment_method() == 'easypay_mb') {
                 global $wpdb;
                 if (!$sent_to_admin) {
                     // Log
                     $this->log('A new mail for client');
                     // Search entity, reference and value in database for this $order->get_id()
-                    $row = $wpdb->get_row( $wpdb->prepare(
+                    $row = $wpdb->get_row($wpdb->prepare(
                         "
                         SELECT *
-                        FROM ".$wpdb -> prefix."easypay_notifications_2
+                        FROM " . $wpdb->prefix . "easypay_notifications_2
                         WHERE t_key = %d;
                         ",
                         $order->get_id()
                     ));
                     if ($row != null) {
                         // Do a log
-                        $result  = 'Data correctly search from database:' . PHP_EOL;
+                        $result = 'Data correctly search from database:' . PHP_EOL;
                         $result .= 'Order ID: ' . $order->get_id() . ';' . PHP_EOL;
                         $result .= 'Entity: ' . $row->ep_entity . ';' . PHP_EOL;
                         $result .= 'Value: ' . $row->ep_value . ';' . PHP_EOL;
                         $result .= 'Reference: ' . $row->ep_reference . ';' . PHP_EOL;
                         $this->log($result);
                         // Output the reference, entity and value in email
-
-                        $template = '<div style="width: 220px; float: left; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color:#eee;">
-                            <!-- img src="http://store.easyp.eu/img/MB_bw-01.png" -->
-
-                            <div style="padding: 5px; padding-top: 10px; clear: both;">
-                                <span style="font-weight: bold;float: left;">%s:</span>
-                                <span style="color: #0088cc; float: right">%s (Easypay)</span>
-                            </div>
-
-                            <div style="padding: 5px;clear: both;">
-                                <span style="font-weight: bold;float: left;">%s:</span>
-                                <span style="color: #0088cc; float: right">%s</span>
-                            </div>
-
-                            <div style="padding: 5px; clear: both;">
-                                <span style="font-weight: bold;float: left;">%s:</span>
-                                <span style="color: #0088cc; float: right">%s &euro;</span>
-                            </div>
-
-
-                        </div>
-                        <br />';
-                        echo sprintf($template, __('Entity', 'wceasypay'), $row->ep_entity, __('Reference', 'wceasypay'), wordwrap($row->ep_reference, 3, ' ', true), __('Value', 'wceasypay'), $row->ep_value);
+                        ?>
+                        <br/>
+                        <table cellspacing="0" cellpadding="6" style="width: 100%; border: 1px solid #eee;"
+                               bordercolor="#eee">
+                            <tr>
+                                <td colspan="5">
+                                    <!-- Alterar logo -->
+                                    <img
+                                            src="http://store.easyp.eu/img/easypay_logo_nobrands-01.png"
+                                            style="max-width:120px;"
+                                            title="Se quer pagar uma referência multibanco utilize a easypay"
+                                            alt="Se quer pagar uma referência multibanco utilize a easypay"
+                                    >
+                                </td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td><strong>Entidade: </strong></td>
+                                <td><?= $row->ep_entity ?></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td><strong>Referência: </strong></td>
+                                <td><?= $row->ep_reference ?></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td><strong>Valor: </strong></td>
+                                <td><?= $row->ep_value ?>&nbsp;&euro;</td>
+                            </tr>
+                        </table>
+                        <?php
                     } else {
                         $result = 'Error while search data in database:' . PHP_EOL;
                         $result .= 'Order ID: ' . $order->get_id() . ';' . PHP_EOL;
@@ -226,6 +243,7 @@ function woocommerce_gateway_easypay_mb_2_init()
                     $this->log('A new mail for administrator');
                 }
             }
+            return;
         }
 
         /**
@@ -475,7 +493,14 @@ function woocommerce_gateway_easypay_mb_2_init()
             // reduces stock
             $this->payment_on_hold($order, $reason = '');
 
-            do_action('woocommerce_email_after_order_table', $order, false, false, false);
+            // Send Email
+            add_action(
+                'mail_the_guy',
+                array($this, 'reference_in_mail'),
+                10,
+                2
+            );
+            do_action('mail_the_guy', $order, $data);
 
             $value = $order->get_total();
 
