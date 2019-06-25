@@ -102,7 +102,7 @@ class WC_Gateway_Easypay_Request
      */
     public function get_reference_html($reference, $value)
     {
-        $html = '<div style="clear: both; float: left; text-align:center; border: 1px solid #ddd; border-radius: 5px; width: 240px; min-height: 70px;">';
+        $html = '<div style="clear: both; float: left; text-align:center; border-radius: 5px; width: 240px; min-height: 70px;">';
         //$html .= '<img src="http://store.easyp.eu/img/easypay_logo_nobrands-01.png" style="height:40px; margin-bottom: 10px;" title="Se quer pagar uma referência multibanco utilize a easypay" alt="Se quer pagar uma referência multibanco utilize a easypay">';
         $html .= $this->get_mbbox_template($reference['method']['entity'], $reference['method']['reference'], $value);
         return $html . '</div>';
