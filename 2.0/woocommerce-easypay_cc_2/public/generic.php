@@ -65,7 +65,35 @@ if ( $query[0]['ep_status'] == 'processed' ) {
 
     $order = new WC_Order($query[0]['t_key']);
 
-    $order->update_status('completed', 'Payment completed');
+    // Check if the plugin is set for auto capture
+    if ($wcep->autoCapture == 'yes' && $wcep->method = "cc") {
+        // Capture
+        $body = [
+            "key" => (string)$order->get_id(),
+            "method" => $this->method,
+            "value"	=> floatval($order->get_total()),
+            "currency"	=> $this->currency,
+        ]; // Commented the fiscal number since the special nif field is commented also
+
+        $url = "https://api.prod.easypay.pt/2.0/capture/" . $id;
+
+        $auth = [
+            "url" => $url,
+            "account_id" => $wcep->account_id,
+            "api_key" => $wcep->api_key,
+            "method" => 'POST',
+        ];
+
+        $request = new WC_Gateway_Easypay_Request($auth);
+
+        $data = $request->get_contents($body);
+
+    } else if($wcep->autoCapture == 'no' && $wcep->method == "cc") {
+        // Change order to authorized state and wait for capture in here we have to place another condition to check if this is a capture notification
+        // or a final notification
+    } else if($wcep->method == "mb") {
+        $order->update_status('completed', 'Payment completed');
+    }
 
     print_r($set);
 }
