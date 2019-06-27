@@ -52,16 +52,6 @@ if ( $query[0]['ep_status'] == 'processed' ) {
     $temp['ep_status'] = 'ok0';
 
 } else {
-    $set = array(
-        'ep_status' => 'processed',
-        'ep_entity' => $response['method']['entity'],
-        'ep_reference' => $response['method']['reference'],
-        'ep_value' => $response['value'],
-        'ep_payment_type' => $response['method']['type'],
-        't_key' => $response['key'],
-    );
-
-    $wpdb->update($wpdb->prefix . 'easypay_notifications_2', $set, array('ep_reference' => $response['method']['reference']));
 
     $order = new WC_Order($query[0]['t_key']);
 
@@ -88,11 +78,43 @@ if ( $query[0]['ep_status'] == 'processed' ) {
 
         $data = $request->get_contents($body);
 
-    } else if($wcep->autoCapture == 'no' && $wcep->method == "cc") {
-        // Change order to authorized state and wait for capture in here we have to place another condition to check if this is a capture notification
-        // or a final notification
-    } else if($wcep->method == "mb") {
+        $set = array(
+            'ep_status' => 'processed',
+            'ep_entity' => $response['method']['entity'],
+            'ep_reference' => $response['method']['reference'],
+            'ep_value' => $response['value'],
+            'ep_payment_type' => $response['method']['type'],
+            't_key' => $response['key'],
+        );
+
+        $wpdb->update($wpdb->prefix . 'easypay_notifications_2', $set, array('ep_reference' => $response['method']['reference']));
         $order->update_status('completed', 'Payment completed');
+
+    } else if($wcep->autoCapture == 'no' && $wcep->method == "cc") {
+        $set = array(
+            'ep_status' => 'authorized',
+            'ep_entity' => $response['method']['entity'],
+            'ep_reference' => $response['method']['reference'],
+            'ep_value' => $response['value'],
+            'ep_payment_type' => $response['method']['type'],
+            't_key' => $response['key'],
+        );
+
+        $wpdb->update($wpdb->prefix . 'easypay_notifications_2', $set, array('ep_reference' => $response['method']['reference']));
+        $order->update_status('pending', 'Card authorized, waiting for capture');
+    } else if($wcep->method == "mb") {
+        $set = array(
+            'ep_status' => 'processed',
+            'ep_entity' => $response['method']['entity'],
+            'ep_reference' => $response['method']['reference'],
+            'ep_value' => $response['value'],
+            'ep_payment_type' => $response['method']['type'],
+            't_key' => $response['key'],
+        );
+
+        $wpdb->update($wpdb->prefix . 'easypay_notifications_2', $set, array('ep_reference' => $response['method']['reference']));
+        $order->update_status('completed', 'Payment completed');
+
     }
 
     print_r($set);
