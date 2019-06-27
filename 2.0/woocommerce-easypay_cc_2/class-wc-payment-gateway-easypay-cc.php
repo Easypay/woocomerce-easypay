@@ -1,18 +1,18 @@
 <?php
 
 /**
- * Plugin Name: WooCommerce Easypay Gateway MultiBanco
+ * Plugin Name: WooCommerce Easypay Gateway Cartao de Credito
  * Description: Easypay Payment Gateway for WooCommerce - Don't leave for tomorrow what you can receive today
  * Version: 2.00
  * Author: Easypay
  * Author URI: https://easypay.pt
- * Requires at least: 3.5
- * Tested up to: 3.8.1
+ * Requires at least: 3.6
+ * Tested up to: 3.6.4
  *
  * Text Domain: wceasypay
  * Domain Path: /languages/
  *
- * @package Woocommerce-easypay-gateway-mb
+ * @package Woocommerce-easypay-gateway-cc-2
  * @category Gateway
  * @author Easypay
  */
@@ -78,7 +78,7 @@ function woocommerce_gateway_easypay_cc_2_init()
             $this->id = 'easypay_cc_2';
             $this->icon = plugins_url('images/logo.png', __FILE__);
             $this->has_fields = false;
-            $this->method_title = __('Easypay MB', 'wceasypay');
+            $this->method_title = __('Easypay CC', 'wceasypay');
             $this->method_description = __('Don\'t leave for tomorrow what you can receive today', 'wceasypay');
             // -----------------------------------------------------------------
 
@@ -92,9 +92,11 @@ function woocommerce_gateway_easypay_cc_2_init()
             $this->title = $this->get_option('title');
             $this->description = $this->get_option('description');
             $this->currency = 'EUR';
-            $this->expiration_time = $this->get_option('expiration');
-            $this->expiration_enable = $this->get_option('expiration_enable');
-            $this->method = "mb";
+            // This should be out since its cc
+            // $this->expiration_time = $this->get_option('expiration');
+            // $this->expiration_enable = $this->get_option('expiration_enable');
+            $this->autoCapture      = $this->get_option('capture');
+            $this->method = "cc";
             // Auth Stuff
             $this->account_id = $this->get_option('account_id');
             $this->api_key = $this->get_option('api_key');
@@ -129,14 +131,6 @@ function woocommerce_gateway_easypay_cc_2_init()
             );
             // -----------------------------------------------------------------
 
-            // Send Email
-            add_action(
-                'woocommerce_email_after_order_table_2',
-                array($this, 'reference_in_mail'),
-                10,
-                3
-            );
-            // -----------------------------------------------------------------
 
         } //END of constructor
 
@@ -161,90 +155,6 @@ function woocommerce_gateway_easypay_cc_2_init()
             return $api_auth;
         }
 
-        /**
-         * Put the reference, entity and value in the email.
-         *
-         * @param   $order
-         * @param   $sent_to_admin
-         * @param   $plain_text
-         * @return  void
-         */
-        public function reference_in_mail($order, $sent_to_admin)
-        {
-            if ($order->get_payment_method() == 'easypay_cc') {
-                global $wpdb;
-                if (!$sent_to_admin) {
-                    // Log
-                    $this->log('A new mail for client');
-                    // Search entity, reference and value in database for this $order->get_id()
-                    $row = $wpdb->get_row($wpdb->prepare(
-                        "
-                        SELECT *
-                        FROM " . $wpdb->prefix . "easypay_notifications_2
-                        WHERE t_key = %d;
-                        ",
-                        $order->get_id()
-                    ));
-                    if ($row != null) {
-                        // Do a log
-                        $result = 'Data correctly search from database:' . PHP_EOL;
-                        $result .= 'Order ID: ' . $order->get_id() . ';' . PHP_EOL;
-                        $result .= 'Entity: ' . $row->ep_entity . ';' . PHP_EOL;
-                        $result .= 'Value: ' . $row->ep_value . ';' . PHP_EOL;
-                        $result .= 'Reference: ' . $row->ep_reference . ';' . PHP_EOL;
-                        $this->log($result);
-                        // Output the reference, entity and value in email
-                        ?>
-                        <br/>
-                        <table cellspacing="0" cellpadding="6" style="width: 100%; border: 1px solid #eee;"
-                               bordercolor="#eee">
-                            <tr>
-                                <td colspan="5">
-                                    <!-- Alterar logo -->
-                                    <img
-                                            src="http://store.easyp.eu/img/easypay_logo_nobrands-01.png"
-                                            style="max-width:120px;"
-                                            title="Se quer pagar uma referência multibanco utilize a easypay"
-                                            alt="Se quer pagar uma referência multibanco utilize a easypay"
-                                    >
-                                </td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td><strong>Entidade: </strong></td>
-                                <td><?= $row->ep_entity ?></td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td><strong>Referência: </strong></td>
-                                <td><?= $row->ep_reference ?></td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td><strong>Valor: </strong></td>
-                                <td><?= $row->ep_value ?>&nbsp;&euro;</td>
-                            </tr>
-                        </table>
-                        <?php
-                    } else {
-                        $result = 'Error while search data in database:' . PHP_EOL;
-                        $result .= 'Order ID: ' . $order->get_id() . ';' . PHP_EOL;
-                        $this->log($result);
-                        die("Error while search data in database...");
-                    }
-                } else {
-                    // Log
-                    $this->log('A new mail for administrator');
-                }
-            }
-            return;
-        }
 
         /**
          * Check if the settings are correct
@@ -336,6 +246,12 @@ function woocommerce_gateway_easypay_cc_2_init()
                     'default' => 'no',
                     'desc_tip' => true,
                 ),
+                'capture' => array(
+                    'title' => __('Auto Capture', 'wceasypay'),
+                    'type' => 'checkbox',
+                    'description' => __('Auto request the capture of the authorized transactions .', 'wceasypay'),
+                    'default' => false,
+                ),
                 'testing'     => array(
                     'title'       => __('Gateway Testing', 'wceasypay'),
                     'type'        => 'title',
@@ -400,7 +316,7 @@ function woocommerce_gateway_easypay_cc_2_init()
          * Request a new reference to API 01BG
          *
          * @param integer $order_id
-         * @return  string
+         * @return  void
          */
         public function generate_form($order_id)
         {
@@ -493,18 +409,9 @@ function woocommerce_gateway_easypay_cc_2_init()
             // reduces stock
             $this->payment_on_hold($order, $reason = '');
 
-            // Send Email
-            add_action(
-                'mail_the_guy',
-                array($this, 'reference_in_mail'),
-                10,
-                2
-            );
-            do_action('mail_the_guy', $order, $data);
-
-            $value = $order->get_total();
-
-            return $request->get_reference_html($data, $value);
+            // Add a method to the class to credit card
+            $visa_url = $data['method']['url'];
+            return $request->get_visa_template($visa_url);
         }
 
         /**
@@ -666,13 +573,13 @@ function woocommerce_gateway_easypay_cc_2_init()
      * @param array $billing_data
      * @return  array
      */
-    function custom_override_order_billing_details_nif_2($billing_data)
+    function custom_override_order_billing_details_nif_cc_2($billing_data)
     {
         $billing_data['fiscal_number'] = array('label' => __('Fiscal Number', 'wceasypay'), 'show' => true);
         return $billing_data;
     }
 
-    #add_filter('woocommerce_admin_billing_fields', 'custom_override_order_billing_details_nif_2');
+    #add_filter('woocommerce_admin_billing_fields', 'custom_override_order_billing_details_nif_cc_2');
 
     /**
      * Order Shipping Details NIF Override
@@ -680,13 +587,13 @@ function woocommerce_gateway_easypay_cc_2_init()
      * @param array $shipping_data
      * @return  array
      */
-    function custom_override_order_shipping_details_nif_2($shipping_data)
+    function custom_override_order_shipping_details_nif_cc_2($shipping_data)
     {
         $shipping_data['fiscal_number'] = array('label' => __('Fiscal Number', 'wceasypay'), 'show' => true);
         return $shipping_data;
     }
 
-    #add_filter('woocommerce_admin_shipping_fields', 'custom_override_order_shipping_details_nif_2');
+    #add_filter('woocommerce_admin_shipping_fields', 'custom_override_order_shipping_details_nif_cc_2');
 
 
 } //END of function woocommerce_gateway_easypay_cc_2_init

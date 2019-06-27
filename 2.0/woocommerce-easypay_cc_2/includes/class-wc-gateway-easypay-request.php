@@ -146,5 +146,19 @@ class WC_Gateway_Easypay_Request
         return sprintf($template, __('Entity', 'wceasypay'), $entity, __('Reference', 'wceasypay'), wordwrap($reference, 3, ' ', true), __('Value', 'wceasypay'), $value);
     }
 
+    public function get_visa_template($visa_url)
+    {
+        if(wp_redirect( $visa_url ) ) {
+            exit;
+        } else {
+            $msg = __(
+                '<strong>Easypay Gateway Not Avaiable</strong>',
+                'wceasypay'
+            );
+            $msgFinal = sprintf($msg);
+            echo sprintf($this->error, $msgFinal);
+        }
+    }
+
 }
 
