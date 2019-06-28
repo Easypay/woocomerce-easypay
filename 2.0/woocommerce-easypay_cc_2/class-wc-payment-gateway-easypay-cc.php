@@ -333,6 +333,7 @@ function woocommerce_gateway_easypay_cc_2_init()
 
             // start to build the body with the ref data
             $body = [
+                "type" => "authorisation",
                 "key" => (string)$order->get_id(),
                 "method" => $this->method,
                 "value"	=> floatval($order->get_total()),

@@ -56,14 +56,14 @@ if ( $query[0]['ep_status'] == 'processed' ) {
     $order = new WC_Order($query[0]['t_key']);
 
     // Check if the plugin is set for auto capture
-    if ($wcep->autoCapture == 'yes' && $wcep->method = "cc") {
+    if ($wcep->autoCapture == 'yes' && $wcep->method = "cc" && $data['type'] == "capture") {
         // Capture
         $body = [
             "key" => (string)$order->get_id(),
             "method" => $this->method,
             "value"	=> floatval($order->get_total()),
             "currency"	=> $this->currency,
-        ]; // Commented the fiscal number since the special nif field is commented also
+        ];
 
         $url = "https://api.prod.easypay.pt/2.0/capture/" . $id;
 
@@ -90,7 +90,8 @@ if ( $query[0]['ep_status'] == 'processed' ) {
         $wpdb->update($wpdb->prefix . 'easypay_notifications_2', $set, array('ep_reference' => $response['method']['reference']));
         $order->update_status('completed', 'Payment completed');
 
-    } else if($wcep->autoCapture == 'no' && $wcep->method == "cc") {
+
+    } else if($wcep->autoCapture == 'no' && $wcep->method == "cc" && $data['type'] == "authorisation") {
         $set = array(
             'ep_status' => 'authorized',
             'ep_entity' => $response['method']['entity'],
@@ -101,7 +102,7 @@ if ( $query[0]['ep_status'] == 'processed' ) {
         );
 
         $wpdb->update($wpdb->prefix . 'easypay_notifications_2', $set, array('ep_reference' => $response['method']['reference']));
-        $order->update_status('pending', 'Card authorized, waiting for capture');
+        $order->update_status('pending payment', 'Card authorized, waiting for capture');
     } else if($wcep->method == "mb") {
         $set = array(
             'ep_status' => 'processed',
