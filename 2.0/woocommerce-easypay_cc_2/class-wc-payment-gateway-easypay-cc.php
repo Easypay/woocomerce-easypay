@@ -316,7 +316,7 @@ function woocommerce_gateway_easypay_cc_2_init()
          * Request a new reference to API 01BG
          *
          * @param integer $order_id
-         * @return  void
+         * @return  string
          */
         public function generate_form($order_id)
         {
