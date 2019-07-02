@@ -296,6 +296,9 @@ function woocommerce_gateway_easypay_cc_2_init()
             echo '</tr><tr>';
             echo '<td><h4>' . __('Notification URL', 'wceasypay') . '</h4></td>';
             echo '<td><input type="text" size="100" readonly value="' . $public_url . 'generic.php' . '"/></td>';
+            echo '</tr><tr>';
+            echo '<td><h4>'.__('Visa - Fwd URL', 'wceasypay').'</h4></td>';
+            echo '<td><input type="text" size="100" readonly value="'.$public_url . 'visa-fwd-2.php'.'"/></td>';
             echo '</tr>';
             echo '</table>';
         }
