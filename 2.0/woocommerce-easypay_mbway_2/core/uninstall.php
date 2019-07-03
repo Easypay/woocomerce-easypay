@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Soft deactivation
-function wceasypay_deactivation_mb_2() {
+function wceasypay_deactivation_mbway_2() {
     $option_name = 'woocommerce_easypay_mbway_2_settings';
 
     delete_option( $option_name );
