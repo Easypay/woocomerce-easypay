@@ -21,7 +21,8 @@ class WC_Gateway_Easypay_Request
      * @param array $auth
      * @return void
      */
-    public function __construct( $auth ) {
+    public function __construct($auth)
+    {
         $this->url = $auth["url"];
         $this->account_id = $auth["account_id"];
         $this->api_key = $auth["api_key"];
@@ -39,7 +40,7 @@ class WC_Gateway_Easypay_Request
         $url = $this->url;
 
 
-        switch ($this->method){
+        switch ($this->method) {
             case 'POST':
                 if (function_exists('curl_init')) {
                     $headers = [
@@ -80,7 +81,7 @@ class WC_Gateway_Easypay_Request
                     CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_TIMEOUT        => 60,
                     CURLOPT_HTTPHEADER     => $headers,
-                    ];
+                ];
                 break;
         }
 
@@ -146,8 +147,26 @@ class WC_Gateway_Easypay_Request
         return sprintf($template, __('Entity', 'wceasypay'), $entity, __('Reference', 'wceasypay'), wordwrap($reference, 3, ' ', true), __('Value', 'wceasypay'), $value);
     }
 
-    public function mbway_template() {
+    public function get_mbway()
+    {
+        $html = '<div style="float: left; text-align:center; border: 1px solid #ddd; border-radius: 5px; width: 240px; min-height: 70px; padding:10px;">';
+        $html .= $this->mbway_template();
+        die;
+        return $html . '</div>';
+    }
+
+    public function mbway_template()
+    {
         $html = '<link rel="stylesheet" href="includes/css/spin.css">';
+
+        $html .= '
+            <div style="padding: 5px; padding-top: 10px; clear: both; id="mbway_idle">
+            </div>
+             
+            <div style="padding: 5px; clear: both;">
+                <a class="button wc-backward" href="' . esc_url(apply_filters('woocommerce_return_to_shop_redirect', wc_get_page_permalink('shop'))) . '">' . __('Return to shop', 'wceasypay') . ' </a>
+            </div>
+        ';
 
         $script = "<script>
         import {Spinner} from 'includes/js/spin.js';
@@ -173,10 +192,12 @@ class WC_Gateway_Easypay_Request
               position: 'absolute' // Element positioning
             };
             
-            var target = document.getElementById('foo');
+            var target = document.getElementById('mbway_idle');
             var spinner = new Spinner(opts).spin(target);
             </script>
         ";
+
+        return $html . $script;
     }
 
 }

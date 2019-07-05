@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Plugin Name: WooCommerce Easypay Gateway MultiBanco
+ * Plugin Name: WooCommerce Easypay Gateway MBWay
  * Description: Easypay Payment Gateway for WooCommerce - Don't leave for tomorrow what you can receive today
  * Version: 2.00
  * Author: Easypay
@@ -12,7 +12,7 @@
  * Text Domain: wceasypay
  * Domain Path: /languages/
  *
- * @package Woocommerce-easypay-gateway-mb
+ * @package Woocommerce-easypay-gateway-mbway
  * @category Gateway
  * @author Easypay
  */
@@ -94,7 +94,7 @@ function woocommerce_gateway_easypay_mbway_2_init()
             $this->currency = 'EUR';
             $this->expiration_time = $this->get_option('expiration');
             $this->expiration_enable = $this->get_option('expiration_enable');
-            $this->method = "mbway";
+            $this->method = "mbw";
             // Auth Stuff
             $this->account_id = $this->get_option('account_id');
             $this->api_key = $this->get_option('api_key');
@@ -406,9 +406,8 @@ function woocommerce_gateway_easypay_mbway_2_init()
             // reduces stock
             $this->payment_on_hold($order, $reason = '');
 
-            $value = $order->get_total();
-
-            return $request->get_reference_html($data, $value);
+            // Now do the magic in the class with the query cycle
+            return $request->mbway_template();
         }
 
         /**
@@ -600,7 +599,7 @@ function woocommerce_gateway_easypay_mbway_2_init()
  *
  * Request to user that Easypay Plugin needs the last vresion of WooCommerce
  */
-function wceasypay_woocommerce_notice_mb_2()
+function wceasypay_woocommerce_notice_mbway_2()
 {
     echo '<div class="error"><p>' . __('WooCommerce Easypay Gateway depends on the last version of <a href="http://wordpress.org/extend/plugins/woocommerce/">WooCommerce</a> to work!', 'wceasypay') . '</p></div>';
 }
