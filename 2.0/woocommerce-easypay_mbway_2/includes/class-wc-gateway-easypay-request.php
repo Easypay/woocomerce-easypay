@@ -157,47 +157,91 @@ class WC_Gateway_Easypay_Request
 
     public function mbway_template()
     {
-        $html = '<link rel="stylesheet" href="includes/css/spin.css">';
-
-        $html .= '
+        $html = '
             <div style="padding: 5px; padding-top: 10px; clear: both; id="mbway_idle">
             </div>
-             
+            
+            <style type="text/css">
+              .lds-grid {
+              display: inline-block;
+              position: relative;
+              width: 80px;
+              height: 80px;
+            }
+            .lds-grid div {
+              position: absolute;
+              width: 16px;
+              height: 16px;
+              border-radius: 50%;
+              background: #034f84;
+              animation: lds-grid 1.2s linear infinite;
+            }
+            .lds-grid div:nth-child(1) {
+              top: 8px;
+              left: 8px;
+              animation-delay: 0s;
+            }
+            .lds-grid div:nth-child(2) {
+              top: 8px;
+              left: 32px;
+              animation-delay: -0.4s;
+            }
+            .lds-grid div:nth-child(3) {
+              top: 8px;
+              left: 56px;
+              animation-delay: -0.8s;
+            }
+            .lds-grid div:nth-child(4) {
+              top: 32px;
+              left: 8px;
+              animation-delay: -0.4s;
+            }
+            .lds-grid div:nth-child(5) {
+              top: 32px;
+              left: 32px;
+              animation-delay: -0.8s;
+            }
+            .lds-grid div:nth-child(6) {
+              top: 32px;
+              left: 56px;
+              animation-delay: -1.2s;
+            }
+            .lds-grid div:nth-child(7) {
+              top: 56px;
+              left: 8px;
+              animation-delay: -0.8s;
+            }
+            .lds-grid div:nth-child(8) {
+              top: 56px;
+              left: 32px;
+              animation-delay: -1.2s;
+            }
+            .lds-grid div:nth-child(9) {
+              top: 56px;
+              left: 56px;
+              animation-delay: -1.6s;
+            }
+            @keyframes lds-grid {
+              0%, 100% {
+                opacity: 1;
+              }
+              50% {
+                opacity: 0.5;
+              }
+            }
+            
+            </style>
+            <div class="lds-grid"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+            <div style="padding: 5px; clear: both;">
+                <h4>... We are waiting 20s for your MBWay App Approval</h4>
+            </div>
             <div style="padding: 5px; clear: both;">
                 <a class="button wc-backward" href="' . esc_url(apply_filters('woocommerce_return_to_shop_redirect', wc_get_page_permalink('shop'))) . '">' . __('Return to shop', 'wceasypay') . ' </a>
             </div>
-        ';
 
-        $script = "<script>
-        import {Spinner} from 'includes/js/spin.js';
+        '; // we are going to put this in a cycle and work with the timer down and the animation with easypay color scheme
 
-            var opts = {
-              lines: 12, // The number of lines to draw
-              length: 10, // The length of each line
-              width: 8, // The line thickness
-              radius: 48, // The radius of the inner circle
-              scale: 1.35, // Scales overall size of the spinner
-              corners: 1, // Corner roundness (0..1)
-              color: '#82ffc0', // CSS color or array of colors
-              fadeColor: 'transparent', // CSS color or array of colors
-              speed: 1.4, // Rounds per second
-              rotate: 20, // The rotation offset
-              animation: 'spinner-line-fade-more', // The CSS animation name for the lines
-              direction: 1, // 1: clockwise, -1: counterclockwise
-              zIndex: 2e9, // The z-index (defaults to 2000000000)
-              className: 'spinner', // The CSS class to assign to the spinner
-              top: '50%', // Top position relative to parent
-              left: '50%', // Left position relative to parent
-              shadow: '0 0 1px transparent', // Box-shadow for the lines
-              position: 'absolute' // Element positioning
-            };
-            
-            var target = document.getElementById('mbway_idle');
-            var spinner = new Spinner(opts).spin(target);
-            </script>
-        ";
-
-        return $html . $script;
+        return $html;
     }
 
 }

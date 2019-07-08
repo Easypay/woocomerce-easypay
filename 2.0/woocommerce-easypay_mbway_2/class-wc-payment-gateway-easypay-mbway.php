@@ -85,7 +85,8 @@ function woocommerce_gateway_easypay_mbway_2_init()
             // Load the form fields (is a function in this class)
             $this->init_form_fields();
 
-            $this->init_settings(); // Woocommerce function
+            // Woocommerce function
+            $this->init_settings();
 
             // Define user set variables from form_fields function
             $this->enabled = $this->get_option('enabled');

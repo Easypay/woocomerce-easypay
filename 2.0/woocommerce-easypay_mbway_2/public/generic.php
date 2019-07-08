@@ -14,7 +14,7 @@ require_once $wpLoadFilePath;
 
 global $wpdb;
 
-$wcep = new WC_Gateway_Easypay_CC_2();
+$wcep = new WC_Gateway_Easypay_CC_2(); // We need to detect the gateway we are working with
 
 include_once '../includes/class-wc-gateway-easypay-request.php';
 
