@@ -155,8 +155,23 @@ class WC_Gateway_Easypay_Request
         return $html . '</div>';
     }
 
-    public function mbway_template()
+    public function mbway_template($order_key)
     {
+        $js_mbway = plugin_dir_url(__FILE__) . 'mbway_notification.js';
+        $deps = ['jquery'];
+        $script_handle = 'mbway_check_for_payment_notification';
+        wp_enqueue_script($script_handle
+            , $js_mbway
+            , $deps
+            , 0
+            , true);
+        $ajax_nonce = wp_create_nonce('wp-ep-mbway2-plugin');
+        wp_localize_script($script_handle, 'ajax_object', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'order_key' => $order_key,
+            'nonce' => $ajax_nonce,
+        ]);
+
         $html = '
             <div style="padding: 5px; padding-top: 10px; clear: both; id="mbway_idle">
             </div>
@@ -237,6 +252,9 @@ class WC_Gateway_Easypay_Request
             </div>
             <div style="padding: 5px; clear: both;">
                 <a class="button wc-backward" href="' . esc_url(apply_filters('woocommerce_return_to_shop_redirect', wc_get_page_permalink('shop'))) . '">' . __('Return to shop', 'wceasypay') . ' </a>
+            </div>
+            <div style="padding: 5px; clear: both;">
+                <a id="wc-cancel-order" class="button wc-backward" href="#">' . __('Cancel Purchase', 'wceasypay') . ' </a>
             </div>
 
         '; // we are going to put this in a cycle and work with the timer down and the animation with easypay color scheme
