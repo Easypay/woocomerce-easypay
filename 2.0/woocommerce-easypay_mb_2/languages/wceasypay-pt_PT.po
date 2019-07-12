@@ -309,3 +309,6 @@ msgid ""
 msgstr ""
 "WooCommerce Easypay Gateway depende da última versão do <a href=\"http://"
 "wordpress.org/extend/plugins/woocommerce/\">WooCommerce</a> para funcionar!"
+
+msgid "Cancel Purchase"
+msgstr "Cancelar Compra"
