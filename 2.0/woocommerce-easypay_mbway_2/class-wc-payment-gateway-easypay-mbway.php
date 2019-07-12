@@ -33,9 +33,90 @@ register_deactivation_hook(__FILE__, 'wceasypay_deactivation_mbway_2');
 //Plugin initialization
 add_action('plugins_loaded', 'woocommerce_gateway_easypay_mbway_2_init', 0);
 add_action('woocommerce_api_easypay', 'easypay_callback_handler');
+add_action('wp_ajax_ep_mbway_check_payment', 'ep_mbway_check_payment');
+add_action('wp_ajax_nopriv_ep_mbway_check_payment', 'ep_mbway_check_payment');
+
+function ep_mbway_check_payment()
+{
+    $ajax_nonce = wp_create_nonce('wp-ep-mbway2-plugin');
+    check_ajax_referer('wp-ep-mbway2-plugin', 'wp-ep-nonce');
+
+    $order_key = filter_input(INPUT_GET
+        , 'order_key'
+        , FILTER_VALIDATE_INT);
+    if (is_null($order_key) || false === $order_key) {
+        echo json_encode(false);
+        wp_die();
+    }
+
+    global $wpdb; // this is how you get access to the database
+
+    $query_string = "SELECT COUNT(t_key)"
+        . " FROM %seasypay_notifications_2"
+        /* %u presente as unsigned int */
+        . "WHERE t_key = %u AND ep_status != 'pending'";
+    $select = sprintf($query_string, $wpdb->prefix, $order_key);
+
+    $rset = $wpdb->get_results($select);
+    if (empty($rset)) {
+        $paid = false;
+    } else {
+        $paid = true;
+    }
+
+    echo json_encode($paid);
+    // this is required to terminate immediately and return a proper response
+    wp_die();
+}
+
+add_action('wp_ajax_ep_mbway_user_cancelled', 'ep_mbway_user_cancelled');
+add_action('wp_ajax_nopriv_ep_mbway_user_cancelled', 'ep_mbway_user_cancelled');
+
+function ep_mbway_user_cancelled()
+{
+    $ajax_nonce = wp_create_nonce('wp-ep-mbway2-plugin');
+    check_ajax_referer('wp-ep-mbway2-plugin', 'wp-ep-nonce');
+
+    $order_key = filter_input(INPUT_POST
+        , 'order_key'
+        , FILTER_VALIDATE_INT);
+    if (is_null($order_key) || false === $order_key) {
+        echo json_encode(false);
+        wp_die();
+    }
+
+    global $wpdb; // this is how you get access to the database
+
+    $query_string = "SELECT COUNT(t_key)"
+        . " FROM %seasypay_notifications_2"
+        /* %u presente as unsigned int */
+        . "WHERE t_key = %u AND ep_status != 'pending'";
+    $select = sprintf($query_string, $wpdb->prefix, $order_key);
+
+    $rset = $wpdb->get_results($select);
+    if (empty($rset)) {
+        $is_cancelled = false;
+    } else {
+
+        $notifications_table = $wpdb->prefix . 'easypay_notifications_2';
+        $set['ep_status'] = 'declined';
+        $where = [
+            't_key' => $order_key
+        ];
+        $wpdb->update($notifications_table, $set, $where);
+
+        $order = new WC_Order($order_key);
+        $order->update_status('cancelled', 'Cancelled by customer');
+        $is_cancelled = true;
+    }
+
+    echo json_encode($is_cancelled);
+    // this is required to terminate immediately and return a proper response
+    wp_die();
+}
 
 /**
- * WC Gateway Class - Easypay MB API 2.0
+ * WC Gateway Class - Easypay MBWAY API 2.0
  */
 function woocommerce_gateway_easypay_mbway_2_init()
 {
@@ -95,6 +176,7 @@ function woocommerce_gateway_easypay_mbway_2_init()
             $this->currency = 'EUR';
             $this->expiration_time = $this->get_option('expiration');
             $this->expiration_enable = $this->get_option('expiration_enable');
+            $this->autoCapture      = $this->get_option('capture');
             $this->method = "mbw";
             // Auth Stuff
             $this->account_id = $this->get_option('account_id');
@@ -243,6 +325,12 @@ function woocommerce_gateway_easypay_mbway_2_init()
                     'default' => 'no',
                     'desc_tip' => true,
                 ),
+                'capture' => array(
+                    'title' => __('Auto Capture', 'wceasypay'),
+                    'type' => 'checkbox',
+                    'description' => __('Auto request the capture of the authorized transactions .', 'wceasypay'),
+                    'default' => false,
+                ),
                 'testing'     => array(
                     'title'       => __('Gateway Testing', 'wceasypay'),
                     'type'        => 'title',
@@ -382,10 +470,12 @@ function woocommerce_gateway_easypay_mbway_2_init()
             if (!$wpdb->insert(
                 $wpdb->prefix . 'easypay_notifications_2',
                 array(
-                    'ep_entity'    => $data['method']['entity'],
-                    'ep_value'     => $order->get_total(),
-                    'ep_reference' => $data['method']['reference'],
-                    't_key'        => $order->get_id(),
+                    'ep_entity'     => $data['method']['entity'],
+                    'ep_value'      => $order->get_total(),
+                    'ep_reference'  => $data['method']['reference'],
+                    't_key'         => $order->get_id(),
+                    'ep_method'     => $this->method,
+                    'ep_payment_id' =>  $data['id'], // payment uuid
                 )
             )) {
                 $result = 'Error while inserting the new generated reference in database:' . PHP_EOL;
@@ -408,7 +498,7 @@ function woocommerce_gateway_easypay_mbway_2_init()
             $this->payment_on_hold($order, $reason = '');
 
             // Now do the magic in the class with the query cycle
-            return $request->mbway_template();
+            return $request->mbway_template((string)$order->get_id());
         }
 
         /**

@@ -450,10 +450,12 @@ function woocommerce_gateway_easypay_mb_2_init()
             if (!$wpdb->insert(
                 $wpdb->prefix . 'easypay_notifications_2',
                 array(
-                    'ep_entity'    => $data['method']['entity'],
-                    'ep_value'     => $order->get_total(),
-                    'ep_reference' => $data['method']['reference'],
-                    't_key'        => $order->get_id(),
+                    'ep_entity'     => $data['method']['entity'],
+                    'ep_value'      => $order->get_total(),
+                    'ep_reference'  => $data['method']['reference'],
+                    't_key'         => $order->get_id(),
+                    'ep_method'     => $this->method,
+                    'ep_payment_id' =>  $data['id'], // payment uuid
                 )
             )) {
                 $result = 'Error while inserting the new generated reference in database:' . PHP_EOL;
