@@ -35,13 +35,16 @@ jQuery(document).ready(function () {
         check_for_payment(ajax_object.ajax_url, data);
     }, timeout);
 
-    jQuery('#wc-ep-cancel-order').on('click', function() {
+    jQuery('#wc-ep-cancel-order').on('click', function () {
 
         data.action = 'wp_ajax_ep_mbway_user_cancelled';
 
         jQuery.getJSON(url, data, function (response) {
             if (true === response) {
                 alert('Cancelled! Doing something...');
+                jQuery('#wc-ep-cancel-order').parent().fadeOut(function () {
+                    jQuery(this).remove();
+                });
             } else {
                 alert('Cannot Cancel! Doing something...');
             }
