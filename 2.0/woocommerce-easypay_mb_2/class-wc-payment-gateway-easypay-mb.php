@@ -429,14 +429,14 @@ function woocommerce_gateway_easypay_mb_2_init()
                     "api_key" => $this->api_key,
                     "method" => 'POST',
             ];
-
             $request = new WC_Gateway_Easypay_Request($auth);
 
             $data = $request->get_contents($body);
 
             if ($data['status'] != 'ok') {
-                $this->log('Error while requesting reference #' . $order->get_id() . ' [' . $data['message'][0] . ']');
+                $this->log('Error while requesting payment for Order #' . $order->get_id() . ' [' . $data['message'][0] . ']');
                 return $this->error_btn_order($order, $data['message'][0]);
+
             } else {
                 $this->log('Reference created #' . $order->get_id() . ' @' . $data['method']['reference'] . ']');
                 $note = __('Awaiting for reference payment.', 'wceasypay') . PHP_EOL;
@@ -447,32 +447,29 @@ function woocommerce_gateway_easypay_mb_2_init()
                 $order->add_order_note($note, 0);
             }
 
+            $result = [
+                '',
+                "Order ID: {$order->get_id()};",
+                "Entity: {$data['method']['entity']};",
+                "Value: {$order->get_total()};",
+                "Reference: {$data['method']['reference']};"
+            ];
             if (!$wpdb->insert(
                 $wpdb->prefix . 'easypay_notifications_2',
-                array(
+                [
                     'ep_entity'     => $data['method']['entity'],
                     'ep_value'      => $order->get_total(),
                     'ep_reference'  => $data['method']['reference'],
                     't_key'         => $order->get_id(),
                     'ep_method'     => $this->method,
-                    'ep_payment_id' =>  $data['id'], // payment uuid
-                )
+                    'ep_payment_id' =>  $data['id'],
+                ]
             )) {
-                $result = 'Error while inserting the new generated reference in database:' . PHP_EOL;
-                $result .= 'Order ID: ' . $order->get_id() . ';' . PHP_EOL;
-                $result .= 'Entity: ' . $data['method']['entity'] . ';' . PHP_EOL;
-                $result .= 'Value: ' . $order->get_total() . ';' . PHP_EOL;
-                $result .= 'Reference: ' . $data['method']['reference'] . ';' . PHP_EOL;
-                $this->log($result);
-
+                $result[0] = 'Error while inserting the new payment in database:';
             } else {
-                $result = 'New data inserted in database:' . PHP_EOL;
-                $result .= 'Order ID: ' . $order->get_id() . ';' . PHP_EOL;
-                $result .= 'Entity: ' . $data['method']['entity'] . ';' . PHP_EOL;
-                $result .= 'Value: ' . $order->get_total() . ';' . PHP_EOL;
-                $result .= 'Reference: ' . $data['method']['reference'] . ';' . PHP_EOL;
-                $this->log($result);
+                $result[0] = 'New payment inserted in database:';
             }
+            $this->log(implode(PHP_EOL, $result));
 
             // reduces stock
             $this->payment_on_hold($order, $reason = '');
