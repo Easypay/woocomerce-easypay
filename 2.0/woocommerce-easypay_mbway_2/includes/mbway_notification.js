@@ -42,7 +42,7 @@ jQuery(document).ready(function () {
         window.clearTimeout(timeoutID);
         try_counter = -1;
 
-        jQuery.getJSON(url, data, function (response) {
+        jQuery.getJSON(ajax_object.ajax_url, data, function (response) {
             if (true === response) {
                 alert('Cancelled! Doing something...');
                 jQuery('#wc-ep-cancel-order').parent().fadeOut(function () {
