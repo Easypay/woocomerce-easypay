@@ -90,7 +90,7 @@ function ep_mbway_user_cancelled()
     $query_string = "SELECT COUNT(t_key)"
         . " FROM %seasypay_notifications_2"
         /* %u presente as unsigned int */
-        . "WHERE t_key = %u AND ep_status != 'pending'";
+        . "WHERE t_key = %u AND ep_status = 'on-hold'";
     $select = sprintf($query_string, $wpdb->prefix, $order_key);
 
     $rset = $wpdb->get_results($select);

@@ -254,7 +254,7 @@ class WC_Gateway_Easypay_Request
                 <a class="button wc-backward" href="' . esc_url(apply_filters('woocommerce_return_to_shop_redirect', wc_get_page_permalink('shop'))) . '">' . __('Return to shop', 'wceasypay') . ' </a>
             </div>
             <div style="padding: 5px; clear: both;">
-                <a id="wc-cancel-order" class="button wc-backward" href="#">' . __('Cancel Purchase', 'wceasypay') . ' </a>
+                <a id="wc-ep-cancel-order" class="button wc-backward" href="#">' . __('Cancel Purchase', 'wceasypay') . ' </a>
             </div>
 
         '; // we are going to put this in a cycle and work with the timer down and the animation with easypay color scheme

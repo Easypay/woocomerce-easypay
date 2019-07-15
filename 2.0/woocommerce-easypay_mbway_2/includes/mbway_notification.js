@@ -34,4 +34,19 @@ jQuery(document).ready(function () {
     window.setTimeout(function () {
         check_for_payment(ajax_object.ajax_url, data);
     }, timeout);
+
+    jQuery('#wc-ep-cancel-order').on('click', function() {
+
+        data.action = 'wp_ajax_ep_mbway_user_cancelled';
+
+        jQuery.getJSON(url, data, function (response) {
+            if (true === response) {
+                alert('Cancelled! Doing something...');
+            } else {
+                alert('Cannot Cancel! Doing something...');
+            }
+        }).fail(function () {
+            alert('Cannot Cancel! Doing something...');
+        });
+    });
 });
