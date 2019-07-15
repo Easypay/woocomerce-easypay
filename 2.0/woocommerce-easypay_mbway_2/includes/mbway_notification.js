@@ -38,7 +38,7 @@ jQuery(document).ready(function () {
 
     jQuery('#wc-ep-cancel-order').on('click', function () {
 
-        data.action = 'wp_ajax_ep_mbway_user_cancelled';
+        data.action = 'ep_mbway_user_cancelled';
         window.clearTimeout(timeoutID);
         try_counter = -1;
 
