@@ -50,14 +50,13 @@ function ep_mbway_check_payment()
     }
 
     global $wpdb; // this is how you get access to the database
+    $notifications_table = $wpdb->prefix . 'easypay_notifications_2';
 
     $query_string = "SELECT COUNT(t_key)"
-        . " FROM %seasypay_notifications_2"
-        /* %u presente as unsigned int */
-        . "WHERE t_key = %u AND ep_status != 'pending'";
-    $select = sprintf($query_string, $wpdb->prefix, $order_key);
+        . " FROM $notifications_table"
+        . " WHERE t_key = %u AND ep_status != 'pending'";
 
-    $rset = $wpdb->get_results($select);
+    $rset = $wpdb->get_results($wpdb->prepare($query_string, [$order_key]));
     if (empty($rset)) {
         $paid = false;
     } else {
@@ -86,19 +85,17 @@ function ep_mbway_user_cancelled()
     }
 
     global $wpdb; // this is how you get access to the database
+    $notifications_table = $wpdb->prefix . 'easypay_notifications_2';
 
-    $query_string = "SELECT COUNT(t_key)"
-        . " FROM %seasypay_notifications_2"
-        /* %u presente as unsigned int */
-        . "WHERE t_key = %u AND ep_status = 'on-hold'";
-    $select = sprintf($query_string, $wpdb->prefix, $order_key);
+    $query_string = "SELECT COUNT(t_key), ep_payment_id, t_key"
+        . " FROM $notifications_table"
+        . " WHERE t_key = %u AND ep_status = 'on-hold'";
 
-    $rset = $wpdb->get_results($select);
+    $rset = $wpdb->get_results($wpdb->prepare($query_string, [$order_key]));
     if (empty($rset)) {
         $is_cancelled = false;
     } else {
 
-        $notifications_table = $wpdb->prefix . 'easypay_notifications_2';
         $set['ep_status'] = 'declined';
         $where = [
             't_key' => $order_key
@@ -107,6 +104,25 @@ function ep_mbway_user_cancelled()
 
         $order = new WC_Order($order_key);
         $order->update_status('cancelled', 'Cancelled by customer');
+
+        // cancel on easypay
+        $auth = [
+            'url' => '/void/' . $rset[0]['ep_payment_id'],
+            'account_id' => $this->account_id,
+            'api_key' => $this->api_key,
+            'method' => 'POST',
+        ];
+        $payload = [
+            'transaction_key' => $rset[0]['t_key'],
+            'descriptive' => 'User cancelled',
+        ];
+        $request = new WC_Gateway_Easypay_Request($auth);
+        $response = $request->get_contents($payload);
+        if ($response['status'] != 'ok') {
+            // log and silently discard
+            // auth will be voided after X days
+            (new WC_Logger())->add('easypay', '[' . basename(__FILE__) . '] Error voiding auth in ep: ' . $response['message'][0]);
+        }
         $is_cancelled = true;
     }
 
