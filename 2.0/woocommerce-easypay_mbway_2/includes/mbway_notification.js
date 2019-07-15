@@ -5,6 +5,7 @@ var data = {
     'order_key': ajax_object.order_key,
     'wp-ep-nonce': ajax_object.nonce,
 };
+var timeoutID;
 
 function check_for_payment(url, data) {
     if (try_counter <= 0) {
@@ -17,7 +18,7 @@ function check_for_payment(url, data) {
             alert('Paid for! Doing something...');
             try_counter = 0;
         } else {
-            window.setTimeout(function () {
+            timeoutID = window.setTimeout(function () {
                 check_for_payment(ajax_object.ajax_url, data);
             }, timeout);
         }
@@ -31,13 +32,15 @@ function check_for_payment(url, data) {
 
 jQuery(document).ready(function () {
 
-    window.setTimeout(function () {
+    timeoutID = window.setTimeout(function () {
         check_for_payment(ajax_object.ajax_url, data);
     }, timeout);
 
     jQuery('#wc-ep-cancel-order').on('click', function () {
 
         data.action = 'wp_ajax_ep_mbway_user_cancelled';
+        window.clearTimeout(timeoutID);
+        try_counter = -1;
 
         jQuery.getJSON(url, data, function (response) {
             if (true === response) {
