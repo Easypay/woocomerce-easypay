@@ -470,7 +470,7 @@ function woocommerce_gateway_easypay_mbway_2_init()
                 '',
                 "Order ID: {$order->get_id()}; ",
                 "Payment ID: {$data['id']}; ",
-                "'Value: {$order->get_total()}; ",
+                "Value: {$order->get_total()}; ",
                 "Method: {$this->method}"
             ];
             if (!$wpdb->insert(
