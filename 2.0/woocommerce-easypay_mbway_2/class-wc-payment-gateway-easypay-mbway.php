@@ -482,7 +482,7 @@ function woocommerce_gateway_easypay_mbway_2_init()
                     'ep_payment_id' =>  $data['id']
                 ]
             )) {
-                $result[0] = 'Error while inserting the new generated payment in database:';
+                $result[0] = 'Error while inserting the new payment in database:';
             } else {
                 $result[0] = 'New payment inserted in database:';
             }
