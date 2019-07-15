@@ -147,14 +147,6 @@ class WC_Gateway_Easypay_Request
         return sprintf($template, __('Entity', 'wceasypay'), $entity, __('Reference', 'wceasypay'), wordwrap($reference, 3, ' ', true), __('Value', 'wceasypay'), $value);
     }
 
-    public function get_mbway()
-    {
-        $html = '<div style="float: left; text-align:center; border: 1px solid #ddd; border-radius: 5px; width: 240px; min-height: 70px; padding:10px;">';
-        $html .= $this->mbway_template();
-        die;
-        return $html . '</div>';
-    }
-
     public function mbway_template($order_key)
     {
         $js_mbway = plugin_dir_url(__FILE__) . 'mbway_notification.js';
