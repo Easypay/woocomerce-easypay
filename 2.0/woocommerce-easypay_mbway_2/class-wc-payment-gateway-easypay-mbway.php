@@ -444,8 +444,6 @@ function woocommerce_gateway_easypay_mbway_2_init()
                     "method" => 'POST',
             ];
 
-            $data = null;
-            $request = null;
             // Check if the billing phone is there if not die!
             if(empty($order->get_billing_phone())) {
                 return $this->error_btn_order($order, "The phone field must be filled!");
