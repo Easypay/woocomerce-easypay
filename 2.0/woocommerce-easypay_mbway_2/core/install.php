@@ -59,6 +59,26 @@ function wceasypay_activation_mbway_2()
         $new_table_columns[] = "ADD COLUMN `ep_payment_id` varchar(36) default NULL AFTER `ep_value`";
     }
 
+    $add_col = true;
+    foreach ($table_schema as $col) {
+        if ($col->Field == 'ep_last_operation_id') {
+            $add_col = false;
+        }
+    }
+    if ($add_col) {
+        $new_table_columns[] = "ADD COLUMN `ep_last_operation_id` varchar(36) default NULL AFTER `ep_payment_id`";
+    }
+
+    $add_col = true;
+    foreach ($table_schema as $col) {
+        if ($col->Field == 'ep_last_operation_type') {
+            $add_col = false;
+        }
+    }
+    if ($add_col) {
+        $new_table_columns[] = "ADD COLUMN `ep_last_operation_type` varchar(36) default NULL AFTER `ep_payment_id`";
+    }
+
     if (!empty($new_table_columns)) {
         $wpdb->query("ALTER TABLE $notification_table " . implode(',', $new_table_columns));
     }
