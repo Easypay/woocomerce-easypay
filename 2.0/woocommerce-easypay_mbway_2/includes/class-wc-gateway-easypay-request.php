@@ -23,10 +23,10 @@ class WC_Gateway_Easypay_Request
      */
     public function __construct($auth)
     {
-        $this->url = $auth["url"];
-        $this->account_id = $auth["account_id"];
-        $this->api_key = $auth["api_key"];
-        $this->method = $auth["method"];
+        $this->url = $auth['url'];
+        $this->account_id = $auth['account_id'];
+        $this->api_key = $auth['api_key'];
+        $this->method = $auth['method'];
     }
 
     /**
@@ -64,7 +64,7 @@ class WC_Gateway_Easypay_Request
                 break;
             case 'GET':
                 if (function_exists('curl_init')) {
-                    $url = $url . "/" . $payload;
+                    $url .= "/$payload";
 
                     $headers = [
                         "AccountId: {$this->account_id}",
