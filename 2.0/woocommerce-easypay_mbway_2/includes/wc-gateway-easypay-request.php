@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * Class WC_Gateway_Easypay_Request file.
  *
@@ -50,12 +49,12 @@ class WC_Gateway_Easypay_Request
                     ];
 
                     $curlOpts = [
-                        CURLOPT_URL            => $url,
+                        CURLOPT_URL => $url,
                         CURLOPT_RETURNTRANSFER => true,
-                        CURLOPT_POST           => 1,
-                        CURLOPT_TIMEOUT        => 60,
-                        CURLOPT_POSTFIELDS     => json_encode($payload),
-                        CURLOPT_HTTPHEADER     => $headers,
+                        CURLOPT_POST => 1,
+                        CURLOPT_TIMEOUT => 60,
+                        CURLOPT_POSTFIELDS => json_encode($payload),
+                        CURLOPT_HTTPHEADER => $headers,
                     ];
 
                 } else {
@@ -77,10 +76,10 @@ class WC_Gateway_Easypay_Request
                 }
 
                 $curlOpts = [
-                    CURLOPT_URL            => $url,
+                    CURLOPT_URL => $url,
                     CURLOPT_RETURNTRANSFER => true,
-                    CURLOPT_TIMEOUT        => 60,
-                    CURLOPT_HTTPHEADER     => $headers,
+                    CURLOPT_TIMEOUT => 60,
+                    CURLOPT_HTTPHEADER => $headers,
                 ];
                 break;
         }
@@ -149,7 +148,10 @@ class WC_Gateway_Easypay_Request
 
     public function mbway_template($order_key)
     {
-        $js_mbway = plugin_dir_url(__FILE__) . 'mbway_notification.js';
+        $js_mbway = plugin_dir_url(__FILE__)
+            . '..' . DIRECTORY_SEPARATOR
+            . 'public' . DIRECTORY_SEPARATOR
+            . 'ep-mbway.js';
         $deps = ['jquery'];
         $script_handle = 'mbway_check_for_payment_notification';
         wp_enqueue_script($script_handle

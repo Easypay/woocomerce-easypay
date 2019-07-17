@@ -22,21 +22,6 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-//
-// standart autolader
-function ep_autoloader($class_name)
-{
-    $plugin_dir = realpath(plugin_dir_path(__FILE__));
-
-
-
-    $classes_dir = realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR;
-    $class_file = str_replace('_', DIRECTORY_SEPARATOR, $class_name) . '.php';
-    require_once $classes_dir . $class_file;
-}
-
-spl_autoload_register('ep_autoloader');
-
 // Install
 require_once 'core/install.php';
 register_activation_hook(__FILE__, 'wceasypay_activation_mbway_2');
@@ -90,7 +75,6 @@ function ep_mbway_check_payment()
     }
 
     echo json_encode($paid);
-    // this is required to terminate immediately and return a proper response
     wp_die();
 }
 
@@ -144,7 +128,7 @@ function ep_mbway_user_cancelled()
                 break;
 
             case 'mbw':
-                $wcep = new WC_Gateway_Easypay_MBWay_2();
+                $wcep = new WC_Gateway_Easypay_MBWay(); // WC_Gateway_Easypay_MBWay_2();
                 break;
         }
 
@@ -166,8 +150,10 @@ function ep_mbway_user_cancelled()
             'descriptive' => 'User cancelled',
         ];
 
-        if(!class_exists('WC_Gateway_Easypay_Request')) {
-            include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-easypay-request.php';
+        if (!class_exists('WC_Gateway_Easypay_Request')) {
+            require_once realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR
+                . 'includes' . DIRECTORY_SEPARATOR
+                . 'wc-gateway-easypay-request.php';
         }
 
         $request = new WC_Gateway_Easypay_Request($auth);
@@ -184,11 +170,8 @@ function ep_mbway_user_cancelled()
         ) {
             // log and silently discard
             // auth will be voided after X days
-            $msg = '[' . basename(__FILE__) . "] Error voiding auth in ep: {$response['message'][0]}";
-
-
             (new WC_Logger())->add('easypay', '[' . basename(__FILE__)
-                . '] Error voiding auth in ep: ' . $response['message'][0]);
+                . '] Error voiding auth in ep: ' . $void_response['message'][0]);
         } else {
             $set['ep_last_operation_id'] = $void_response['id'];
         }
@@ -221,22 +204,22 @@ function woocommerce_gateway_easypay_mbway_2_init()
      */
     load_plugin_textdomain('wceasypay', false, dirname(plugin_basename(__FILE__)) . '/languages');
 
-//    class WC_Gateway_Easypay_MBWay_2 extends WC_Payment_Gateway
-//    {
-//    }
-
     /**
      * Add the Easypay Gateway to WooCommerce
      *
      * @param array $methods
      * @return  array
      */
-    include_once dirname(__FILE__)
-        . '/includes/class-wc-payment-gateway-easypay-mbway.php';
+    if (!class_exists('WC_Gateway_Easypay_MBWay')) {
+
+        require_once realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR
+            . 'includes' . DIRECTORY_SEPARATOR
+            . 'wc-gateway-easypay-mbway.php';
+    }
 
     function woocommerce_add_gateway_easypay_mbway_2($methods)
     {
-        $methods[] = 'WC_Gateway_Easypay_MBWay_2';
+        $methods[] = 'WC_Gateway_Easypay_MBWay';
         return $methods;
     }
 
@@ -254,11 +237,11 @@ function woocommerce_gateway_easypay_mbway_2_init()
         $fields['shipping']['shipping_state']['required'] = false;
 
         $nif_field = array(
-            'label'       => __('Fiscal Number', 'wceasypay'),
+            'label' => __('Fiscal Number', 'wceasypay'),
             'placeholder' => _x('Fiscal Number', 'placeholder', 'wceasypay'),
-            'required'    => false,
-            'class'       => array('form-row-wide'),
-            'clear'       => true
+            'required' => false,
+            'class' => array('form-row-wide'),
+            'clear' => true
         );
 
         $fields['billing']['billing_fiscal_number'] = $nif_field;

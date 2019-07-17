@@ -14,7 +14,16 @@ require_once $wpLoadFilePath;
 
 global $wpdb;
 
-include_once '../includes/class-wc-gateway-easypay-request.php';
+if (!class_exists('WC_Gateway_Easypay_Request')) {
+    require_once realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR
+        . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR
+        . 'wc-gateway-easypay-request.php';
+}
+if (!class_exists('WC_Gateway_Easypay_MBWay')) {
+    require_once realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR
+        . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR
+        . 'wc-gateway-easypay-mbway.php';
+}
 
 $ep_notification = json_decode(file_get_contents('php://input'), true);
 if (false === $ep_notification) {
@@ -88,22 +97,24 @@ switch ($ep_method) {
         break;
 
     case 'mbw':
-        $wcep = new WC_Gateway_Easypay_MBWay_2();
+        $wcep = new WC_Gateway_Easypay_MBWay();
         break;
 }
 
 $api_auth = $wcep->easypay_api_auth();
 
 $auth = [
-    'url' => $api_auth['url'],
+    'url' => '',
     'account_id' => $api_auth['account_id'],
     'api_key' => $api_auth['api_key'],
-    'method' => 'GET',
+    'method' => 'POST',
 ];
-//
-// 2nd the payment (status) itself from easypay
-$request = new WC_Gateway_Easypay_Request($auth);
-$payment = $request->get_contents($ep_payment_id);
+if ($wcep->test) {
+    $auth['url'] = "https://api.test.easypay.pt/2.0/capture/$ep_payment_id";
+} else {
+    $auth['url'] = "https://api.prod.easypay.pt/2.0/capture/$ep_payment_id";
+};
+$capture_request = new WC_Gateway_Easypay_Request($auth);
 //
 // get ready to update the order
 $order = new WC_Order($t_key);
@@ -134,19 +145,10 @@ if ($ep_method == 'cc') {
             'transaction_key' => (string)$t_key,
             'capture_date' => date('Y-m-d'),
             'descriptive' => (string)$t_key,
-            'value' => $payment['value'],
+            'value' => $ep_value,
         ];
-
-        if ($wcep->test) {
-            $url = "https://api.test.easypay.pt/2.0/capture/$ep_payment_id";
-        } else {
-            $url = "https://api.prod.easypay.pt/2.0/capture/$ep_payment_id";
-        };
-
-        $auth['url'] = $url;
-        $auth['method'] = 'POST';
-        $capture_request = new WC_Gateway_Easypay_Request($auth);
-
+        //
+        // make the capture request to easypay
         $capture_request_response = $capture_request->get_contents($body);
         $set = [
             'ep_status' => 'waiting_capture',
@@ -213,19 +215,8 @@ if ($ep_method == 'cc') {
             'descriptive' => (string)$t_key,
             'value' => floatval($ep_value),
         ];
-
-        if ($wcep->test) {
-            $url = "https://api.test.easypay.pt/2.0/capture/$ep_payment_id";
-        } else {
-            $url = "https://api.prod.easypay.pt/2.0/capture/$ep_payment_id";
-        };
-
-        $auth = [
-            'url' => $url,
-            'method' => 'POST',
-        ];
-        $capture_request = new WC_Gateway_Easypay_Request($auth);
-
+        //
+        // make the capture request to easypay
         $capture_request_response = $capture_request->get_contents($body);
         if ($capture_request_response['status'] != 'ok') {
 
