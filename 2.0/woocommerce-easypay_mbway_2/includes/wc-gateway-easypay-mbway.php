@@ -366,7 +366,7 @@ class WC_Gateway_Easypay_MBWay extends WC_Payment_Gateway
         $this->payment_on_hold($order, $reason = '');
 
         // Now do the magic in the class with the query cycle
-        return $request->mbway_template((string)$order->get_id());
+        return $request->get_mbway_template((string)$order->get_id());
     }
 
     /**
