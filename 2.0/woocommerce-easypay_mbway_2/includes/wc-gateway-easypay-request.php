@@ -36,44 +36,40 @@ class WC_Gateway_Easypay_Request
      */
     public function get_contents($payload)
     {
-        $url = $this->url;
+        if (!function_exists('curl_init')) {
+            /*
+             * @todo    throw custom exception or something else
+             */
+            wp_die();
+        }
 
+        $url = $this->url;
 
         switch ($this->method) {
             case 'POST':
-                if (function_exists('curl_init')) {
-                    $headers = [
-                        "AccountId: {$this->account_id}",
-                        "ApiKey: {$this->api_key}",
-                        'Content-Type: application/json',
-                    ];
+                $headers = [
+                    "AccountId: {$this->account_id}",
+                    "ApiKey: {$this->api_key}",
+                    'Content-Type: application/json',
+                ];
 
-                    $curlOpts = [
-                        CURLOPT_URL => $url,
-                        CURLOPT_RETURNTRANSFER => true,
-                        CURLOPT_POST => 1,
-                        CURLOPT_TIMEOUT => 60,
-                        CURLOPT_POSTFIELDS => json_encode($payload),
-                        CURLOPT_HTTPHEADER => $headers,
-                    ];
-
-                } else {
-                    die; // add something later
-                }
+                $curlOpts = [
+                    CURLOPT_URL => $url,
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_POST => 1,
+                    CURLOPT_TIMEOUT => 60,
+                    CURLOPT_POSTFIELDS => json_encode($payload),
+                    CURLOPT_HTTPHEADER => $headers,
+                ];
                 break;
+
             case 'GET':
-                if (function_exists('curl_init')) {
-                    $url .= "/$payload";
-
-                    $headers = [
-                        "AccountId: {$this->account_id}",
-                        "ApiKey: {$this->api_key}",
-                        'Content-Type: application/json',
-                    ];
-
-                } else {
-                    die; // add something later
-                }
+                $url .= "/$payload";
+                $headers = [
+                    "AccountId: {$this->account_id}",
+                    "ApiKey: {$this->api_key}",
+                    'Content-Type: application/json',
+                ];
 
                 $curlOpts = [
                     CURLOPT_URL => $url,

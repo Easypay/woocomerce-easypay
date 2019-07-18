@@ -37,6 +37,13 @@ class WC_Gateway_Easypay_Request
      */
     public function get_contents($payload)
     {
+        if (!function_exists('curl_init')) {
+            /*
+             * @todo    throw custom exception or something else
+             */
+            wp_die();
+        }
+
         $url = $this->url;
         $curlOpts = null;
 
