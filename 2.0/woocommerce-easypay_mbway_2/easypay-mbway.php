@@ -231,24 +231,24 @@ function woocommerce_gateway_easypay_mbway_2_init()
      * @param array $fields
      * @return  array
      */
-    function custom_override_checkout_fields_mbway_2($fields)
-    {
-        $fields['billing']['billing_state']['required'] = false;
-        $fields['shipping']['shipping_state']['required'] = false;
-
-        $nif_field = array(
-            'label' => __('Fiscal Number', 'wceasypay'),
-            'placeholder' => _x('Fiscal Number', 'placeholder', 'wceasypay'),
-            'required' => false,
-            'class' => array('form-row-wide'),
-            'clear' => true
-        );
-
-        $fields['billing']['billing_fiscal_number'] = $nif_field;
-        $fields['shipping']['shipping_fiscal_number'] = $nif_field;
-
-        return $fields;
-    }
+//    function custom_override_checkout_fields_mbway_2($fields)
+//    {
+//        $fields['billing']['billing_state']['required'] = false;
+//        $fields['shipping']['shipping_state']['required'] = false;
+//
+//        $nif_field = array(
+//            'label' => __('Fiscal Number', 'wceasypay'),
+//            'placeholder' => _x('Fiscal Number', 'placeholder', 'wceasypay'),
+//            'required' => false,
+//            'class' => array('form-row-wide'),
+//            'clear' => true
+//        );
+//
+//        $fields['billing']['billing_fiscal_number'] = $nif_field;
+//        $fields['shipping']['shipping_fiscal_number'] = $nif_field;
+//
+//        return $fields;
+//    }
 
     #add_filter('woocommerce_checkout_fields', ' custom_override_checkout_fields_mbway_2');
 
@@ -258,11 +258,11 @@ function woocommerce_gateway_easypay_mbway_2_init()
      * @param array $billing_data
      * @return  array
      */
-    function custom_override_order_billing_details_nif_mbway_2($billing_data)
-    {
-        $billing_data['fiscal_number'] = array('label' => __('Fiscal Number', 'wceasypay'), 'show' => true);
-        return $billing_data;
-    }
+//    function custom_override_order_billing_details_nif_mbway_2($billing_data)
+//    {
+//        $billing_data['fiscal_number'] = array('label' => __('Fiscal Number', 'wceasypay'), 'show' => true);
+//        return $billing_data;
+//    }
 
     #add_filter('woocommerce_admin_billing_fields', 'custom_override_order_billing_details_nif_mbway_2');
 
@@ -272,11 +272,11 @@ function woocommerce_gateway_easypay_mbway_2_init()
      * @param array $shipping_data
      * @return  array
      */
-    function custom_override_order_shipping_details_nif_mbway_2($shipping_data)
-    {
-        $shipping_data['fiscal_number'] = array('label' => __('Fiscal Number', 'wceasypay'), 'show' => true);
-        return $shipping_data;
-    }
+//    function custom_override_order_shipping_details_nif_mbway_2($shipping_data)
+//    {
+//        $shipping_data['fiscal_number'] = array('label' => __('Fiscal Number', 'wceasypay'), 'show' => true);
+//        return $shipping_data;
+//    }
 
     #add_filter('woocommerce_admin_shipping_fields', 'custom_override_order_shipping_details_nif_mbway_2');
 
