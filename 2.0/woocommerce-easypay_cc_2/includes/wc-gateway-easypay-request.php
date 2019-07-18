@@ -1,5 +1,6 @@
 <?php
 
+
 /**
  * Class WC_Gateway_Easypay_Request file.
  *
@@ -37,43 +38,34 @@ class WC_Gateway_Easypay_Request
     public function get_contents($payload)
     {
         $url = $this->url;
-
+        $curlOpts = null;
 
         switch ($this->method) {
             case 'POST':
-                if (function_exists('curl_init')) {
-                    $headers = [
-                        "AccountId: {$this->account_id}",
-                        "ApiKey: {$this->api_key}",
-                        'Content-Type: application/json',
-                    ];
+                $headers = [
+                    "AccountId: {$this->account_id}",
+                    "ApiKey: {$this->api_key}",
+                    'Content-Type: application/json',
+                ];
 
-                    $curlOpts = [
-                        CURLOPT_URL => $url,
-                        CURLOPT_RETURNTRANSFER => true,
-                        CURLOPT_POST => 1,
-                        CURLOPT_TIMEOUT => 60,
-                        CURLOPT_POSTFIELDS => json_encode($payload),
-                        CURLOPT_HTTPHEADER => $headers,
-                    ];
+                $curlOpts = [
+                    CURLOPT_URL => $url,
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_POST => 1,
+                    CURLOPT_TIMEOUT => 60,
+                    CURLOPT_POSTFIELDS => json_encode($payload),
+                    CURLOPT_HTTPHEADER => $headers,
+                ];
 
-                } else {
-                    die; // add something later
-                }
                 break;
             case 'GET':
-                if (function_exists('curl_init')) {
-                    $url .= "/$payload";
+                $url .= "/$payload";
 
-                    $headers = [
-                        "AccountId: {$this->account_id}",
-                        "ApiKey: {$this->api_key}",
-                        'Content-Type: application/json',
-                    ];
-
-                } else {
-                    die; // add something later
-                }
+                $headers = [
+                    "AccountId: {$this->account_id}",
+                    "ApiKey: {$this->api_key}",
+                    'Content-Type: application/json',
+                ];
 
                 $curlOpts = [
                     CURLOPT_URL => $url,
@@ -81,6 +73,7 @@ class WC_Gateway_Easypay_Request
                     CURLOPT_TIMEOUT => 60,
                     CURLOPT_HTTPHEADER => $headers,
                 ];
+
                 break;
         }
 
