@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * Class WC_Gateway_Easypay_Request file.
  *
@@ -63,11 +62,10 @@ class WC_Gateway_Easypay_Request
                     CURLOPT_POSTFIELDS => json_encode($payload),
                     CURLOPT_HTTPHEADER => $headers,
                 ];
-
                 break;
+
             case 'GET':
                 $url .= "/$payload";
-
                 $headers = [
                     "AccountId: {$this->account_id}",
                     "ApiKey: {$this->api_key}",
@@ -80,7 +78,6 @@ class WC_Gateway_Easypay_Request
                     CURLOPT_TIMEOUT => 60,
                     CURLOPT_HTTPHEADER => $headers,
                 ];
-
                 break;
         }
 
