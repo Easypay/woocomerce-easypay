@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
 }
 
 /**
- * Generates requests to send to PayPal.
+ * Generates requests to send to Easypay.
  */
 class WC_Easypay_Request
 {
@@ -44,7 +44,6 @@ class WC_Easypay_Request
         }
 
         $url = $this->url;
-        $curlOpts = null;
 
         switch ($this->method) {
             case 'POST':
@@ -267,4 +266,3 @@ class WC_Easypay_Request
     }
 
 }
-

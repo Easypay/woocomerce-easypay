@@ -13,7 +13,6 @@ function wceasypay_activation_mb_2()
 
     global $wpdb, $wceasypay_db_version_2;
     $charset_collate = $wpdb->get_charset_collate();
-
     $notification_table = $wpdb->prefix . 'easypay_notifications_2';
 
     $sql = "CREATE TABLE IF NOT EXISTS $notification_table ("
@@ -30,7 +29,7 @@ function wceasypay_activation_mb_2()
 
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
-    $wpdb->query($sql) or die("Error Creating Table!");
+    $wpdb->query($sql) or die('Error Creating Table!');
     //
     // for clients that have had the easypay plugin installed
     //
@@ -58,6 +57,26 @@ function wceasypay_activation_mb_2()
     }
     if ($add_col) {
         $new_table_columns[] = "ADD COLUMN `ep_payment_id` varchar(36) default NULL AFTER `ep_value`";
+    }
+
+    $add_col = true;
+    foreach ($table_schema as $col) {
+        if ($col->Field == 'ep_last_operation_id') {
+            $add_col = false;
+        }
+    }
+    if ($add_col) {
+        $new_table_columns[] = "ADD COLUMN `ep_last_operation_id` varchar(36) default NULL AFTER `ep_payment_id`";
+    }
+
+    $add_col = true;
+    foreach ($table_schema as $col) {
+        if ($col->Field == 'ep_last_operation_type') {
+            $add_col = false;
+        }
+    }
+    if ($add_col) {
+        $new_table_columns[] = "ADD COLUMN `ep_last_operation_type` varchar(36) default NULL AFTER `ep_payment_id`";
     }
 
     if (!empty($new_table_columns)) {

@@ -119,28 +119,32 @@ function ep_mbway_user_cancelled()
         // cancel on easypay
         // we need to detect the gateway we are working with
         switch ($ep_method) {
-            case 'cc':
-                $wcep = new WC_Gateway_Easypay_CC_2();
-                break;
-
-            case 'mb':
-                $wcep = new WC_Gateway_Easypay_MB_2();
-                break;
-
             case 'mbw':
-                $wcep = new WC_Gateway_Easypay_MBWay(); // WC_Gateway_Easypay_MBWay_2();
-                break;
-        }
+                if (!class_exists('WC_Gateway_Easypay_MBWay')) {
 
-        if ($wcep->test) {
-            $url = 'https://api.test.easypay.pt/2.0/void';
-        } else {
-            $url = 'https://api.prod.easypay.pt/2.0/void';
-        };
+                    include realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR
+                        . 'includes' . DIRECTORY_SEPARATOR
+                        . 'wc-gateway-easypay-mbway.php';
+                }
+
+                $wcep = new WC_Gateway_Easypay_MBWay();
+                break;
+
+            case 'cc':
+            case 'mb':
+            default:
+                //
+                // this hook is only used with mbw
+                $msg = '[' . basename(__FILE__)
+                    . '] Bad ep_method for this hook';
+                (new WC_Logger())->add('easypay', $msg);
+                echo json_encode(false);
+                wp_die();
+        }
 
         $api_auth = $wcep->easypay_api_auth();
         $auth = [
-            'url' => "$url/$ep_payment_id",
+            'url' => $wcep->getVoidUrl() . "/$ep_payment_id",
             'account_id' => $api_auth['account_id'],
             'api_key' => $api_auth['api_key'],
             'method' => 'POST',
@@ -150,13 +154,13 @@ function ep_mbway_user_cancelled()
             'descriptive' => 'User cancelled',
         ];
 
-        if (!class_exists('WC_Gateway_Easypay_Request')) {
+        if (!class_exists('WC_Easypay_Request')) {
             require_once realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR
                 . 'includes' . DIRECTORY_SEPARATOR
-                . 'wc-gateway-easypay-request.php';
+                . 'wc-easypay-request.php';
         }
 
-        $request = new WC_Gateway_Easypay_Request($auth);
+        $request = new WC_Easypay_Request($auth);
         $void_response = $request->get_contents($payload);
         $set = [
             'ep_last_operation_type' => 'void',
@@ -184,7 +188,6 @@ function ep_mbway_user_cancelled()
     }
 
     echo json_encode($is_cancelled);
-    // this is required to terminate immediately and return a proper response
     wp_die();
 }
 
@@ -210,15 +213,15 @@ function woocommerce_gateway_easypay_mbway_2_init()
      * @param array $methods
      * @return  array
      */
-    if (!class_exists('WC_Gateway_Easypay_MBWay')) {
-
-        require_once realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR
-            . 'includes' . DIRECTORY_SEPARATOR
-            . 'wc-gateway-easypay-mbway.php';
-    }
-
     function woocommerce_add_gateway_easypay_mbway_2($methods)
     {
+        if (!class_exists('WC_Gateway_Easypay_MBWay')) {
+
+            include realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR
+                . 'includes' . DIRECTORY_SEPARATOR
+                . 'wc-gateway-easypay-mbway.php';
+        }
+
         $methods[] = 'WC_Gateway_Easypay_MBWay';
         return $methods;
     }

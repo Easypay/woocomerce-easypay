@@ -1,6 +1,6 @@
 <?php
 
-class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
+class WC_Gateway_Easypay_MB extends WC_Payment_Gateway
 {
     /**
      * Gateway's Constructor.
@@ -16,7 +16,7 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
         $this->ahref = '<a href="' . get_admin_url() . 'admin.php?' .
             'page=wc-settings&amp;' .
             'tab=checkout&amp;' .
-            'section=wc_payment_gateway_easypay_cc_2">';
+            'section=wc_payment_gateway_easypay_mb_2">';
         $this->a = '</a>';
 
         // 2.0 API EndPoint
@@ -25,10 +25,10 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
         // -----------------------------------------------------------------
 
         // Inherited Variables----------------------------------------------
-        $this->id = 'easypay_cc_2';
+        $this->id = 'easypay_mb_2';
         $this->icon = plugins_url('images/logo.png', __FILE__);
         $this->has_fields = false;
-        $this->method_title = __('Easypay CC', 'wceasypay');
+        $this->method_title = __('Easypay MB', 'wceasypay');
         $this->method_description = __('Don\'t leave for tomorrow what you can receive today', 'wceasypay');
         // -----------------------------------------------------------------
 
@@ -42,11 +42,9 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
         $this->title = $this->get_option('title');
         $this->description = $this->get_option('description');
         $this->currency = 'EUR';
-        // This should be out since its cc
-        // $this->expiration_time = $this->get_option('expiration');
-        // $this->expiration_enable = $this->get_option('expiration_enable');
-        $this->autoCapture = $this->get_option('capture');
-        $this->method = "cc";
+        $this->expiration_time = $this->get_option('expiration');
+        $this->expiration_enable = $this->get_option('expiration_enable');
+        $this->method = "mb";
         // Auth Stuff
         $this->account_id = $this->get_option('account_id');
         $this->api_key = $this->get_option('api_key');
@@ -85,6 +83,15 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
         );
         // -----------------------------------------------------------------
 
+        // Send Email
+        add_action(
+            'woocommerce_email_after_order_table',
+            [$this, 'reference_in_mail_2'],
+            20,
+            5
+        );
+        // -----------------------------------------------------------------
+
     } //END of constructor
 
     /*
@@ -109,6 +116,69 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
         return $api_auth;
     }
 
+    /**
+     * Put the reference, entity and value in the email.
+     *
+     * @param   $order
+     * @param   $sent_to_admin
+     */
+    public function reference_in_mail_2($order, $sent_to_admin, $plain_text, $email)
+    {
+        if ($order->get_payment_method() == 'easypay_mb_2') {
+            global $wpdb;
+            if (!$sent_to_admin) {
+                // Log
+                $this->log('A new mail for client');
+                // Search entity, reference and value in database for this $order->get_id()
+                $query_str = "SELECT *"
+                    . " FROM {$wpdb->prefix} easypay_notifications_2"
+                    . " WHERE t_key = %d";
+                $row = $wpdb->get_row($wpdb->prepare($query_str, $order->get_id()));
+
+                if ($row != null) {
+                    // Do a log
+                    $result = 'Data correctly search from database:' . PHP_EOL;
+                    $result .= 'Order ID: ' . $order->get_id() . ';' . PHP_EOL;
+                    $result .= 'Entity: ' . $row->ep_entity . ';' . PHP_EOL;
+                    $result .= 'Value: ' . $row->ep_value . ';' . PHP_EOL;
+                    $result .= 'Reference: ' . $row->ep_reference . ';' . PHP_EOL;
+                    $this->log($result);
+                    // Output the reference, entity and value in email
+
+                    $template = '<div style="width: 220px; float: left; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color:#eee;">
+                            <!-- img src="http://store.easyp.eu/img/MB_bw-01.png" -->
+
+                            <div style="padding: 5px; padding-top: 10px; clear: both;">
+                                <span style="font-weight: bold;float: left;">%s:</span>
+                                <span style="color: #0088cc; float: right">%s (Easypay)</span>
+                            </div>
+
+                            <div style="padding: 5px;clear: both;">
+                                <span style="font-weight: bold;float: left;">%s:</span>
+                                <span style="color: #0088cc; float: right">%s</span>
+                            </div>
+
+                            <div style="padding: 5px; clear: both;">
+                                <span style="font-weight: bold;float: left;">%s:</span>
+                                <span style="color: #0088cc; float: right">%s &euro;</span>
+                            </div>
+
+
+                        </div>
+                        <br />';
+                    echo sprintf($template, __('Entity', 'wceasypay'), $row->ep_entity, __('Reference', 'wceasypay'), wordwrap($row->ep_reference, 3, ' ', true), __('Value', 'wceasypay'), $row->ep_value);
+                } else {
+                    $result = 'Error while search data in database:' . PHP_EOL;
+                    $result .= 'Order ID: ' . $order->get_id() . ';' . PHP_EOL;
+                    $this->log($result);
+                    die("Error while search data in database...");
+                }
+            } else {
+                // Log
+                $this->log('A new mail for administrator');
+            }
+        }
+    }
 
     /**
      * Check if the settings are correct
@@ -131,16 +201,16 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
 //    private function gateway_validation_2()
 //    {
 //        if (empty($this->account_id)) {
-//            add_action('admin_notices', [$this, 'cc_error_missing_account_id']);
+//            add_action('admin_notices', [$this, 'mb_error_missing_account_id']);
 //        }
 //        if (empty($this->api_key)) {
-//            add_action('admin_notices', [$this, 'cc_error_missing_api_key']);
+//            add_action('admin_notices', [$this, 'mb_error_missing_api_key']);
 //        }
 //        if (!$this->is_valid_for_use()) {
-//            add_action('admin_notices', [$this, 'cc_error_invalid_currency']);
+//            add_action('admin_notices', [$this, 'mb_error_invalid_currency']);
 //        }
 //        if ($this->expiration_time < 1 || $this->expiration_time > 93) {
-//            add_action('admin_notices', [$this, 'cc_error_invalid_expiration']);
+//            add_action('admin_notices', [$this, 'mb_error_invalid_expiration']);
 //        }
 //    }
 
@@ -179,7 +249,7 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
                 'title' => __('Title', 'wceasypay'),
                 'type' => 'text',
                 'description' => __('This controls the title which the user sees during checkout.', 'wceasypay'),
-                'default' => __('Easypay CC', 'wceasypay'),
+                'default' => __('Easypay MB', 'wceasypay'),
                 'desc_tip' => true,
             ],
             'description' => [
@@ -209,17 +279,11 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
                 'desc_tip' => true,
             ],
             'expiration_enable' => [
-                'title' => __('Enable Expiration for CC References', 'wceasypay'),
+                'title' => __('Enable Expiration for MB References', 'wceasypay'),
                 'type' => 'checkbox',
                 'description' => __('Enable This Option to Activate Reference Expiration Time', 'wceasypay'),
                 'default' => 'no',
                 'desc_tip' => true,
-            ],
-            'capture' => [
-                'title' => __('Auto Capture', 'wceasypay'),
-                'type' => 'checkbox',
-                'description' => __('Auto request the capture of the authorized transactions .', 'wceasypay'),
-                'default' => false,
             ],
             'testing' => [
                 'title' => __('Gateway Testing', 'wceasypay'),
@@ -253,10 +317,7 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
     public function admin_options()
     {
         //Public_Url is for "Easypay Configurations" urls
-        $public_url = get_site_url()
-            . '/wp-content/plugins/'
-            . pathinfo(dirname(__FILE__), PATHINFO_BASENAME)
-            . '/public/';
+        $public_url = get_site_url() . '/wp-content/plugins/' . pathinfo(dirname(__FILE__), PATHINFO_BASENAME) . '/public/';
 
         echo '<h3>' . __('Easypay standard', 'wceasypay') . '</h3>';
         echo '<p>' . __('Easypay standard works by sending the user to Easypay to enter their payment information.', '') . '</p>';
@@ -268,9 +329,6 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
         echo '</tr><tr>';
         echo '<td><h4>' . __('Notification URL', 'wceasypay') . '</h4></td>';
         echo '<td><input type="text" size="100" readonly value="' . $public_url . 'generic.php' . '"/></td>';
-        echo '</tr><tr>';
-        echo '<td><h4>' . __('Visa - Fwd URL', 'wceasypay') . '</h4></td>';
-        echo '<td><input type="text" size="100" readonly value="' . $public_url . 'visa-fwd-2.php' . '"/></td>';
         echo '</tr>';
         echo '</table>';
     }
@@ -308,7 +366,6 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
 
         // start to build the body with the ref data
         $body = [
-            'type' => 'authorisation',
             'key' => (string)$order->get_id(),
             'method' => $this->method,
             'value' => floatval($order->get_total()),
@@ -317,9 +374,9 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
                 'name' => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
                 'email' => $order->get_billing_email(),
                 'key' => (string)$order->get_id(),
-                'phone_indicative' => '+351',
+                'phone_indicative' => "+351",
                 'phone' => $order->get_billing_phone(),
-                // 'fiscal_number' => 'PT123456789',
+                // 'fiscal_number' =>"PT123456789",
             ],
         ]; // Commented the fiscal number since the special nif field is commented also
 
@@ -352,24 +409,28 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
             return $this->error_btn_order($order, $data['message'][0]);
 
         } else {
-            $this->log('Payment created #' . $order->get_id() . ' @' . $data['id'] . ']');
-            $note = __('Awaiting for Credit Card payment.', 'wceasypay') . PHP_EOL;
-            $note .= 'Value: ' . $order->get_total() . '; ' . PHP_EOL;
+            $this->log('Reference created #' . $order->get_id() . ' @' . $data['method']['reference'] . ']');
+            $note = __('Awaiting for reference payment.', 'wceasypay') . PHP_EOL;
+            $note .= "Entity: {$data['method']['entity']}; " . PHP_EOL;
+            $note .= "Value: {$order->get_total()}; " . PHP_EOL;
+            $note .= "Reference: {$data['method']['reference']}; " . PHP_EOL;
 
             $order->add_order_note($note, 0);
         }
 
         $result = [
             '',
-            "Order ID: {$order->get_id()}; ",
-            "Payment ID: {$data['id']}; ",
-            "Value: {$order->get_total()}; ",
-            "Method: {$this->method}"
+            "Order ID: {$order->get_id()};",
+            "Entity: {$data['method']['entity']};",
+            "Value: {$order->get_total()};",
+            "Reference: {$data['method']['reference']};"
         ];
         if (!$wpdb->insert(
             $wpdb->prefix . 'easypay_notifications_2',
             [
+                'ep_entity' => $data['method']['entity'],
                 'ep_value' => $order->get_total(),
+                'ep_reference' => $data['method']['reference'],
                 't_key' => $order->get_id(),
                 'ep_method' => $this->method,
                 'ep_payment_id' => $data['id'],
@@ -384,9 +445,11 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
         // reduces stock
         $this->payment_on_hold($order, $reason = '');
 
-        // Add a method to the class to credit card
-        $visa_url = $data['method']['url'];
-        return $request->get_visa_template($visa_url);
+        do_action('woocommerce_email_after_order_table', $order, false, false, false);
+
+        $value = $order->get_total();
+
+        return $request->get_reference_html($data, $value);
     }
 
     /**
@@ -407,7 +470,6 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
 
         return $html;
     }
-
 
     /**
      * Process the payment and return the result.
@@ -445,7 +507,7 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
     /**
      * Displays an error message on the top of admin panel
      */
-    public function cc_error_missing_api_key()
+    public function mb_error_missing_api_key()
     {
         $msg = __(
             '<strong>Easypay Gateway Disabled</strong> Missing API Key. %sClick here to configure.%s',
@@ -460,7 +522,7 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
     /**
      * Displays an error message on the top of admin panel
      */
-    public function cc_error_missing_account_id()
+    public function mb_error_missing_account_id()
     {
         $msg = __(
             '<strong>Easypay Gateway Disabled</strong> Missing Account ID. %sClick here to configure.%s',
@@ -475,7 +537,7 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
     /**
      * Displays an error message on the top of admin panel
      */
-    public function cc_error_invalid_currency()
+    public function mb_error_invalid_currency()
     {
         $msg = __(
             '<strong>Easypay Gateway Disabled</strong> The currency your cart is using is not valid, please set to Euro (EUR) if you want to use Easypay payments. %sClick here to configure.%s',

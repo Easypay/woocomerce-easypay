@@ -29,7 +29,7 @@ function wceasypay_activation_cc_2()
 
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
-    $wpdb->query($sql) or die("Error Creating Table!");
+    $wpdb->query($sql) or die('Error Creating Table!');
     //
     // for clients that have had the easypay plugin installed
     //
