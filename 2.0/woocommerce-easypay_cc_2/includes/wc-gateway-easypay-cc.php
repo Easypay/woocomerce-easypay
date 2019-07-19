@@ -483,4 +483,18 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
         if ($this->logs)
             $this->logger->add('easypay', $message);
     }
+
+    public function getVoidUrl()
+    {
+        $url = $this->test ? $this->test_url : $this->live_url;
+
+        return str_replace('/single', '/void', $url);
+    }
+
+    public function getCaptureUrl()
+    {
+        $url = $this->test ? $this->test_url : $this->live_url;
+
+        return str_replace('/single', '/capture', $url);
+    }
 }

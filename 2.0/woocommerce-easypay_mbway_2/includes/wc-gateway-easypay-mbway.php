@@ -490,4 +490,11 @@ class WC_Gateway_Easypay_MBWay extends WC_Payment_Gateway
         return str_replace('/single', '/void', $url);
     }
 
+    public function getCaptureUrl()
+    {
+        $url = $this->test ? $this->test_url : $this->live_url;
+
+        return str_replace('/single', '/capture', $url);
+    }
+
 }

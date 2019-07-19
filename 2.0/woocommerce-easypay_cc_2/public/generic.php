@@ -121,34 +121,19 @@ if (empty(array_diff_key($payment_details, $default_err))) {
     //
     // something's wrong with comms
     wp_die();
-} elseif (empty($payment_details['transactions'])
-    && $ep_notification['type'] == 'capture'
-) {
-    //
-    // capture notification but no transactions?! something's wrong
-    print_r([
-        'message' => 'No transactions sent',
-        'ep_status' => 'err1',
-    ]);
-    wp_die();
 } else {
     //
     // this is only for single payments,
     // so we must have just one transaction
-    $ep_value = $payment_details['transactions'][0]['values']['paid'];
+    $ep_value = floatval($payment_details['value']);
 }
 //
 // prepare to capture...
 if ($ep_method != 'mb') {
-    $auth = [
-        'url' => "/2.0/capture/$ep_payment_id",
-        'method' => 'POST',
-    ];
-    if ($wcep->test) {
-        $auth['url'] = "https://api.test.easypay.pt{$auth['url']}";
-    } else {
-        $auth['url'] = "https://api.prod.easypay.pt{$auth['url']}";
-    };
+
+    $auth['url'] = $wcep->getCaptureUrl() . "/$ep_payment_id";
+    $auth['method'] = 'POST';
+
     $capture_request = new WC_Easypay_Request($auth);
 }
 //
@@ -257,17 +242,17 @@ if ($ep_method == 'cc') {
         if ($capture_request_response['status'] != 'ok') {
 
             $set['ep_status'] = 'failed_capture';
+        } else {
+            //
+            // save the capture (operation) id so we can
+            // find the payment later when the notification arrives
+            $set['ep_last_operation_type'] = 'capture';
+            $set['ep_last_operation_id'] = $capture_request_response['id'];
+            //
+            // update the order status
+            $p1 = 'pending payment';
+            $p2 = 'Payment authorized, waiting for capture';
         }
-        //
-        // save the capture (operation) id so we can
-        // find the payment later when the notification arrives
-        $set['ep_last_operation_type'] = 'capture';
-        $set['ep_last_operation_id'] = $capture_request_response['id'];
-        //
-        // update the order status
-        $p1 = 'pending payment';
-        $p2 = 'Payment authorized, waiting for capture';
-
     } elseif ($ep_notification['type'] == 'authorisation'
         && $wcep->autoCapture == 'no'
     ) {
@@ -314,7 +299,9 @@ if ($ep_method == 'cc') {
     }
 
     $wpdb->update($notifications_table, $set, $where);
-    $order->update_status($p1, $p2);
+    if (isset($p1) && isset($p2)) {
+        $order->update_status($p1, $p2);
+    }
 }
 
 print_r($set);
