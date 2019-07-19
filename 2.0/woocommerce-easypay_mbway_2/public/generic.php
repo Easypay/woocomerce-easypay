@@ -14,15 +14,10 @@ require_once $wpLoadFilePath;
 
 global $wpdb;
 
-if (!class_exists('WC_Gateway_Easypay_Request')) {
-    require_once realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR
+if (!class_exists('WC_Easypay_Request')) {
+    include realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR
         . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR
-        . 'wc-gateway-easypay-request.php';
-}
-if (!class_exists('WC_Gateway_Easypay_MBWay')) {
-    require_once realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR
-        . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR
-        . 'wc-gateway-easypay-mbway.php';
+        . 'wc-easypay-request.php';
 }
 
 $ep_notification = json_decode(file_get_contents('php://input'), true);
@@ -42,7 +37,7 @@ $notifications_table = $wpdb->prefix . 'easypay_notifications_2';
 $aux_ep_id = trim($ep_notification['id']);
 $aux_ep_id = substr($aux_ep_id, 0, 36);
 
-$query_str = "SELECT ep_key, ep_status, t_key, ep_method, ep_payment_id, ep_value"
+$query_str = "SELECT ep_key, ep_status, t_key, ep_method, ep_payment_id"
     . " FROM $notifications_table WHERE";
 switch ($ep_notification['type']) {
     case 'capture':
@@ -72,7 +67,6 @@ $ep_status = $notification[0]->ep_status;
 $t_key = $notification[0]->t_key;
 $ep_method = $notification[0]->ep_method;
 $ep_payment_id = $notification[0]->ep_payment_id;
-$ep_value = $notification[0]->ep_value;
 unset($notification);
 
 if ($ep_status == 'processed') {
@@ -87,9 +81,15 @@ if ($ep_status == 'processed') {
 // GET the payment so we can validate this notification
 //
 // 1st get the gateway class for this payment method
+// so we can access the account id and key
 switch ($ep_method) {
     case 'cc':
-        $wcep = new WC_Gateway_Easypay_CC_2();
+        if (!class_exists('WC_Gateway_Easypay_MBWay')) {
+            include realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR
+                . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR
+                . 'wc-gateway-easypay-cc.php';
+        }
+        $wcep = new WC_Gateway_Easypay_CC();
         break;
 
     case 'mb':
@@ -97,6 +97,11 @@ switch ($ep_method) {
         break;
 
     case 'mbw':
+        if (!class_exists('WC_Gateway_Easypay_MBWay')) {
+            include realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR
+                . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR
+                . 'wc-gateway-easypay-mbway.php';
+        }
         $wcep = new WC_Gateway_Easypay_MBWay();
         break;
 }
@@ -104,17 +109,48 @@ switch ($ep_method) {
 $api_auth = $wcep->easypay_api_auth();
 
 $auth = [
-    'url' => '',
+    'url' => $api_auth['url'],
     'account_id' => $api_auth['account_id'],
     'api_key' => $api_auth['api_key'],
-    'method' => 'POST',
+    'method' => 'GET',
 ];
-if ($wcep->test) {
-    $auth['url'] = "https://api.test.easypay.pt/2.0/capture/$ep_payment_id";
+$payment_details = (new WC_Easypay_Request($auth))
+    ->get_contents($ep_payment_id);
+$default_err = ['status' => '', 'message' => ''];
+if (empty(array_diff_key($payment_details, $default_err))) {
+    //
+    // something's wrong with comms
+    wp_die();
+} elseif (empty($payment_details['transactions'])
+    && $ep_notification['type'] == 'capture'
+) {
+    //
+    // capture notification but no transactions?! something's wrong
+    print_r([
+        'message' => 'No transactions sent',
+        'ep_status' => 'err1',
+    ]);
+    wp_die();
 } else {
-    $auth['url'] = "https://api.prod.easypay.pt/2.0/capture/$ep_payment_id";
-};
-$capture_request = new WC_Gateway_Easypay_Request($auth);
+    //
+    // this is only for single payments,
+    // so we must have just one transaction
+    $ep_value = $payment_details['transactions'][0]['values']['paid'];
+}
+//
+// prepare to capture...
+if ($ep_method != 'mb') {
+    $auth = [
+        'url' => "/2.0/capture/$ep_payment_id",
+        'method' => 'POST',
+    ];
+    if ($wcep->test) {
+        $auth['url'] = "https://api.test.easypay.pt{$auth['url']}";
+    } else {
+        $auth['url'] = "https://api.prod.easypay.pt{$auth['url']}";
+    };
+    $capture_request = new WC_Easypay_Request($auth);
+}
 //
 // get ready to update the order
 $order = new WC_Order($t_key);
@@ -221,17 +257,17 @@ if ($ep_method == 'cc') {
         if ($capture_request_response['status'] != 'ok') {
 
             $set['ep_status'] = 'failed_capture';
+        } else {
+            //
+            // save the capture (operation) id so we can
+            // find the payment later when the notification arrives
+            $set['ep_last_operation_type'] = 'capture';
+            $set['ep_last_operation_id'] = $capture_request_response['id'];
+            //
+            // update the order status
+            $p1 = 'pending payment';
+            $p2 = 'Payment authorized, waiting for capture';
         }
-        //
-        // save the capture (operation) id so we can
-        // find the payment later when the notification arrives
-        $set['ep_last_operation_type'] = 'capture';
-        $set['ep_last_operation_id'] = $capture_request_response['id'];
-        //
-        // update the order status
-        $p1 = 'pending payment';
-        $p2 = 'Payment authorized, waiting for capture';
-
     } elseif ($ep_notification['type'] == 'authorisation'
         && $wcep->autoCapture == 'no'
     ) {
@@ -278,7 +314,9 @@ if ($ep_method == 'cc') {
     }
 
     $wpdb->update($notifications_table, $set, $where);
-    $order->update_status($p1, $p2);
+    if (isset($p1) && isset($p2)) {
+        $order->update_status($p1, $p2);
+    }
 }
 
 print_r($set);

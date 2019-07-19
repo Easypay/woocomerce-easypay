@@ -1,10 +1,5 @@
 <?php
 
-if (!class_exists('WC_Gateway_Easypay_Request')) {
-    require_once realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR
-        . 'wc-gateway-easypay-request.php';
-}
-
 class WC_Gateway_Easypay_MBWay extends WC_Payment_Gateway
 {
     /**
@@ -63,7 +58,11 @@ class WC_Gateway_Easypay_MBWay extends WC_Payment_Gateway
 
         // Validations
         $this->enabled = $this->gateway_enabled_2();
-        $this->gateway_validation_2();
+
+//        $this->gateway_validation_2();
+        add_action("woocommerce_update_options_payment_gateways_{$this->id}"
+            , [$this, 'process_admin_options']);
+
         // -----------------------------------------------------------------
 
         // Activate logs
@@ -128,20 +127,35 @@ class WC_Gateway_Easypay_MBWay extends WC_Payment_Gateway
      *
      * @return void
      */
-    private function gateway_validation_2()
+//    private function gateway_validation_2()
+//    {
+//        if (empty($this->account_id)) {
+//            add_action('admin_notices', [$this, 'mbw_error_missing_account_id']);
+//        }
+//        if (empty($this->api_key)) {
+//            add_action('admin_notices', [$this, 'mbw_error_missing_api_key']);
+//        }
+//        if (!$this->is_valid_for_use()) {
+//            add_action('admin_notices', [$this, 'mbw_error_invalid_currency']);
+//        }
+//        if ($this->expiration_time < 1 || $this->expiration_time > 93) {
+//            add_action('admin_notices', [$this, 'mbw_error_invalid_expiration']);
+//        }
+//    }
+
+    public function process_admin_options()
     {
-        if (empty($this->account_id)) {
-            add_action('admin_notices', array(&$this, 'error_missing_account_id'));
+        if (empty($_POST["woocommerce_{$this->id}_account_id"])) {
+            WC_Admin_Settings::add_error('Error: Please fill required field: Easypay Account ID');
+            return false;
         }
-        if (empty($this->api_key)) {
-            add_action('admin_notices', array(&$this, 'error_missing_api_key'));
+        if (empty($_POST["woocommerce_{$this->id}_api_key"])) {
+            WC_Admin_Settings::add_error('Error: Please fill required field: Easypay API key');
+            return false;
         }
-        if (!$this->is_valid_for_use()) {
-            add_action('admin_notices', array(&$this, 'error_invalid_currency'));
-        }
-        if ($this->expiration_time < 1 || $this->expiration_time > 93) {
-            add_action('admin_notices', array(&$this, 'error_invalid_expiration'));
-        }
+        parent::process_admin_options();
+
+        return true;
     }
 
     /**
@@ -238,7 +252,10 @@ class WC_Gateway_Easypay_MBWay extends WC_Payment_Gateway
     public function admin_options()
     {
         //Public_Url is for "Easypay Configurations" urls
-        $public_url = get_site_url() . '/wp-content/plugins/' . pathinfo(dirname(__FILE__), PATHINFO_BASENAME) . '/public/';
+        $public_url = get_site_url()
+            . '/wp-content/plugins/'
+            . pathinfo(dirname(__FILE__), PATHINFO_BASENAME)
+            . '/public/';
 
         echo '<h3>' . __('Easypay standard', 'wceasypay') . '</h3>';
         echo '<p>' . __('Easypay standard works by sending the user to Easypay to enter their payment information.', '') . '</p>';
@@ -307,10 +324,6 @@ class WC_Gateway_Easypay_MBWay extends WC_Payment_Gateway
 
         $this->log("Payload for order #{$order->get_id()}: " . print_r(json_encode($body), true));
 
-        if (!class_exists('WC_Gateway_Easypay_Request')) {
-            include_once dirname(__FILE__)
-                . '/includes/class-wc-gateway-easypay-request.php';
-        }
         $url = $this->test ? $this->test_url : $this->live_url;
 
         $auth = [
@@ -324,7 +337,13 @@ class WC_Gateway_Easypay_MBWay extends WC_Payment_Gateway
         if (empty($order->get_billing_phone())) {
             return $this->error_btn_order($order, 'The phone field must be filled!');
         } else {
-            $request = new WC_Gateway_Easypay_Request($auth);
+
+            if (!class_exists('WC_Easypay_Request')) {
+                include realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR
+                    . 'wc-easypay-request.php';
+            }
+
+            $request = new WC_Easypay_Request($auth);
             $data = $request->get_contents($body);
         }
 
@@ -425,7 +444,7 @@ class WC_Gateway_Easypay_MBWay extends WC_Payment_Gateway
     /**
      * Displays an error message on the top of admin panel
      */
-    public function error_missing_api_key()
+    public function mbw_error_missing_api_key()
     {
         $msg = __(
             '<strong>Easypay Gateway Disabled</strong> Missing API Key. %sClick here to configure.%s',
@@ -440,7 +459,7 @@ class WC_Gateway_Easypay_MBWay extends WC_Payment_Gateway
     /**
      * Displays an error message on the top of admin panel
      */
-    public function error_missing_account_id()
+    public function mbw_error_missing_account_id()
     {
         $msg = __(
             '<strong>Easypay Gateway Disabled</strong> Missing Account ID. %sClick here to configure.%s',
@@ -455,7 +474,7 @@ class WC_Gateway_Easypay_MBWay extends WC_Payment_Gateway
     /**
      * Displays an error message on the top of admin panel
      */
-    public function error_invalid_currency()
+    public function mbw_error_invalid_currency()
     {
         $msg = __(
             '<strong>Easypay Gateway Disabled</strong> The currency your cart is using is not valid, please set to Euro (EUR) if you want to use Easypay payments. %sClick here to configure.%s',
@@ -479,4 +498,12 @@ class WC_Gateway_Easypay_MBWay extends WC_Payment_Gateway
         if ($this->logs)
             $this->logger->add('easypay', $message);
     }
+
+    public function getVoidUrl()
+    {
+        $url = $this->test ? $this->test_url : $this->live_url;
+
+        return str_replace('/single', '/void', $url);
+    }
+
 }

@@ -97,7 +97,6 @@ class WC_Gateway_Easypay_Request
      * @param string $value
      * @return  string
      */
-
     public function get_reference_html($reference, $value)
     {
         $html = '<div style="float: left; text-align:center; border: 1px solid #ddd; border-radius: 5px; width: 240px; min-height: 70px; padding:10px;">';
