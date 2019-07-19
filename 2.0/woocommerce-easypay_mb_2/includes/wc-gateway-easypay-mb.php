@@ -26,7 +26,7 @@ class WC_Gateway_Easypay_MB extends WC_Payment_Gateway
 
         // Inherited Variables----------------------------------------------
         $this->id = 'easypay_mb_2';
-        $this->icon = plugins_url('images/logo.png', __FILE__);
+        $this->icon = plugins_url('../images/logo.png', __FILE__);
         $this->has_fields = false;
         $this->method_title = __('Easypay MB', 'wceasypay');
         $this->method_description = __('Don\'t leave for tomorrow what you can receive today', 'wceasypay');
@@ -56,8 +56,8 @@ class WC_Gateway_Easypay_MB extends WC_Payment_Gateway
 
         // Validations
         $this->enabled = $this->gateway_enabled_2();
-
-//        $this->gateway_validation_2();
+        //
+        // validate admin options
         add_action("woocommerce_update_options_payment_gateways_{$this->id}"
             , [$this, 'process_admin_options']);
 
@@ -198,22 +198,6 @@ class WC_Gateway_Easypay_MB extends WC_Payment_Gateway
      *
      * @return void
      */
-//    private function gateway_validation_2()
-//    {
-//        if (empty($this->account_id)) {
-//            add_action('admin_notices', [$this, 'mb_error_missing_account_id']);
-//        }
-//        if (empty($this->api_key)) {
-//            add_action('admin_notices', [$this, 'mb_error_missing_api_key']);
-//        }
-//        if (!$this->is_valid_for_use()) {
-//            add_action('admin_notices', [$this, 'mb_error_invalid_currency']);
-//        }
-//        if ($this->expiration_time < 1 || $this->expiration_time > 93) {
-//            add_action('admin_notices', [$this, 'mb_error_invalid_expiration']);
-//        }
-//    }
-
     public function process_admin_options()
     {
         if (empty($_POST["woocommerce_{$this->id}_account_id"])) {
