@@ -155,7 +155,7 @@ function ep_mbway_user_cancelled()
         ];
 
         if (!class_exists('WC_Easypay_Request')) {
-            require_once realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR
+            include realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR
                 . 'includes' . DIRECTORY_SEPARATOR
                 . 'wc-easypay-request.php';
         }

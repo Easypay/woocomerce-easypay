@@ -237,22 +237,37 @@ class WC_Gateway_Easypay_MBWay extends WC_Payment_Gateway
     {
         //Public_Url is for "Easypay Configurations" urls
         $public_url = get_site_url()
-            . '/wp-content/plugins/'
-            . pathinfo(dirname(__FILE__), PATHINFO_BASENAME)
+            . '/wp-content/plugins'
+            . "/woocommerce-{$this->id}"
             . '/public/';
 
-        echo '<h3>' . __('Easypay standard', 'wceasypay') . '</h3>';
-        echo '<p>' . __('Easypay standard works by sending the user to Easypay to enter their payment information.', '') . '</p>';
-        echo '<table class="form-table">';
-        $this->generate_settings_html();
-        echo '<tr>';
-        echo '<td><h3>' . __('Easypay Configurations', 'wceasypay') . '</h3></td>';
-        echo '<td><p>Configurations that you must perform on your Easypay account.<br/><strong>' . __('Go to "Webservices" > "URL Configuration"', 'wceasypay') . '</strong></p></td>';
-        echo '</tr><tr>';
-        echo '<td><h4>' . __('Notification URL', 'wceasypay') . '</h4></td>';
-        echo '<td><input type="text" size="100" readonly value="' . $public_url . 'generic.php' . '"/></td>';
-        echo '</tr>';
-        echo '</table>';
+        ob_start();
+        ?>
+        <h3><?= __('Easypay standard', 'wceasypay') ?></h3>
+        <p><?= __('Easypay standard works by sending the user to Easypay to enter their payment information.', '') ?></p>
+        <table class="form-table">
+            <?= $this->generate_settings_html() ?>
+            <tr>
+                <td>
+                    <h3><?= __('Easypay Configurations', 'wceasypay') ?></h3>
+                </td>
+                <td>
+                    <p>Configurations that you must perform on your Easypay account.
+                        <br>
+                        <strong><?= __('Go to "Webservices" > "URL Configuration"', 'wceasypay') ?></strong>
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td><h4><?= __('Notification URL', 'wceasypay') ?></h4></td>
+                <td>
+                    <input value="<?= $public_url ?>generic.php" type="text" size="100" readonly>
+                </td>
+            </tr>
+        </table>
+        <?php
+
+        echo ob_get_clean();
     }
 
     /**

@@ -131,45 +131,49 @@ class WC_Gateway_Easypay_MB extends WC_Payment_Gateway
                 $this->log('A new mail for client');
                 // Search entity, reference and value in database for this $order->get_id()
                 $query_str = "SELECT *"
-                    . " FROM {$wpdb->prefix} easypay_notifications_2"
+                    . " FROM {$wpdb->prefix}easypay_notifications_2"
                     . " WHERE t_key = %d";
                 $row = $wpdb->get_row($wpdb->prepare($query_str, $order->get_id()));
 
                 if ($row != null) {
                     // Do a log
                     $result = 'Data correctly search from database:' . PHP_EOL;
-                    $result .= 'Order ID: ' . $order->get_id() . ';' . PHP_EOL;
-                    $result .= 'Entity: ' . $row->ep_entity . ';' . PHP_EOL;
-                    $result .= 'Value: ' . $row->ep_value . ';' . PHP_EOL;
-                    $result .= 'Reference: ' . $row->ep_reference . ';' . PHP_EOL;
+                    $result .= "Order ID: {$order->get_id()};" . PHP_EOL;
+                    $result .= "Entity: {$row->ep_entity};" . PHP_EOL;
+                    $result .= "Value: {$row->ep_value} ;" . PHP_EOL;
+                    $result .= "Reference: {$row->ep_reference} ;" . PHP_EOL;
                     $this->log($result);
                     // Output the reference, entity and value in email
 
-                    $template = '<div style="width: 220px; float: left; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color:#eee;">
-                            <!-- img src="http://store.easyp.eu/img/MB_bw-01.png" -->
+                    ob_start();
+                    ?>
+                    <div style="width: 220px; float: left; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color:#eee;">
+                        <!-- img src="http://store.easyp.eu/img/MB_bw-01.png" -->
 
-                            <div style="padding: 5px; padding-top: 10px; clear: both;">
-                                <span style="font-weight: bold;float: left;">%s:</span>
-                                <span style="color: #0088cc; float: right">%s (Easypay)</span>
-                            </div>
-
-                            <div style="padding: 5px;clear: both;">
-                                <span style="font-weight: bold;float: left;">%s:</span>
-                                <span style="color: #0088cc; float: right">%s</span>
-                            </div>
-
-                            <div style="padding: 5px; clear: both;">
-                                <span style="font-weight: bold;float: left;">%s:</span>
-                                <span style="color: #0088cc; float: right">%s &euro;</span>
-                            </div>
-
-
+                        <div style="padding: 5px; padding-top: 10px; clear: both;">
+                            <span style="font-weight: bold;float: left;"><?= __('Entity', 'wceasypay') ?>:</span>
+                            <span style="color: #0088cc; float: right"><?= $row->ep_entity ?> (Easypay)</span>
                         </div>
-                        <br />';
-                    echo sprintf($template, __('Entity', 'wceasypay'), $row->ep_entity, __('Reference', 'wceasypay'), wordwrap($row->ep_reference, 3, ' ', true), __('Value', 'wceasypay'), $row->ep_value);
+
+                        <div style="padding: 5px;clear: both;">
+                            <span style="font-weight: bold;float: left;"><?= __('Reference', 'wceasypay') ?>:</span>
+                            <span style="color: #0088cc; float: right"><?= wordwrap($row->ep_reference, 3, ' ', true) ?></span>
+                        </div>
+
+                        <div style="padding: 5px; clear: both;">
+                            <span style="font-weight: bold;float: left;"><?= __('Value', 'wceasypay') ?>:</span>
+                            <span style="color: #0088cc; float: right"><?= $row->ep_value ?> &euro;</span>
+                        </div>
+                    </div>
+                    <br>
+                    <?php
+
+                    $template = ob_get_clean();
+                    echo $template;
                 } else {
+
                     $result = 'Error while search data in database:' . PHP_EOL;
-                    $result .= 'Order ID: ' . $order->get_id() . ';' . PHP_EOL;
+                    $result .= "Order ID: {$order->get_id()};" . PHP_EOL;
                     $this->log($result);
                     die("Error while search data in database...");
                 }
@@ -300,21 +304,41 @@ class WC_Gateway_Easypay_MB extends WC_Payment_Gateway
      */
     public function admin_options()
     {
-        //Public_Url is for "Easypay Configurations" urls
-        $public_url = get_site_url() . '/wp-content/plugins/' . pathinfo(dirname(__FILE__), PATHINFO_BASENAME) . '/public/';
+        // Public_Url is for "Easypay Configurations" urls
+        $public_url = get_site_url()
+            . '/wp-content/plugins'
+            . "/woocommerce-{$this->id}"
+            . '/public/';
 
-        echo '<h3>' . __('Easypay standard', 'wceasypay') . '</h3>';
-        echo '<p>' . __('Easypay standard works by sending the user to Easypay to enter their payment information.', '') . '</p>';
-        echo '<table class="form-table">';
-        $this->generate_settings_html();
-        echo '<tr>';
-        echo '<td><h3>' . __('Easypay Configurations', 'wceasypay') . '</h3></td>';
-        echo '<td><p>Configurations that you must perform on your Easypay account.<br/><strong>' . __('Go to "Webservices" > "URL Configuration"', 'wceasypay') . '</strong></p></td>';
-        echo '</tr><tr>';
-        echo '<td><h4>' . __('Notification URL', 'wceasypay') . '</h4></td>';
-        echo '<td><input type="text" size="100" readonly value="' . $public_url . 'generic.php' . '"/></td>';
-        echo '</tr>';
-        echo '</table>';
+        ob_start();
+        ?>
+        <h3><?= __('Easypay standard', 'wceasypay') ?></h3>
+        <p><?= __('Easypay standard works by sending the user to Easypay to enter their payment information.', '') ?></p>
+        <table class="form-table">
+            <?= $this->generate_settings_html() ?>
+            <tr>
+                <td>
+                    <h3><?= __('Easypay Configurations', 'wceasypay') ?></h3>
+                </td>
+                <td>
+                    <p>Configurations that you must perform on your Easypay account.
+                        <br>
+                        <strong><?= __('Go to "Webservices" > "URL Configuration"', 'wceasypay') ?></strong>
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <h4><?= __('Notification URL', 'wceasypay') ?></h4>
+                </td>
+                <td>
+                    <input type="text" size="100" readonly value="<?= $public_url ?>generic.php">
+                </td>
+            </tr>
+        </table>
+        <?php
+
+        echo ob_get_clean();
     }
 
     /**
@@ -433,7 +457,9 @@ class WC_Gateway_Easypay_MB extends WC_Payment_Gateway
 
         $value = $order->get_total();
 
-        return $request->get_reference_html($data, $value);
+        return $request->get_mbbox_template($data['method']['entity']
+            , $data['method']['reference']
+            , $value);
     }
 
     /**
@@ -446,11 +472,11 @@ class WC_Gateway_Easypay_MB extends WC_Payment_Gateway
     private function error_btn_order($order, $message = 'Internal Error')
     {
         // Display message if there is problem.
-        $html = '<p>' . __('An error has occurred while processing your payment, please try again. Or contact us for assistance.', 'wceasypay') . '</p>';
+        $html = "<p>{__('An error has occurred while processing your payment, please try again. Or contact us for assistance.', 'wceasypay')}</p>";
         if ($this->logs) {
-            $html .= '<p><strong>Message</strong>: ' . $message . '</p>';
+            $html .= "<p><strong>Message</strong>: $message</p>";
         }
-        $html .= '<a class="button cancel" href="' . esc_url($order->get_cancel_order_url()) . '">' . __('Click to try again', 'wceasypay') . '</a>';
+        $html .= "<a class='button cancel' href='{ esc_url($order->get_cancel_order_url()) ?>'>{ __('Click to try again', 'wceasypay') }</a>";
 
         return $html;
     }
