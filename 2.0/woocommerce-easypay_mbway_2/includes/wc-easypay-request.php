@@ -113,30 +113,40 @@ class WC_Easypay_Request
      */
     public function get_mbbox_template($entity, $reference, $value)
     {
-        $template = '<div style="width: 220px; float: left; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color:#eee;">
-                            <!-- img src="http://store.easyp.eu/img/MB_bw-01.png" -->
+        $href = esc_url(apply_filters('woocommerce_return_to_shop_redirect', wc_get_page_permalink('shop')));
 
-                            <div style="padding: 5px; padding-top: 10px; clear: both;">
-                                <span style="font-weight: bold;float: left;">%s:</span>
-                                <span style="color: #0088cc; float: right">%s (Easypay)</span>
-                            </div>
+        $lng_entity = __('Entity', 'wceasypay');
+        $lng_ref = __('Reference', 'wceasypay');
+        $lng_value = __('Value', 'wceasypay');
+        $ep_ref = wordwrap($reference, 3, ' ', true);
 
-                            <div style="padding: 5px;clear: both;">
-                                <span style="font-weight: bold;float: left;">%s:</span>
-                                <span style="color: #0088cc; float: right">%s</span>
-                            </div>
+        ob_start();
+        ?>
+        <div
+            style="width: 220px; float: left; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color:#eee;">
+            <!-- img src="http://store.easyp.eu/img/MB_bw-01.png" -->
 
-                            <div style="padding: 5px; clear: both;">
-                                <span style="font-weight: bold;float: left;">%s:</span>
-                                <span style="color: #0088cc; float: right">%s &euro;</span>
-                            </div>
+            <div style="padding: 5px; padding-top: 10px; clear: both;">
+                <span style="font-weight: bold;float: left;"><?= $lng_entity ?>:</span>
+                <span style="color: #0088cc; float: right"><?= $entity ?> (Easypay)</span>
+            </div>
 
+            <div style="padding: 5px;clear: both;">
+                <span style="font-weight: bold;float: left;"><?= $lng_ref ?>:</span>
+                <span style="color: #0088cc; float: right"><?= $ep_ref ?></span>
+            </div>
 
-                        </div>
-                        <div style="padding: 5px; clear: both;">
-                          <a class="button wc-backward" href="' . esc_url(apply_filters('woocommerce_return_to_shop_redirect', wc_get_page_permalink('shop'))) . '">' . __('Return to shop', 'wceasypay') . ' </a>
-                        </div>';
+            <div style="padding: 5px; clear: both;">
+                <span style="font-weight: bold;float: left;"><?= $lng_value ?>:</span>
+                <span style="color: #0088cc; float: right"><?= $value ?> &euro;</span>
+            </div>
 
+        </div>
+        <div style="padding: 5px; clear: both;">
+            <a class="button wc-backward" href="<?= $href ?>"><?= __('Return to shop', 'wceasypay') ?></a>
+        </div>';
+        <?php
+        $template = ob_get_clean();
 
         return sprintf($template, __('Entity', 'wceasypay'), $entity, __('Reference', 'wceasypay'), wordwrap($reference, 3, ' ', true), __('Value', 'wceasypay'), $value);
     }
