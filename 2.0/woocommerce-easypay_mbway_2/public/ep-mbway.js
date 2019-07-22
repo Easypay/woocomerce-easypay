@@ -1,4 +1,4 @@
-var try_counter = 7;
+var try_counter = 100;
 var timeout = 3000;
 var data = {
     'action': 'ep_mbway_check_payment',
@@ -9,21 +9,22 @@ var timeoutID;
 
 function check_for_payment(url, data) {
     if (try_counter <= 0) {
-        alert('No more tries left!');
+        updateOrderUI('Authorization has timedout! Your order will be cancelled!');
         return;
     }
 
     jQuery.getJSON(url, data, function (response) {
         if (true === response) {
-            alert('Paid for! Doing something...');
             try_counter = 0;
+            updateOrderUI('Authorization has been paid for! Your order will be shipped as soon as possible!');
+            return;
         } else {
             timeoutID = window.setTimeout(function () {
                 check_for_payment(ajax_object.ajax_url, data);
             }, timeout);
         }
     }).fail(function () {
-        alert('Request failed! Doing something...');
+        updateOrderUI('Request failed!');
         try_counter = 0;
     }).always(function () {
         --try_counter;
@@ -44,15 +45,26 @@ jQuery(document).ready(function () {
 
         jQuery.getJSON(ajax_object.ajax_url, data, function (response) {
             if (true === response) {
-                alert('Cancelled! Doing something...');
-                jQuery('#wc-ep-cancel-order').parent().fadeOut(function () {
-                    jQuery(this).remove();
-                });
+                updateOrderUI('Your order is cancelled!');
             } else {
-                alert('Cannot Cancel! Doing something...');
+                updateOrderUI('Cannot cancel cancelled!');
             }
         }).fail(function () {
-            alert('Cannot Cancel! Doing something...');
+            updateOrderUI('Cannot cancel cancelled!');
         });
     });
 });
+
+function updateOrderUI(text_msg) {
+
+    var loader = jQuery('div#lds-grid');
+    var msg_placeholder = jQuery(loader).next();
+
+    jQuery(loader).fadeOut(function () {
+        jQuery(this).empty().remove();
+    });
+    jQuery('a#wc-ep-cancel-order').fadeOut(function () {
+        jQuery(this).parent().remove();
+    });
+    jQuery(msg_placeholder).text(text_msg).fadeIn();
+}

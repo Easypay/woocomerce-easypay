@@ -247,7 +247,7 @@ class WC_Easypay_Request
             }
 
         </style>
-        <div class="lds-grid">
+        <div id="lds-grid" class="lds-grid">
             <div></div>
             <div></div>
             <div></div>
@@ -259,7 +259,7 @@ class WC_Easypay_Request
             <div></div>
         </div>
         <div style="padding: 5px; clear: both;">
-            <h4>... We are waiting 20s for your MBWay App Approval</h4>
+            <h4>... We are waiting 5 minutes for your MBWay App Approval</h4>
         </div>
         <div style="padding: 5px; clear: both;">
             <a class="button wc-backward" href="<?= $href ?>"><?= __('Return to shop', 'wceasypay') ?></a>
