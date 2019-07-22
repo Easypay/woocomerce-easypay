@@ -40,10 +40,10 @@ $aux_ep_id = substr($aux_ep_id, 0, 36);
 $query_str = "SELECT ep_key, ep_status, t_key, ep_method, ep_payment_id"
     . " FROM $notifications_table WHERE";
 switch ($ep_notification['type']) {
-    case 'capture':
     case 'void':
         $query_str .= ' ep_last_operation_id = "%s"';
         break;
+    case 'capture':
     default: /* authorisation */
         $query_str .= ' ep_payment_id = "%s"';
         break;
@@ -84,7 +84,7 @@ if ($ep_status == 'processed') {
 // so we can access the account id and key
 switch ($ep_method) {
     case 'cc':
-        if (!class_exists('WC_Gateway_Easypay_MBWay')) {
+        if (!class_exists('WC_Gateway_Easypay_CC')) {
             include realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR
                 . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR
                 . 'wc-gateway-easypay-cc.php';
