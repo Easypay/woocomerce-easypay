@@ -312,3 +312,18 @@ msgstr ""
 
 msgid "Cancel Purchase"
 msgstr "Cancelar Compra"
+
+msgid "Authorization has timed out! Your order will be cancelled!"
+msgstr "Autorização expirou! A sua encomenda vai ser cancelada!"
+
+msgid "Authorization has been paid for! Your order will be shipped as soon as possible!"
+msgstr "Autorização paga! A sua encomenda vai ser expedida o mais depressa possível"
+
+msgid "Request failed!"
+msgstr "Pedido falhou!"
+
+msgid "Your order is cancelled"
+msgstr "A sua encomenda foi cancelada"
+
+msgid "Cannot cancel order!"
+msgstr "Não foi possível cancelar a sua encomenda"

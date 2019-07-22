@@ -9,14 +9,14 @@ var timeoutID;
 
 function check_for_payment(url, data) {
     if (try_counter <= 0) {
-        updateOrderUI('Authorization has timedout! Your order will be cancelled!');
+        updateOrderUI(ep_lng.auth_canceled_order_cancelled);
         return;
     }
 
     jQuery.getJSON(url, data, function (response) {
         if (true === response) {
             try_counter = 0;
-            updateOrderUI('Authorization has been paid for! Your order will be shipped as soon as possible!');
+            updateOrderUI(ep_lng.auth_paid_order_shipped);
             return;
         } else {
             timeoutID = window.setTimeout(function () {
@@ -24,7 +24,7 @@ function check_for_payment(url, data) {
             }, timeout);
         }
     }).fail(function () {
-        updateOrderUI('Request failed!');
+        updateOrderUI(ep_lng.request_failed);
         try_counter = 0;
     }).always(function () {
         --try_counter;
@@ -45,12 +45,12 @@ jQuery(document).ready(function () {
 
         jQuery.getJSON(ajax_object.ajax_url, data, function (response) {
             if (true === response) {
-                updateOrderUI('Your order is cancelled!');
+                updateOrderUI(ep_lng.user_cancelled_order);
             } else {
-                updateOrderUI('Cannot cancel cancelled!');
+                updateOrderUI(ep_lng.cannot_cancel_order);
             }
         }).fail(function () {
-            updateOrderUI('Cannot cancel cancelled!');
+            updateOrderUI(ep_lng.cannot_cancel_order);
         });
     });
 });

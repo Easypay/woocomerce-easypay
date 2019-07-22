@@ -129,7 +129,7 @@ class WC_Easypay_Request
             <?php
         }
         //
-        // but always show the "back to store" button
+        // ... but always show the "back to store" button
         ?>
         <div style="padding: 5px; clear: both;">
             <a class="button wc-backward" href="<?= $href ?>"><?= __('Return to shop', 'wceasypay') ?></a>
@@ -157,6 +157,13 @@ class WC_Easypay_Request
             'ajax_url' => admin_url('admin-ajax.php'),
             'order_key' => $order_key,
             'nonce' => $ajax_nonce,
+        ]);
+        wp_localize_script($script_handle, 'ep_lng', [
+            'auth_canceled_order_cancelled' => __("Authorization has timed out! Your order will be cancelled!", 'wceasypay'),
+            'auth_paid_order_shipped' => __("Authorization has been paid for! Your order will be shipped as soon as possible!", 'wceasypay'),
+            'request_failed' => __("Request failed!", 'wceasypay'),
+            'user_cancelled_order' => __("Your order is cancelled", 'wceasypay'),
+            'cannot_cancel_order' => __("Cannot cancel order!", 'wceasypay')
         ]);
 
         $href = esc_url(apply_filters('woocommerce_return_to_shop_redirect', wc_get_page_permalink('shop')));
@@ -247,7 +254,7 @@ class WC_Easypay_Request
             }
 
         </style>
-        <div class="lds-grid">
+        <div id="lds-grid" class="lds-grid">
             <div></div>
             <div></div>
             <div></div>
@@ -259,7 +266,7 @@ class WC_Easypay_Request
             <div></div>
         </div>
         <div style="padding: 5px; clear: both;">
-            <h4>... We are waiting 20s for your MBWay App Approval</h4>
+            <h4>... We are waiting 5 minutes for your MBWay App Approval</h4>
         </div>
         <div style="padding: 5px; clear: both;">
             <a class="button wc-backward" href="<?= $href ?>"><?= __('Return to shop', 'wceasypay') ?></a>
