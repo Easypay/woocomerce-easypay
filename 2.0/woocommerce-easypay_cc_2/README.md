@@ -76,4 +76,6 @@ This is the URL your customer is redirected to after leaving the gateway, either
 Copy&paste this url into easypay's Backoffice web services configuration, Web Services -> URL Configuration -> Payment_Account_XX -> VISA:Forward
 
 ## Final Notes
+We strongly recommend against having older versions of the plugin installed at the same time. We recommend you uninstall older version and only use this new one.
+
 If you'd like to understand how the plugin uses easypay's payment APIs you can read our online docs available at https://api.prod.easypay.pt/docs

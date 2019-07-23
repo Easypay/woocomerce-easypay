@@ -71,4 +71,6 @@ This is the URL in your system that easypay will use to communicate with the plu
 Copy&paste this url into easypay's Backoffice web services configuration, Web Services -> Configuration 2.0 -> Payment_Account_XX -> Notifications -> Generic - URL
 
 ## Final Notes
+We strongly recommend against having older versions of the plugin installed at the same time. We recommend you uninstall older version and only use this new one.
+
 If you'd like to understand how the plugin uses easypay's payment APIs you can read our online docs available at https://api.prod.easypay.pt/docs

@@ -62,4 +62,6 @@ The order is not automatically cancelled when this time is over, that is up to y
 Check this box to enforce payment expiration. Your customer won’t be able to pay after the set number of days 
 
 ## Final Notes
+We strongly recommend against having older versions of the plugin installed at the same time. We recommend you uninstall older version and only use this new one.
+
 If you'd like to understand how the plugin uses easypay's payment APIs you can read our online docs available at https://api.prod.easypay.pt/docs
