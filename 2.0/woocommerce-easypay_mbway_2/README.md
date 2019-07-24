@@ -76,7 +76,7 @@ Check this box if you want the funds to be captured automatically after payment 
 #### Notification URL
 This is the URL in your system that easypay will use to communicate with the plugin, to communicate payment status or other operations. 
 
-Copy&paste this url into easypay's Backoffice web services configuration, Web Services -> Configuration 2.0 -> Payment_Account_XX -> Notifications -> Generic - URL
+Copy&paste this url into easypay's Backoffice web services configuration, _WebServices_ > _Configuration 2.0_ > _[Your payments account]_ > _Notifications_ > _Generic - URL_
 
 ## Final Notes
 We strongly recommend against having older versions of the plugin installed at the same time. We recommend you uninstall older version and only use this new one.
