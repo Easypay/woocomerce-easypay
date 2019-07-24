@@ -40,7 +40,7 @@ After you have your account activated you must go to _WebServices_ > _Configurat
 ## Plugin installation
 - Download the plugin installation zip file available at [easypay's downloads page](https://docs.easypay.pt/download)
 - Install the zipped folder with the Wordpress buit-in plugin installation tool **OR** unzip the plugin and copy as a folder to the plugins dir, making sure the web server can read the plugin files directory (555) and files (444)
-- Activate the plugin in the plugins list. The plugin is named _WooCommerce Easypay Gateway Credit Card_
+- Activate the plugin in the plugins list. The plugin is named _Easypay CC_
 
 __Note__: It is required to have Woocommerce previously installed.
 
@@ -48,7 +48,7 @@ __Note__: It is required to have Woocommerce previously installed.
 All plugins require an **Account ID** and **API Key**. You did this before in **Before installing the plugin...**
 
 > Place your new Account ID and API Key pair in the plugin
-![Place your new Account ID and API Key pair in the plugin](doc-images/woocommerce-plugin-account_id-api_key.png "Place your new Account ID and API Key pair in the plugin")
+![Place your new Account ID and API Key pair in the plugin](doc-images/woocommerce-easypay-plugin-account_id-api_key.png "Place your new Account ID and API Key pair in the plugin")
 
 ### Easypay Sandbox
 Check this box if you to use easypay’s sandbox (test mode). 

@@ -57,9 +57,12 @@ After you have your account activated you must go to _WebServices_ > _Configurat
 - Download the plugin installation zip file available at [easypay's downloads page](https://docs.easypay.pt/download)
 - Install the zipped folder with the Wordpress buit-in plugin installation tool **OR** unzip the plugin and copy as a folder to the plugins dir, making sure the web server can read the plugin files directory (555) and files (444)
 - Activate the plugin in the plugins list. The plugin is named after the payment method it provides, like this: 
-  - WooCommerce Easypay Gateway Credit Card
-  - WooCommerce Easypay Gateway Multibanco
-  - WooCommerce Easypay Gateway MBWay
+  - Easypay CC
+  - Easypay MB
+  - Easypay MBWay
+
+> WooCommerce payments plugin list
+![Place your new Account ID and API Key pair in the plugin](doc-images/woocommerce-easypay-plugin-account_id-api_key.png "Place your new Account ID and API Key pair in the plugin")
 
 __Note__: It is required to have Woocommerce previously installed.
 
@@ -67,17 +70,19 @@ __Note__: It is required to have Woocommerce previously installed.
 All plugins require an **Account ID** and **API Key**. You did this before in **Before installing the plugin...**
 
 > Place your new Account ID and API Key pair in the plugin
-![Place your new Account ID and API Key pair in the plugin](doc-images/woocommerce-plugin-account_id-api_key.png "Place your new Account ID and API Key pair in the plugin")
+![Place your new Account ID and API Key pair in the plugin](doc-images/woocommerce-easypay-plugin-account_id-api_key.png "Place your new Account ID and API Key pair in the plugin")
 
 ### Easypay Sandbox
 Check this box if you to use easypay’s sandbox (test mode). 
 
-__Note__: If using sandbox mode the Account ID and API Key must be generated in easypay’s Sandbox Backoffice (https://backoffice.test.easypay.pt).  Production key and id will not work in sandbox mode and vice-versa.
+__Note__: If using sandbox mode the Account ID and API Key must be generated in easypay’s [sandbox backoffice](https://backoffice.test.easypay.pt). Production Account ID and API key pair will not work in debug mode and vice-versa.
 
-__Note__: No real money is used when this is enabled! Use this for testing purposes only.
+__Note__: No real money is used when Debug is enabled. Use this for testing purposes only.
 
 ### Debug
-Check this box if you to use log actions into a log file in your system. Depending on your woocommerce configuration you may find these files in the plugins directory - /uploads/wc-logs/ - there is a file for errors and another for actions logged by the plugin. These log files rotate so expected it to be suffixed with a date and alpha-numeric hash.
+Check this box if you to use log actions into a log file in your system. 
+
+Depending on your woocommerce configuration you may find these files in the plugins directory - /uploads/wc-logs/ - there is a file for errors and another for actions logged by the plugin. These log files rotate so expected it to be suffixed with a date and alpha-numeric hash.
 
 ## The following configurations are plugin specific:
 ### WooCommerce Easypay Gateway Credit Card
