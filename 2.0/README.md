@@ -61,10 +61,10 @@ After you have your account activated you must go to _WebServices_ > _Configurat
   - Easypay MB
   - Easypay MBWay
 
-> WooCommerce payments plugin list
-![Place your new Account ID and API Key pair in the plugin](doc-images/woocommerce-easypay-plugin-account_id-api_key.png "Place your new Account ID and API Key pair in the plugin")
+> easypay WooCommerce's payments plugin list
+![easypay WooCommerce's payments plugin list](doc-images/woocommerce-payments-plugin-list.png "easypay WooCommerce's payments plugin list")
 
-__Note__: It is required to have Woocommerce previously installed.
+__Note__: It is required to have WooCommerce previously installed.
 
 ## Plugin configuration
 All plugins require an **Account ID** and **API Key**. You did this before in **Before installing the plugin...**
@@ -82,7 +82,7 @@ __Note__: No real money is used when Debug is enabled. Use this for testing purp
 ### Debug
 Check this box if you to use log actions into a log file in your system. 
 
-Depending on your woocommerce configuration you may find these files in the plugins directory - /uploads/wc-logs/ - there is a file for errors and another for actions logged by the plugin. These log files rotate so expected it to be suffixed with a date and alpha-numeric hash.
+Depending on your WooCommerce configuration you may find these files in the plugins directory - /uploads/wc-logs/ - there is a file for errors and another for actions logged by the plugin. These log files rotate so expected it to be suffixed with a date and alpha-numeric hash.
 
 ## The following configurations are plugin specific:
 ### WooCommerce Easypay Gateway Credit Card
