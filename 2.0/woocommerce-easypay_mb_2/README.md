@@ -22,7 +22,9 @@ When your customer checks out he / she will receive an email with the necessary 
 
 Once the payment process is completed easypay’s online services notify the plugin. 
 
-## Before installing the plugin…
+## Before installing the plugin...
+You must uninstall previous versions of the plugin. We strongly recommend against having older versions of the plugin installed simultaneously.
+
 You must have an easypay payments account - _sandbox_ or _production_ - with the desired payment method activated by your easypay business manager.
 
 After you have your account activated you must go to WebServices > Configuration API 2.0 > Your_Payments_Account > Keys > New , name your key and save it. You will be redirected back and the table will show the Account ID and API Key. You will need this in your plugin.  

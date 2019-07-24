@@ -39,7 +39,9 @@ The plugin waits for 5 minutes for the customer’s OK or NOT OK. When the custo
 
 If the 5 minutes are over and the customer does nothing the order and authorisation are automatically canceled. 
 
-## Before installing the plugin…
+## Before installing the plugin...
+You must uninstall previous versions of the plugin. We strongly recommend against having older versions of the plugin installed simultaneously.
+
 You must have an easypay payments account - _sandbox_ or _production_ - with the desired payment method activated by your easypay business manager.
 
 After you have your account activated you must go to WebServices > Configuration API 2.0 > Your_Payments_Account > Keys > New , name your key and save it. You will be redirected back and the table will show the Account ID and API Key. You will need this in your plugin.  
@@ -121,6 +123,4 @@ This is the URL in your system that easypay will use to communicate with the plu
 Copy&paste this url into easypay's Backoffice web services configuration, Web Services -> Configuration 2.0 -> Payment_Account_XX -> Notifications -> Generic - URL
 
 ## Final Notes
-We strongly recommend against having older versions of the plugin installed at the same time. We recommend you uninstall older version and only use this new one.
-
 If you'd like to understand how the plugin uses easypay's payment APIs you can read our online docs available at https://api.prod.easypay.pt/docs
