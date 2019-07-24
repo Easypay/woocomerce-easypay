@@ -29,9 +29,12 @@ You must have an easypay payments account - _sandbox_ or _production_ - with the
 
 After you have your account activated you must go to WebServices > Configuration API 2.0 > Your_Payments_Account > Keys > New , name your key and save it. You will be redirected back and the table will show the Account ID and API Key. You will need this in your plugin.  
 
-![Table that show available Account ID and API Key pairs](doc-images/webservices-config-api-2-account_id-api_key.png "Account ID and API Key")
-![Name the new Account ID and API Key pair that the system will create](doc-images/webservices-config-api-2-new-account_id-api_key.png "Account ID and API Key")
-![Your new Account ID and API Key pair to configure/use in the plugin](webservices-config-api-2-show-account_id-api_key.png "Account ID and API Key")
+> Table that show available Account ID and API Key pairs
+![Table that show available Account ID and API Key pairs](doc-images/webservices-config-api-2-account_id-api_key.png "Table that show available Account ID and API Key pairs")
+> Name the new Account ID and API Key pair that the system will create
+![Name the new Account ID and API Key pair that the system will create](doc-images/webservices-config-api-2-new-account_id-api_key.png "Name the new Account ID and API Key pair that the system will create")
+> Your new Account ID and API Key pair to configure/use in the plugin
+![Your new Account ID and API Key pair to configure/use in the plugin](doc-images/webservices-config-api-2-show-account_id-api_key.png "Your new Account ID and API Key pair to configure/use in the plugin")
 
 ## Plugin installation
 - Download the plugin installation zip file available at https://docs.easypay.pt/download
