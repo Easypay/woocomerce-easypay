@@ -14,7 +14,7 @@ Your clients checkout their order and pay you using Credit Card through easypay�
 Once the payment process is completed easypay’s online services notify the plugin and you can verify it on easypay’s Backoffice or on your own system.
 
 ## In particular
-### WooCommerce Easypay Gateway Credit Card
+### WooCommerce Easypay Credit Card
 This plugin allows for (single payment) credit card order payment at your shop, enabling a costumer to jump into our gateway for safe credit card authorization and later (manual ou automatic) values capture. 
 
 When your customer checks out he / she will be taken to easypay’s credit card gateway to enter the credit card details. After the transaction is authorised by easypay’s services he / she is redirected back to your online shop. 
@@ -61,7 +61,7 @@ __Note__: No real money is used when this is enabled! Use this for testing purpo
 Check this box if you to use log actions into a log file in your system. Depending on your WooCommerce configuration you may find these files in the plugins directory - /uploads/wc-logs/ - there is a file for errors and another for actions logged by the plugin. These log files rotate so expected it to be suffixed with a date and alpha-numeric hash.
 
 ## The following configurations are plugin specific:
-### WooCommerce Easypay Gateway Credit Card
+### WooCommerce Easypay Credit Card
 #### Expiration in Days 
 Set how many days you want the payment to be payable. After that that date your customer won’t be available. 
 

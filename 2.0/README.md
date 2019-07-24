@@ -14,7 +14,7 @@ Your clients checkout their order and pay you using Credit Card / Multibanco / M
 Once the payment process is completed easypay’s online services notify the plugin and you can verify it on easypay’s Backoffice or on your own system.
 
 ## In particular
-### WooCommerce Easypay Gateway Credit Card
+### WooCommerce Easypay Credit Card
 This plugin allows for (single payment) credit card order payment at your shop, enabling a costumer to jump into our gateway for safe credit card authorization and later (manual ou automatic) values capture. 
 
 When your customer checks out he / she will be taken to easypay’s credit card gateway to enter the credit card details. After the transaction is authorised by easypay’s services he / she is redirected back to your online shop. 
@@ -23,14 +23,14 @@ If you have automatic capture configured the plugin tries to capture the funds a
 
 Once the payment process is completed easypay’s online services notify the plugin.
  
-### WooCommerce Easypay Gateway Multibanco
+### WooCommerce Easypay Multibanco
 This plugin allows for Multibanco order payment at your shop using easypay as a payment identifier provider. 
 
 When your customer checks out he / she will receive an email with the necessary payment identifier to pay on an Multibanco machine or on they’re online banking. 
 
 Once the payment process is completed easypay’s online services notify the plugin. 
 
-### WooCommerce Easypay Gateway MBWay
+### WooCommerce Easypay MBWay
 This plugin allows for MBWay order payment at your shop using easypay as a payment provider and the MBWay app installed on the customer’s cellphone. 
 
 When your customer checks out he / she will receive an notification on they’re MBWay app that you wish to charge they’re account with the order value. 
@@ -85,7 +85,7 @@ Check this box if you to use log actions into a log file in your system.
 Depending on your WooCommerce configuration you may find these files in the plugins directory - /uploads/wc-logs/ - there is a file for errors and another for actions logged by the plugin. These log files rotate so expected it to be suffixed with a date and alpha-numeric hash.
 
 ## The following configurations are plugin specific:
-### WooCommerce Easypay Gateway Credit Card
+### WooCommerce Easypay Credit Card
 #### Expiration in Days 
 Set how many days you want the payment to be payable. After that that date your customer won’t be available. 
 
@@ -122,7 +122,7 @@ Copy&paste this url into easypay's Backoffice web services configuration, _WebSe
 > Paste VISA-FWD URL here
 ![Paste VISA-FWD URL here](doc-images/webservices-config-api-2-account_id-visa_fwd_url.png "Paste VISA-FWD URL here")
 
-### WooCommerce Easypay Gateway Multibanco
+### WooCommerce Easypay Multibanco
 #### Expiration in Days 
 Set how many days you want the payment to be payable. After that that date your customer won’t be available. 
 
@@ -131,7 +131,7 @@ The order is not automatically cancelled when this time is over, that is up to y
 #### Enable Expiration for MB References 
 Check this box to enforce payment expiration. Your customer won’t be able to pay after the set number of days 
 
-### WooCommerce Easypay Gateway MBWay
+### WooCommerce Easypay MBWay
 #### Expiration in Days 
 Set how many days you want the payment to be payable. After that that date your customer won’t be available. 
 
