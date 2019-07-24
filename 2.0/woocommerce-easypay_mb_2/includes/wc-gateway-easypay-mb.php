@@ -212,6 +212,12 @@ class WC_Gateway_Easypay_MB extends WC_Payment_Gateway
             WC_Admin_Settings::add_error('Error: Please fill required field: Easypay API key');
             return false;
         }
+        if (!empty($_POST["woocommerce_{$this->id}_expiration"])) {
+            $aux_expiration = intval($_POST["woocommerce_{$this->id}_expiration"], 10);
+            if ($aux_expiration < 1 || $aux_expiration > 93) {
+                WC_Admin_Settings::add_error('Error: Invalid value in field: Expiration in Days');
+            }
+        }
         parent::process_admin_options();
 
         return true;
