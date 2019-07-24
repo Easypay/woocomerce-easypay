@@ -16,7 +16,7 @@ require_once $wpLoadFilePath;
 global $woocommerce, $wpdb;
 
 if (!class_exists('WC_Gateway_Easypay_CC')) {
-    require_once realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR
+    include realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR
         . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR
         . 'wc-gateway-easypay-cc.php';
 }
