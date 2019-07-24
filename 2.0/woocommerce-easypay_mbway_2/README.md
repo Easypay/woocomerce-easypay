@@ -76,7 +76,16 @@ Check this box if you want the funds to be captured automatically after payment 
 #### Notification URL
 This is the URL in your system that easypay will use to communicate with the plugin, to communicate payment status or other operations. 
 
+> Notification URL to copy&paste into backoffice
+![Notification URL to copy&paste into backoffice](doc-images/woocommerce-easypay-plugin-notification_url-example.png "Notification URL to copy&paste into backoffice")
+
 Copy&paste this url into easypay's Backoffice web services configuration, _WebServices_ > _Configuration 2.0_ > _[Your payments account]_ > _Notifications_ > _Generic - URL_
+
+> Your payments account to be configured in backoffice
+![Your payments account to be configured in backoffice](doc-images/webservices-config-api-2-account_id-notifications.png "Your payments account to be configured in backoffice")
+
+> Paste notification URL here
+![Paste notification URL here](doc-images/webservices-config-api-2-account_id-notifications_url.png "Paste notification URL here")
 
 ## Final Notes
 We strongly recommend against having older versions of the plugin installed at the same time. We recommend you uninstall older version and only use this new one.
