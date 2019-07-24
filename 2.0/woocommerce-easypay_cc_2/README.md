@@ -30,6 +30,8 @@ You must have an easypay payments account - _sandbox_ or _production_ - with the
 
 After you have your account activated you must go to WebServices > Configuration API 2.0 > Your_Payments_Account > Keys > New , name your key and save it. You will be redirected back and the table will show the Account ID and API Key. You will need this in your plugin.  
 
+
+
 (doc-images/webservices-config-api-2-account_id-api_key.png "Account ID and API Key")
 
 ## Plugin installation
