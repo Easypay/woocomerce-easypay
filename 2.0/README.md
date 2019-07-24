@@ -40,11 +40,11 @@ The plugin waits for 5 minutes for the customer’s OK or NOT OK. When the custo
 If the 5 minutes are over and the customer does nothing the order and authorisation are automatically canceled. 
 
 ## Before installing the plugin...
-You must uninstall previous versions of the plugin. We strongly recommend against having older versions of the plugin installed simultaneously.
+You **must** uninstall previous versions of the plugin. We strongly recommend against having older versions of the plugin installed simultaneously.
 
-You must have an easypay payments account - _sandbox_ or _production_ - with the desired payment method activated by your easypay business manager.
+You **must** have an easypay payments account - [sandbox](https://backoffice.test.easypay.pt/login) or [production](https://backoffice.easypay.pt/login) - with the desired payment method activated by your easypay business manager.
 
-After you have your account activated you must go to WebServices > Configuration API 2.0 > Your_Payments_Account > Keys > New , name your key and save it. You will be redirected back and the table will show the Account ID and API Key. You will need this in your plugin.  
+After you have your account activated you must go to _WebServices_ > _Configuration API 2.0_ > _[Your payments account]_ > _Keys_ > _New_ (button), name your key and save it. You will be redirected back and the table will show the Account ID and API Key. You will need this in your plugin. Check the images below.  
 
 > Table that show available Account ID and API Key pairs
 ![Table that show available Account ID and API Key pairs](doc-images/webservices-config-api-2-account_id-api_key.png "Table that show available Account ID and API Key pairs")
@@ -54,7 +54,7 @@ After you have your account activated you must go to WebServices > Configuration
 ![Your new Account ID and API Key pair to configure/use in the plugin](doc-images/webservices-config-api-2-show-account_id-api_key.png "Your new Account ID and API Key pair to configure/use in the plugin")
 
 ## Plugin installation
-- Download the plugin installation zip file available at https://docs.easypay.pt/download
+- Download the plugin installation zip file available at [easypay's downloads page](https://docs.easypay.pt/download)
 - Install the zipped folder with the Wordpress buit-in plugin installation tool **OR** unzip the plugin and copy as a folder to the plugins dir, making sure the web server can read the plugin files directory (555) and files (444)
 - Activate the plugin in the plugins list. The plugin is named after the payment method it provides, like this: 
   - WooCommerce Easypay Gateway Credit Card
@@ -64,9 +64,10 @@ After you have your account activated you must go to WebServices > Configuration
 __Note__: It is required to have Woocommerce previously installed.
 
 ## Plugin configuration
-All plugins require an Account ID and API Key. You did this before.
+All plugins require an **Account ID** and **API Key**. You did this before in **Before installing the plugin...**
 
-(doc-images/woocommerce-plugin-account_id-api_key.png "Plugin Account ID and API Key")
+> Place your new Account ID and API Key pair in the plugin
+![Place your new Account ID and API Key pair in the plugin](doc-images/woocommerce-plugin-account_id-api_key.png "Place your new Account ID and API Key pair in the plugin")
 
 ### Easypay Sandbox
 Check this box if you to use easypay’s sandbox (test mode). 
