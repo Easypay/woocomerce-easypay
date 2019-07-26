@@ -225,6 +225,13 @@ if ($ep_method == 'cc') {
 } elseif ($ep_method == 'mbw') {
 
     if ($ep_notification['type'] == 'authorisation'
+        && $ep_notification['status'] == 'failed'
+    ) {
+
+        $set['ep_status'] = 'declined';
+        $p1 = 'cancelled';
+        $p2 = $ep_notification['messages'][0];
+    } elseif ($ep_notification['type'] == 'authorisation'
         && $ep_notification['status'] == 'success'
         && $wcep->autoCapture == 'yes'
     ) {
