@@ -8,7 +8,7 @@ global $wceasypay_db_version_2;
 $wceasypay_db_version_2 = '2.0';
 
 //Create EasyPay tables
-function wceasypay_activation_mb_2()
+function wceasypay_activation_mbway_2()
 {
 
     global $wpdb, $wceasypay_db_version_2;
