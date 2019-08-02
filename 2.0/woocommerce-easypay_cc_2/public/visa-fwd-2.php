@@ -1,9 +1,10 @@
 <?php
 
-if (!isset($_GET["e"])
-    || !isset($_GET["r"])
-    || !isset($_GET["v"])
-    || !isset($_GET["s"])
+if (!isset($_GET['e'])
+    || !isset($_GET['r'])
+    || !isset($_GET['v'])
+    || !isset($_GET['s'])
+    || !isset($_GET['t_key'])
 ) {
     die("Error! Missing parameters!");
 }
