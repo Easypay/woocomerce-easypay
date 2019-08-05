@@ -9,18 +9,20 @@ You can even test easypay’s online payment services with these plugins before 
 
 # How it works
 ## In general 
-Your clients checkout their order and pay you using Credit Card / Multibanco / MBWay through easypay’s payment plugin. 
+Your clients checkout their order and pay you using Credit Card through easypay’s payment plugin. 
 
 Once the payment process is completed easypay’s online services notify the plugin and you can verify it on easypay’s Backoffice or on your own system.
 
 ## In particular
-### WooCommerce Easypay Multibanco
-This plugin allows for Multibanco order payment at your shop using easypay as a payment identifier provider. 
+### WooCommerce Easypay Credit Card
+This plugin allows for (single payment) credit card order payment at your shop, enabling a costumer to jump into our gateway for safe credit card authorization and later (manual ou automatic) values capture. 
 
-When your customer checks out he / she will receive an email with the necessary payment identifier to pay on an Multibanco machine or on they’re online banking. 
+When your customer checks out he / she will be taken to easypay’s credit card gateway to enter the credit card details. After the transaction is authorised by easypay’s services he / she is redirected back to your online shop. 
 
-Once the payment process is completed easypay’s online services notify the plugin. 
+If you have automatic capture configured the plugin tries to capture the funds as soon as possible. 
 
+Once the payment process is completed easypay’s online services notify the plugin.
+ 
 ## Before installing the plugin...
 You **must** uninstall previous versions of the plugin. We strongly recommend against having older versions of the plugin installed simultaneously.
 
@@ -38,7 +40,7 @@ After you have your account activated you must go to _WebServices_ > _Configurat
 ## Plugin installation
 - Download the plugin installation zip file available at [easypay's downloads page](https://docs.easypay.pt/download)
 - Install the zipped folder with the Wordpress buit-in plugin installation tool **OR** unzip the plugin and copy as a folder to the plugins dir, making sure the web server can read the plugin files directory (555) and files (444)
-- Activate the plugin in the plugins list. The plugin is named _ Easypay MB_
+- Activate the plugin in the plugins list. The plugin is named _Easypay CC_
 
 __Note__: It is required to have WooCommerce previously installed.
 
@@ -59,20 +61,23 @@ __Note__: No real money is used when this is enabled! Use this for testing purpo
 Check this box if you to use log actions into a log file in your system. Depending on your WooCommerce configuration you may find these files in the plugins directory - /uploads/wc-logs/ - there is a file for errors and another for actions logged by the plugin. These log files rotate so expected it to be suffixed with a date and alpha-numeric hash.
 
 ## The following configurations are plugin specific:
-### WooCommerce Easypay Multibanco
+### WooCommerce Easypay Credit Card
 #### Expiration in Days 
 Set how many days you want the payment to be payable. After that that date your customer won’t be available. 
 
 The order is not automatically cancelled when this time is over, that is up to you to decide.
 
-#### Enable Expiration for MB References 
+#### Enable Expiration for CC References 
 Check this box to enforce payment expiration. Your customer won’t be able to pay after the set number of days 
 
+#### Auto Capture
+Check this box if you want the funds to be captured automatically after payment authorisation.
+
 #### Notification URL
-This is the URL in your system that easypay will use to communicate with the plugin, to communicate payment status or other operations.
+This is the URL in your system that easypay will use to communicate with the plugin, to communicate payment status or other operations. 
 
 > Notification URL to copy&paste into backoffice
-![Notification URL to copy&paste into backoffice](doc-images/woocommerce-easypay-plugin-notification_url-example.png "Notification URL to copy&paste into backoffice") 
+![Notification URL to copy&paste into backoffice](doc-images/woocommerce-easypay-plugin-notification_url-visa_fwd-example.png "Notification URL to copy&paste into backoffice")
 
 Copy&paste this url into easypay's Backoffice web services configuration, _WebServices_ > _Configuration 2.0_ > _[Your payments account]_ > _Notifications_ > _Generic - URL_
 
@@ -81,6 +86,17 @@ Copy&paste this url into easypay's Backoffice web services configuration, _WebSe
 
 > Paste notification URL here
 ![Paste notification URL here](doc-images/webservices-config-api-2-account_id-notifications_url.png "Paste notification URL here")
+
+#### VISA-FWD URL
+This is the URL your customer is redirected to after leaving the gateway, either with payment authorised or not. 
+
+> VISA-FWD URL to copy&paste into backoffice
+![VISA-FWD URL to copy&paste into backoffice](doc-images/woocommerce-easypay-plugin-notification_url-visa_fwd-example.png "VISA-FWD URL to copy&paste into backoffice")
+
+Copy&paste this url into easypay's Backoffice web services configuration, _WebServices_ > _URL Configuration_ > _[Your payments account]_ > _VISA:Forward_
+
+> Paste VISA-FWD URL here
+![Paste VISA-FWD URL here](doc-images/webservices-config-api-2-account_id-visa_fwd_url.png "Paste VISA-FWD URL here")
 
 ## Final Notes
 We strongly recommend against having older versions of the plugin installed at the same time. We recommend you uninstall older version and only use this new one.
