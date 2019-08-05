@@ -327,3 +327,9 @@ msgstr "A sua encomenda foi cancelada"
 
 msgid "Cannot cancel order!"
 msgstr "Não foi possível cancelar a sua encomenda"
+
+msgid "Authorization voided! Your order will be cancelled!"
+msgstr "Autorização cancelada! A sua encomenda foi cancelada"
+
+msgid "Authorization declined! Your order will be cancelled!"
+msgstr "Autorização cancelada! A sua encomenda foi cancelada"

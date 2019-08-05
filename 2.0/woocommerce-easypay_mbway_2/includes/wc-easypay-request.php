@@ -159,6 +159,8 @@ class WC_Easypay_Request
             'nonce' => $ajax_nonce,
         ]);
         wp_localize_script($script_handle, 'ep_lng', [
+            'auth_voided_order_cancelled' => __("Authorization voided! Your order will be cancelled!", 'wceasypay'),
+            'auth_declined_order_cancelled' => __("Authorization declined! Your order will be cancelled!", 'wceasypay'),
             'auth_canceled_order_cancelled' => __("Authorization has timed out! Your order will be cancelled!", 'wceasypay'),
             'auth_paid_order_shipped' => __("Authorization has been paid for! Your order will be shipped as soon as possible!", 'wceasypay'),
             'request_failed' => __("Request failed!", 'wceasypay'),

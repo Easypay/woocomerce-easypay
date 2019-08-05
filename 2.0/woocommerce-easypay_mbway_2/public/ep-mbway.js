@@ -27,13 +27,17 @@ function check_for_payment(url, data) {
 
                 case 'declined':
                     try_counter = 0;
-                    updateOrderUI(ep_lng.auth_canceled_order_cancelled);
+                    updateOrderUI(ep_lng.auth_declined_order_cancelled);
+                    return;
+
+                case 'voided':
+                    try_counter = 0;
+                    updateOrderUI(ep_lng.auth_voided_order_cancelled);
                     return;
 
                 case 'authorized':
                 case 'failed_capture':
                 case 'pending_void':
-                case 'voided':
                 case 'waiting_capture':
                     timeoutID = window.setTimeout(function () {
                         check_for_payment(ajax_object.ajax_url, data);
