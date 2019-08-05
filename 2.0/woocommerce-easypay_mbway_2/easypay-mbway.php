@@ -59,19 +59,7 @@ function ep_mbway_check_payment()
     if (empty($rset)) {
         $paid = false;
     } else {
-        switch ($rset[0]->ep_status) {
-            case 'processed':
-                $paid = true;
-                break;
-            case 'authorized':
-            case 'declined':
-            case 'failed_capture':
-            case 'pending_void':
-            case 'voided':
-            case 'waiting_capture':
-                $paid = false;
-                break;
-        }
+        $paid = $rset[0]->ep_status;
     }
 
     echo json_encode($paid);

@@ -14,15 +14,34 @@ function check_for_payment(url, data) {
     }
 
     jQuery.getJSON(url, data, function (response) {
-        if (true === response) {
-            try_counter = 0;
-            updateOrderUI(ep_lng.auth_paid_order_shipped);
-            return;
-        } else {
+        if (false === response) {
             timeoutID = window.setTimeout(function () {
                 check_for_payment(ajax_object.ajax_url, data);
             }, timeout);
+        } else {
+            switch (response) {
+                case 'processed':
+                    try_counter = 0;
+                    updateOrderUI(ep_lng.auth_paid_order_shipped);
+                    return;
+
+                case 'declined':
+                    try_counter = 0;
+                    updateOrderUI(ep_lng.auth_canceled_order_cancelled);
+                    return;
+
+                case 'authorized':
+                case 'failed_capture':
+                case 'pending_void':
+                case 'voided':
+                case 'waiting_capture':
+                    timeoutID = window.setTimeout(function () {
+                        check_for_payment(ajax_object.ajax_url, data);
+                    }, timeout);
+                    break;
+            }
         }
+
     }).fail(function () {
         updateOrderUI(ep_lng.request_failed);
         try_counter = 0;
