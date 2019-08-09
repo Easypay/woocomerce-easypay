@@ -71,62 +71,6 @@ function woocommerce_gateway_easypay_cc_2_init()
 
     add_filter('woocommerce_payment_gateways', 'woocommerce_add_gateway_easypay_cc_2');
 
-    /**
-     * Checkout Fields Override
-     *
-     * @param array $fields
-     * @return  array
-     */
-//    function custom_override_checkout_fields_cc_2($fields)
-//    {
-//        $fields['billing']['billing_state']['required'] = false;
-//        $fields['shipping']['shipping_state']['required'] = false;
-//
-//        $nif_field = [
-//            'label'       => __('Fiscal Number', 'wceasypay'),
-//            'placeholder' => _x('Fiscal Number', 'placeholder', 'wceasypay'),
-//            'required'    => false,
-//            'class'       => ['form-row-wide'],
-//            'clear'       => true
-//        ];
-//
-//        $fields['billing']['billing_fiscal_number'] = $nif_field;
-//        $fields['shipping']['shipping_fiscal_number'] = $nif_field;
-//
-//        return $fields;
-//    }
-
-    #add_filter('woocommerce_checkout_fields', ' custom_override_checkout_fields_mb_2');
-
-    /**
-     * Order Billing Details NIF Override
-     *
-     * @param array $billing_data
-     * @return  array
-     */
-//    function custom_override_order_billing_details_nif_cc_2($billing_data)
-//    {
-//        $billing_data['fiscal_number'] = ['label' => __('Fiscal Number', 'wceasypay'), 'show' => true];
-//        return $billing_data;
-//    }
-
-    #add_filter('woocommerce_admin_billing_fields', 'custom_override_order_billing_details_nif_cc_2');
-
-    /**
-     * Order Shipping Details NIF Override
-     *
-     * @param array $shipping_data
-     * @return  array
-     */
-//    function custom_override_order_shipping_details_nif_cc_2($shipping_data)
-//    {
-//        $shipping_data['fiscal_number'] = ['label' => __('Fiscal Number', 'wceasypay'), 'show' => true];
-//        return $shipping_data;
-//    }
-
-    #add_filter('woocommerce_admin_shipping_fields', 'custom_override_order_shipping_details_nif_cc_2');
-
-
 } //END of function woocommerce_gateway_easypay_cc_2_init
 
 /**
