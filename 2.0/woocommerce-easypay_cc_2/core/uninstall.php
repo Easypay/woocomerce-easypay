@@ -4,9 +4,9 @@ if (!defined('ABSPATH')) {
 }
 
 // Soft deactivation
-function wceasypay_deactivation_mb_2()
+function wceasypay_deactivation_cc_2()
 {
-    $option_name = 'woocommerce_easypay_mb_2_settings';
+    $option_name = 'woocommerce_easypay_cc_2_settings';
 
     delete_option($option_name);
 
