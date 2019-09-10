@@ -139,7 +139,7 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
             return false;
         }
         if (!empty($_POST["woocommerce_{$this->id}_expiration"])) {
-            $aux_expiration = intval($_POST["woocommerce_{$this->id}_expiration"], 10);
+            $aux_expiration = (int)$_POST["woocommerce_{$this->id}_expiration"];
             if ($aux_expiration < 1 || $aux_expiration) {
                 WC_Admin_Settings::add_error('Error: Invalid value in field: Expiration in Days');
             }
