@@ -42,9 +42,6 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
         $this->title = $this->get_option('title');
         $this->description = $this->get_option('description');
         $this->currency = 'EUR';
-        // This should be out since its cc
-        // $this->expiration_time = $this->get_option('expiration');
-        // $this->expiration_enable = $this->get_option('expiration_enable');
         $this->autoCapture = $this->get_option('capture');
         $this->method = "cc";
         // Auth Stuff
@@ -138,12 +135,7 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
             WC_Admin_Settings::add_error('Error: Please fill required field: Easypay API key');
             return false;
         }
-        if (!empty($_POST["woocommerce_{$this->id}_expiration"])) {
-            $aux_expiration = intval($_POST["woocommerce_{$this->id}_expiration"], 10);
-            if ($aux_expiration < 1 || $aux_expiration) {
-                WC_Admin_Settings::add_error('Error: Invalid value in field: Expiration in Days');
-            }
-        }
+
         parent::process_admin_options();
 
         return true;
@@ -189,20 +181,6 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
                 'type' => 'text',
                 'description' => __('The API Key You Generated at Easypay Backoffice', 'wceasypay'),
                 'default' => '',
-                'desc_tip' => true,
-            ],
-            'expiration' => [
-                'title' => __('Expiration in Days', 'wceasypay'),
-                'type' => 'decimal',
-                'description' => __('Only 1 to 93 days accepted', 'wceasypay'),
-                'default' => '1',
-                'desc_tip' => true,
-            ],
-            'expiration_enable' => [
-                'title' => __('Enable Expiration for CC References', 'wceasypay'),
-                'type' => 'checkbox',
-                'description' => __('Enable This Option to Activate Reference Expiration Time', 'wceasypay'),
-                'default' => 'no',
                 'desc_tip' => true,
             ],
             'capture' => [
@@ -313,12 +291,6 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
         //Preparing
         $order = new WC_Order($order_id);
 
-        if ($this->expiration_enable == 'yes') {
-            if ($this->expiration_time >= 1 || $this->expiration_time <= 93) {
-                $max_date = Date('Y-m-d h:m', strtotime("+" . $this->expiration_time . " days"));
-            }
-        }
-
         // start to build the body with the ref data
         $body = [
             'type' => 'authorisation',
@@ -335,10 +307,6 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
                 // 'fiscal_number' => 'PT123456789',
             ],
         ]; // Commented the fiscal number since the special nif field is commented also
-
-        if (isset($max_date)) {
-            $body['expiration_time'] = $max_date;
-        }
 
         $this->log('Payload for order #' . $order->get_id() . ': ' . print_r(json_encode($body), true));
 

@@ -27,7 +27,7 @@ if (false === $ep_notification) {
         . '] Bad JSON payload received';
     (new WC_Logger())->add('easypay', $msg);
     print_r([
-        'message' => 'Bad JSON payload received',
+        'message'   => 'Bad JSON payload received',
         'ep_status' => 'err1',
     ]);
     wp_die();
@@ -56,7 +56,7 @@ if (empty($notification)) {
         . '] Error selecting data from database';
     (new WC_Logger())->add('easypay', $msg);
     print_r([
-        'message' => 'Error selecting data from database',
+        'message'   => 'Error selecting data from database',
         'ep_status' => 'err1',
     ]);
     wp_die();
@@ -72,7 +72,7 @@ unset($notification);
 if ($ep_status == 'processed') {
 
     print_r([
-        'message' => 'Document already processed',
+        'message'   => 'Document already processed',
         'ep_status' => 'ok0',
     ]);
     wp_die();
@@ -93,7 +93,12 @@ switch ($ep_method) {
         break;
 
     case 'mb':
-        $wcep = new WC_Gateway_Easypay_MB_2();
+        if (!class_exists('WC_Gateway_Easypay_MB')) {
+            include realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR
+                . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR
+                . 'wc-gateway-easypay-mb.php';
+        }
+        $wcep = new WC_Gateway_Easypay_MB();
         break;
 
     case 'mbw':
@@ -109,10 +114,10 @@ switch ($ep_method) {
 $api_auth = $wcep->easypay_api_auth();
 
 $auth = [
-    'url' => $api_auth['url'],
+    'url'        => $api_auth['url'],
     'account_id' => $api_auth['account_id'],
-    'api_key' => $api_auth['api_key'],
-    'method' => 'GET',
+    'api_key'    => $api_auth['api_key'],
+    'method'     => 'GET',
 ];
 $payment_details = (new WC_Easypay_Request($auth))
     ->get_contents($ep_payment_id);
@@ -164,17 +169,17 @@ if ($ep_method == 'cc') {
         // Capture
         $body = [
             'transaction_key' => (string)$t_key,
-            'capture_date' => date('Y-m-d'),
-            'descriptive' => (string)$t_key,
-            'value' => $ep_value,
+            'capture_date'    => date('Y-m-d'),
+            'descriptive'     => (string)$t_key,
+            'value'           => $ep_value,
         ];
         //
         // make the capture request to easypay
         $capture_request_response = $capture_request->get_contents($body);
         $set = [
-            'ep_status' => 'waiting_capture',
+            'ep_status'              => 'waiting_capture',
             'ep_last_operation_type' => 'capture',
-            'ep_last_operation_id' => null,
+            'ep_last_operation_id'   => null,
         ];
         if (!empty($capture_request_response)) {
 
@@ -198,16 +203,18 @@ if ($ep_method == 'cc') {
         $p1 = 'completed';
         $p2 = 'Payment completed';
 
-    } else if ($wcep->autoCapture == 'no'
-        && $ep_notification['type'] == 'authorisation'
-        && $ep_notification['status'] == 'success'
-    ) {
+    } else {
+        if ($wcep->autoCapture == 'no'
+            && $ep_notification['type'] == 'authorisation'
+            && $ep_notification['status'] == 'success'
+        ) {
 
-        $set = [
-            'ep_status' => 'authorized',
-        ];
-        $p1 = 'pending payment';
-        $p2 = 'Card authorized, waiting for capture';
+            $set = [
+                'ep_status' => 'authorized',
+            ];
+            $p1 = 'pending payment';
+            $p2 = 'Card authorized, waiting for capture';
+        }
     }
 
     $wpdb->update($notifications_table, $set, $where);
@@ -239,9 +246,9 @@ if ($ep_method == 'cc') {
         // Capture
         $body = [
             'transaction_key' => (string)$t_key,
-            'capture_date' => date('Y-m-d'),
-            'descriptive' => (string)$t_key,
-            'value' => floatval($ep_value),
+            'capture_date'    => date('Y-m-d'),
+            'descriptive'     => (string)$t_key,
+            'value'           => floatval($ep_value),
         ];
         //
         // make the capture request to easypay

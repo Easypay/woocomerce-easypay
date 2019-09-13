@@ -42,7 +42,7 @@ class WC_Gateway_Easypay_MB extends WC_Payment_Gateway
         $this->title = $this->get_option('title');
         $this->description = $this->get_option('description');
         $this->currency = 'EUR';
-        $this->expiration_time = $this->get_option('expiration');
+        $this->expiration_time = (int)$this->get_option('expiration');
         $this->expiration_enable = $this->get_option('expiration_enable');
         $this->method = "mb";
         // Auth Stuff
@@ -157,7 +157,8 @@ class WC_Gateway_Easypay_MB extends WC_Payment_Gateway
 
                         <div style="padding: 5px;clear: both;">
                             <span style="font-weight: bold;float: left;"><?= __('Reference', 'wceasypay') ?>:</span>
-                            <span style="color: #0088cc; float: right"><?= wordwrap($row->ep_reference, 3, ' ', true) ?></span>
+                            <span style="color: #0088cc; float: right"><?= wordwrap($row->ep_reference, 3, ' ',
+                                    true) ?></span>
                         </div>
 
                         <div style="padding: 5px; clear: both;">
@@ -212,9 +213,10 @@ class WC_Gateway_Easypay_MB extends WC_Payment_Gateway
             WC_Admin_Settings::add_error('Error: Please fill required field: Easypay API key');
             return false;
         }
-        if (!empty($_POST["woocommerce_{$this->id}_expiration"])) {
-            $aux_expiration = intval($_POST["woocommerce_{$this->id}_expiration"], 10);
-            if ($aux_expiration < 1 || $aux_expiration > 93) {
+        if (isset($_POST["woocommerce_{$this->id}_expiration_enable"])) {
+            if (!is_numeric($_POST["woocommerce_{$this->id}_expiration"])
+                || (int)$_POST["woocommerce_{$this->id}_expiration"] < 1
+                || (int)$_POST["woocommerce_{$this->id}_expiration"] > 93) {
                 WC_Admin_Settings::add_error('Error: Invalid value in field: Expiration in Days');
             }
         }
@@ -233,72 +235,73 @@ class WC_Gateway_Easypay_MB extends WC_Payment_Gateway
     public function init_form_fields()
     {
         $this->form_fields = [
-            'enabled' => [
-                'title' => __('Enable/Disable', 'wceasypay'),
-                'type' => 'checkbox',
-                'label' => __('Enable Easypay Payment Gateway.', 'wceasypay'),
+            'enabled'           => [
+                'title'   => __('Enable/Disable', 'wceasypay'),
+                'type'    => 'checkbox',
+                'label'   => __('Enable Easypay Payment Gateway.', 'wceasypay'),
                 'default' => 'no'
             ],
-            'title' => [
-                'title' => __('Title', 'wceasypay'),
-                'type' => 'text',
+            'title'             => [
+                'title'       => __('Title', 'wceasypay'),
+                'type'        => 'text',
                 'description' => __('This controls the title which the user sees during checkout.', 'wceasypay'),
-                'default' => __('Easypay MB', 'wceasypay'),
-                'desc_tip' => true,
+                'default'     => __('Easypay MB', 'wceasypay'),
+                'desc_tip'    => true,
             ],
-            'description' => [
-                'title' => __('Customer Message', 'wceasypay'),
-                'type' => 'textarea',
+            'description'       => [
+                'title'   => __('Customer Message', 'wceasypay'),
+                'type'    => 'textarea',
                 'default' => __('Don\'t leave for tomorrow what you can receive today', 'wceasypay')
             ],
-            'account_id' => [
-                'title' => __('Account ID', 'wceasypay'),
-                'type' => 'text',
+            'account_id'        => [
+                'title'       => __('Account ID', 'wceasypay'),
+                'type'        => 'text',
                 'description' => __('The Account ID You Generated at Easypay Backoffice', 'wceasypay'),
-                'default' => '',
-                'desc_tip' => true,
+                'default'     => '',
+                'desc_tip'    => true,
             ],
-            'api_key' => [
-                'title' => __('API Key', 'wceasypay'),
-                'type' => 'text',
+            'api_key'           => [
+                'title'       => __('API Key', 'wceasypay'),
+                'type'        => 'text',
                 'description' => __('The API Key You Generated at Easypay Backoffice', 'wceasypay'),
-                'default' => '',
-                'desc_tip' => true,
+                'default'     => '',
+                'desc_tip'    => true,
             ],
-            'expiration' => [
-                'title' => __('Expiration in Days', 'wceasypay'),
-                'type' => 'decimal',
+            'expiration'        => [
+                'title'       => __('Expiration in Days', 'wceasypay'),
+                'type'        => 'decimal',
                 'description' => __('Only 1 to 93 days accepted', 'wceasypay'),
-                'default' => '1',
-                'desc_tip' => true,
+                'default'     => '1',
+                'desc_tip'    => true,
             ],
             'expiration_enable' => [
-                'title' => __('Enable Expiration for MB References', 'wceasypay'),
-                'type' => 'checkbox',
+                'title'       => __('Enable Expiration for MB References', 'wceasypay'),
+                'type'        => 'checkbox',
                 'description' => __('Enable This Option to Activate Reference Expiration Time', 'wceasypay'),
-                'default' => 'no',
-                'desc_tip' => true,
+                'default'     => 'no',
+                'desc_tip'    => true,
             ],
-            'testing' => [
-                'title' => __('Gateway Testing', 'wceasypay'),
-                'type' => 'title',
+            'testing'           => [
+                'title'       => __('Gateway Testing', 'wceasypay'),
+                'type'        => 'title',
                 'description' => '',
             ],
-            'test' => [
-                'title' => __('Easypay sandbox', 'wceasypay'),
-                'type' => 'checkbox',
-                'label' => __('Enable Easypay sandbox', 'wceasypay'),
-                'default' => 'yes',
+            'test'              => [
+                'title'       => __('Easypay sandbox', 'wceasypay'),
+                'type'        => 'checkbox',
+                'label'       => __('Enable Easypay sandbox', 'wceasypay'),
+                'default'     => 'yes',
                 'description' => __('Easypay sandbox can be used to test payments.', 'wceasypay'),
-                'desc_tip' => true,
+                'desc_tip'    => true,
             ],
-            'logs' => [
-                'title' => __('Debug', 'wceasypay'),
-                'type' => 'checkbox',
-                'label' => __('Enable logging', 'wceasypay'),
-                'default' => 'no',
-                'description' => __('Log Easypay events such as API requests, the logs will be placed in <code>woocommerce/logs/easypay.txt</code>', 'wceasypay'),
-                'desc_tip' => true,
+            'logs'              => [
+                'title'       => __('Debug', 'wceasypay'),
+                'type'        => 'checkbox',
+                'label'       => __('Enable logging', 'wceasypay'),
+                'default'     => 'no',
+                'description' => __('Log Easypay events such as API requests, the logs will be placed in <code>woocommerce/logs/easypay.txt</code>',
+                    'wceasypay'),
+                'desc_tip'    => true,
             ],
         ];
     }
@@ -319,7 +322,8 @@ class WC_Gateway_Easypay_MB extends WC_Payment_Gateway
         ob_start();
         ?>
         <h3><?= __('Easypay standard', 'wceasypay') ?></h3>
-        <p><?= __('Easypay standard works by sending the user to Easypay to enter their payment information.', '') ?></p>
+        <p><?= __('Easypay standard works by sending the user to Easypay to enter their payment information.',
+                '') ?></p>
         <table class="form-table">
             <?= $this->generate_settings_html() ?>
             <tr>
@@ -380,16 +384,16 @@ class WC_Gateway_Easypay_MB extends WC_Payment_Gateway
 
         // start to build the body with the ref data
         $body = [
-            'key' => (string)$order->get_id(),
-            'method' => $this->method,
-            'value' => floatval($order->get_total()),
+            'key'      => (string)$order->get_id(),
+            'method'   => $this->method,
+            'value'    => floatval($order->get_total()),
             'currency' => $this->currency,
             'customer' => [
-                'name' => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
-                'email' => $order->get_billing_email(),
-                'key' => (string)$order->get_id(),
+                'name'             => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
+                'email'            => $order->get_billing_email(),
+                'key'              => (string)$order->get_id(),
                 'phone_indicative' => "+351",
-                'phone' => $order->get_billing_phone(),
+                'phone'            => $order->get_billing_phone(),
                 // 'fiscal_number' =>"PT123456789",
             ],
         ]; // Commented the fiscal number since the special nif field is commented also
@@ -403,10 +407,10 @@ class WC_Gateway_Easypay_MB extends WC_Payment_Gateway
         $url = $this->test ? $this->test_url : $this->live_url;
 
         $auth = [
-            'url' => $url,
+            'url'        => $url,
             'account_id' => $this->account_id,
-            'api_key' => $this->api_key,
-            'method' => 'POST',
+            'api_key'    => $this->api_key,
+            'method'     => 'POST',
         ];
 
         if (!class_exists('WC_Easypay_Request')) {
@@ -442,11 +446,11 @@ class WC_Gateway_Easypay_MB extends WC_Payment_Gateway
         if (!$wpdb->insert(
             $wpdb->prefix . 'easypay_notifications_2',
             [
-                'ep_entity' => $data['method']['entity'],
-                'ep_value' => $order->get_total(),
-                'ep_reference' => $data['method']['reference'],
-                't_key' => $order->get_id(),
-                'ep_method' => $this->method,
+                'ep_entity'     => $data['method']['entity'],
+                'ep_value'      => $order->get_total(),
+                'ep_reference'  => $data['method']['reference'],
+                't_key'         => $order->get_id(),
+                'ep_method'     => $this->method,
                 'ep_payment_id' => $data['id'],
             ]
         )) {
@@ -503,7 +507,7 @@ class WC_Gateway_Easypay_MB extends WC_Payment_Gateway
         $woocommerce->cart->empty_cart();
 
         return [
-            'result' => 'success',
+            'result'   => 'success',
             'redirect' => $order->get_checkout_payment_url(true)
         ];
     }
@@ -574,7 +578,8 @@ class WC_Gateway_Easypay_MB extends WC_Payment_Gateway
      */
     public function log($message)
     {
-        if ($this->logs)
+        if ($this->logs) {
             $this->logger->add('easypay', $message);
+        }
     }
 }

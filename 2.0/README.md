@@ -86,14 +86,6 @@ Depending on your WooCommerce configuration you may find these files in the plug
 
 ## The following configurations are plugin specific:
 ### WooCommerce Easypay Credit Card
-#### Expiration in Days 
-Set how many days you want the payment to be payable. After that that date your customer won’t be available. 
-
-The order is not automatically cancelled when this time is over, that is up to you to decide.
-
-#### Enable Expiration for CC References 
-Check this box to enforce payment expiration. Your customer won’t be able to pay after the set number of days 
-
 #### Auto Capture
 Check this box if you want the funds to be captured automatically after payment authorisation.
 
@@ -135,7 +127,7 @@ Check this box to enforce payment expiration. Your customer won’t be able to p
 This is the URL in your system that easypay will use to communicate with the plugin, to communicate payment status or other operations.
 
 > Notification URL to copy&paste into backoffice
-![Notification URL to copy&paste into backoffice](doc-images/woocommerce-easypay-plugin-notification_url-example.png "Notification URL to copy&paste into backoffice") 
+![Notification URL to copy&paste into backoffice](doc-images/woocommerce-easypay-plugin-mb-notification_url-example.png "Notification URL to copy&paste into backoffice") 
 
 Copy&paste this url into easypay's Backoffice web services configuration, _WebServices_ > _Configuration 2.0_ > _[Your payments account]_ > _Notifications_ > _Generic - URL_
 
@@ -146,14 +138,6 @@ Copy&paste this url into easypay's Backoffice web services configuration, _WebSe
 ![Paste notification URL here](doc-images/webservices-config-api-2-account_id-notifications_url.png "Paste notification URL here")
 
 ### WooCommerce Easypay MBWay
-#### Expiration in Days 
-Set how many days you want the payment to be payable. After that that date your customer won’t be available. 
-
-The order is not automatically cancelled when this time is over, that is up to you to decide.
-
-#### Enable Expiration for MBWay References 
-Check this box to enforce payment expiration. Your customer won’t be able to pay after the set number of days 
-
 #### Auto capture
 Check this box if you want the funds to be captured automatically after payment authorisation.
 
