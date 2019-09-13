@@ -42,9 +42,6 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
         $this->title = $this->get_option('title');
         $this->description = $this->get_option('description');
         $this->currency = 'EUR';
-        // This should be out since its cc
-        // $this->expiration_time = $this->get_option('expiration');
-        // $this->expiration_enable = $this->get_option('expiration_enable');
         $this->autoCapture = $this->get_option('capture');
         $this->method = "cc";
         // Auth Stuff
@@ -138,12 +135,7 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
             WC_Admin_Settings::add_error('Error: Please fill required field: Easypay API key');
             return false;
         }
-        if (!empty($_POST["woocommerce_{$this->id}_expiration"])) {
-            $aux_expiration = (int)$_POST["woocommerce_{$this->id}_expiration"];
-            if ($aux_expiration < 1 || $aux_expiration) {
-                WC_Admin_Settings::add_error('Error: Invalid value in field: Expiration in Days');
-            }
-        }
+
         parent::process_admin_options();
 
         return true;
@@ -159,64 +151,50 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
     public function init_form_fields()
     {
         $this->form_fields = [
-            'enabled'           => [
+            'enabled'     => [
                 'title'   => __('Enable/Disable', 'wceasypay'),
                 'type'    => 'checkbox',
                 'label'   => __('Enable Easypay Payment Gateway.', 'wceasypay'),
                 'default' => 'no'
             ],
-            'title'             => [
+            'title'       => [
                 'title'       => __('Title', 'wceasypay'),
                 'type'        => 'text',
                 'description' => __('This controls the title which the user sees during checkout.', 'wceasypay'),
                 'default'     => __('Easypay CC', 'wceasypay'),
                 'desc_tip'    => true,
             ],
-            'description'       => [
+            'description' => [
                 'title'   => __('Customer Message', 'wceasypay'),
                 'type'    => 'textarea',
                 'default' => __('Don\'t leave for tomorrow what you can receive today', 'wceasypay')
             ],
-            'account_id'        => [
+            'account_id'  => [
                 'title'       => __('Account ID', 'wceasypay'),
                 'type'        => 'text',
                 'description' => __('The Account ID You Generated at Easypay Backoffice', 'wceasypay'),
                 'default'     => '',
                 'desc_tip'    => true,
             ],
-            'api_key'           => [
+            'api_key'     => [
                 'title'       => __('API Key', 'wceasypay'),
                 'type'        => 'text',
                 'description' => __('The API Key You Generated at Easypay Backoffice', 'wceasypay'),
                 'default'     => '',
                 'desc_tip'    => true,
             ],
-            'expiration'        => [
-                'title'       => __('Expiration in Days', 'wceasypay'),
-                'type'        => 'decimal',
-                'description' => __('Only 1 to 93 days accepted', 'wceasypay'),
-                'default'     => '1',
-                'desc_tip'    => true,
-            ],
-            'expiration_enable' => [
-                'title'       => __('Enable Expiration for CC References', 'wceasypay'),
-                'type'        => 'checkbox',
-                'description' => __('Enable This Option to Activate Reference Expiration Time', 'wceasypay'),
-                'default'     => 'no',
-                'desc_tip'    => true,
-            ],
-            'capture'           => [
+            'capture'     => [
                 'title'       => __('Auto Capture', 'wceasypay'),
                 'type'        => 'checkbox',
                 'description' => __('Auto request the capture of the authorized transactions .', 'wceasypay'),
                 'default'     => false,
             ],
-            'testing'           => [
+            'testing'     => [
                 'title'       => __('Gateway Testing', 'wceasypay'),
                 'type'        => 'title',
                 'description' => '',
             ],
-            'test'              => [
+            'test'        => [
                 'title'       => __('Easypay sandbox', 'wceasypay'),
                 'type'        => 'checkbox',
                 'label'       => __('Enable Easypay sandbox', 'wceasypay'),
@@ -224,7 +202,7 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
                 'description' => __('Easypay sandbox can be used to test payments.', 'wceasypay'),
                 'desc_tip'    => true,
             ],
-            'logs'              => [
+            'logs'        => [
                 'title'       => __('Debug', 'wceasypay'),
                 'type'        => 'checkbox',
                 'label'       => __('Enable logging', 'wceasypay'),
@@ -315,12 +293,6 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
         //Preparing
         $order = new WC_Order($order_id);
 
-        if ($this->expiration_enable == 'yes') {
-            if ($this->expiration_time >= 1 || $this->expiration_time <= 93) {
-                $max_date = Date('Y-m-d h:m', strtotime("+" . $this->expiration_time . " days"));
-            }
-        }
-
         // start to build the body with the ref data
         $body = [
             'type'     => 'authorisation',
@@ -337,10 +309,6 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
                 // 'fiscal_number' => 'PT123456789',
             ],
         ]; // Commented the fiscal number since the special nif field is commented also
-
-        if (isset($max_date)) {
-            $body['expiration_time'] = $max_date;
-        }
 
         $this->log('Payload for order #' . $order->get_id() . ': ' . print_r(json_encode($body), true));
 

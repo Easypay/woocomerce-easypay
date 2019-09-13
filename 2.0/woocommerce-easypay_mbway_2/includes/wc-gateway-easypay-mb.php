@@ -42,7 +42,7 @@ class WC_Gateway_Easypay_MB extends WC_Payment_Gateway
         $this->title = $this->get_option('title');
         $this->description = $this->get_option('description');
         $this->currency = 'EUR';
-        $this->expiration_time = $this->get_option('expiration');
+        $this->expiration_time = (int)$this->get_option('expiration');
         $this->expiration_enable = $this->get_option('expiration_enable');
         $this->method = "mb";
         // Auth Stuff
@@ -213,9 +213,10 @@ class WC_Gateway_Easypay_MB extends WC_Payment_Gateway
             WC_Admin_Settings::add_error('Error: Please fill required field: Easypay API key');
             return false;
         }
-        if (!empty($_POST["woocommerce_{$this->id}_expiration"])) {
-            $aux_expiration = (int)$_POST["woocommerce_{$this->id}_expiration"];
-            if ($aux_expiration < 1 || $aux_expiration > 93) {
+        if (isset($_POST["woocommerce_{$this->id}_expiration_enable"])) {
+            if (!is_numeric($_POST["woocommerce_{$this->id}_expiration"])
+                || (int)$_POST["woocommerce_{$this->id}_expiration"] < 1
+                || (int)$_POST["woocommerce_{$this->id}_expiration"] > 93) {
                 WC_Admin_Settings::add_error('Error: Invalid value in field: Expiration in Days');
             }
         }
