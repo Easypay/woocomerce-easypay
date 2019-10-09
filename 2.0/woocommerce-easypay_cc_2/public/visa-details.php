@@ -1,6 +1,6 @@
 <?php
 
-if (!isset($_GET['e']) || !isset($_GET['r']) || !isset($_GET['v']) || !isset($_GET['c']) || !isset($_GET['l']) || !isset($_GET['t_key']))
+if (!isset($_GET['t_key']))
     exit();
 
 $explodedFilePath = explode('wp-content', __FILE__);
