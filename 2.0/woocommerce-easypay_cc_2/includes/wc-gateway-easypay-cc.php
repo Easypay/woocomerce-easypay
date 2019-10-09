@@ -262,6 +262,14 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
                     <input value="<?= $public_url ?>visa-fwd-2.php" type="text" size="100" readonly>
                 </td>
             </tr>
+            <tr>
+                <td>
+                    <h4><?= __('Visa - Details URL', 'wceasypay') ?></h4>
+                </td>
+                <td>
+                    <input value="<?= $public_url ?>visa-details.php" type="text" size="100" readonly>
+                </td>
+            </tr>
         </table>
         <?php
 
