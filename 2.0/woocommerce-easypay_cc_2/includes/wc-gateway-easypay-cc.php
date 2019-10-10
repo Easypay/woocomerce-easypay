@@ -264,10 +264,10 @@ class WC_Gateway_Easypay_CC extends WC_Payment_Gateway
             </tr>
             <tr>
                 <td>
-                    <h4><?= __('Visa - Details URL', 'wceasypay') ?></h4>
+                    <h4><?= __('Visa - Detail URL', 'wceasypay') ?></h4>
                 </td>
                 <td>
-                    <input value="<?= $public_url ?>visa-details.php" type="text" size="100" readonly>
+                    <input value="<?= $public_url ?>visa-detail.php" type="text" size="100" readonly>
                 </td>
             </tr>
         </table>

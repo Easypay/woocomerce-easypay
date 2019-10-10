@@ -98,6 +98,17 @@ Copy&paste this url into easypay's Backoffice web services configuration, _WebSe
 > Paste VISA-FWD URL here
 ![Paste VISA-FWD URL here](doc-images/webservices-config-api-2-account_id-visa_fwd_url.png "Paste VISA-FWD URL here")
 
+#### VISA-DETAIL
+This is the URL called by easypay to fetch order details
+
+> VISA-DETAIL URL to copy&paste into backoffice
+![VISA-DETAIL URL to copy&paste into backoffice](doc-images/woocommerce-easypay-plugin-notification_url-visa_detail-example.png "VISA-DETAIL URL to copy&paste into backoffice")
+
+Copy&paste this url into easypay's Backoffice web services configuration, _WebServices_ > _URL Configuration_ > _[Your payments account]_ > _VISA:Detail
+
+> Paste VISA-DETAIL URL here
+![Paste VISA-DETAIL URL here](doc-images/webservices-config-api-2-account_id-visa_detail_url.png "Paste VISA-DETAIL URL here")
+
 ## Final Notes
 We strongly recommend against having older versions of the plugin installed at the same time. We recommend you uninstall older version and only use this new one.
 
