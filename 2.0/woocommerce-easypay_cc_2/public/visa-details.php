@@ -1,7 +1,9 @@
 <?php
 
-if (!isset($_GET['t_key']))
+if (!isset($_GET['t_key']) || !isset($_GET['id'])) {
+    echo "Error: Not enough params";
     exit();
+}
 
 $explodedFilePath = explode('wp-content', __FILE__);
 $wpLoadFilePath   = reset($explodedFilePath) . '/wp-load.php';
@@ -13,6 +15,20 @@ if (!is_file($wpLoadFilePath)) {
 require_once $wpLoadFilePath;
 
 global $wpdb;
+
+if (!class_exists('WC_Gateway_Easypay_CC')) {
+    include realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR
+        . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR
+        . 'wc-gateway-easypay-cc.php';
+}
+$wcep = new WC_Gateway_Easypay_CC();
+
+$api_auth = $wcep->easypay_api_auth();
+
+if ($api_auth['account_id'] != $_GET['id']) {
+    echo "Error: Data mismatch";
+    exit();
+}
 
 $xml = '<?xml version="1.0" encoding="ISO-8859-1" ?>' . PHP_EOL;
 //Output XML
