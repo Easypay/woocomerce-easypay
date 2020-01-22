@@ -54,12 +54,12 @@ class WC_Easypay_Request
                 ];
 
                 $curlOpts = [
-                    CURLOPT_URL => $url,
+                    CURLOPT_URL            => $url,
                     CURLOPT_RETURNTRANSFER => true,
-                    CURLOPT_POST => 1,
-                    CURLOPT_TIMEOUT => 60,
-                    CURLOPT_POSTFIELDS => json_encode($payload),
-                    CURLOPT_HTTPHEADER => $headers,
+                    CURLOPT_POST           => 1,
+                    CURLOPT_TIMEOUT        => 60,
+                    CURLOPT_POSTFIELDS     => json_encode($payload),
+                    CURLOPT_HTTPHEADER     => $headers,
                 ];
                 break;
 
@@ -72,10 +72,10 @@ class WC_Easypay_Request
                 ];
 
                 $curlOpts = [
-                    CURLOPT_URL => $url,
+                    CURLOPT_URL            => $url,
                     CURLOPT_RETURNTRANSFER => true,
-                    CURLOPT_TIMEOUT => 60,
-                    CURLOPT_HTTPHEADER => $headers,
+                    CURLOPT_TIMEOUT        => 60,
+                    CURLOPT_HTTPHEADER     => $headers,
                 ];
                 break;
         }
@@ -154,18 +154,20 @@ class WC_Easypay_Request
             , true);
         $ajax_nonce = wp_create_nonce('wp-ep-mbway2-plugin');
         wp_localize_script($script_handle, 'ajax_object', [
-            'ajax_url' => admin_url('admin-ajax.php'),
+            'ajax_url'  => admin_url('admin-ajax.php'),
             'order_key' => $order_key,
-            'nonce' => $ajax_nonce,
+            'nonce'     => $ajax_nonce,
         ]);
         wp_localize_script($script_handle, 'ep_lng', [
-            'auth_voided_order_cancelled' => __("Authorization voided! Your order will be cancelled!", 'wceasypay'),
+            'auth_voided_order_cancelled'   => __("Authorization voided! Your order will be cancelled!", 'wceasypay'),
             'auth_declined_order_cancelled' => __("Authorization declined! Your order will be cancelled!", 'wceasypay'),
-            'auth_canceled_order_cancelled' => __("Authorization has timed out! Your order will be cancelled!", 'wceasypay'),
-            'auth_paid_order_shipped' => __("Authorization has been paid for! Your order will be shipped as soon as possible!", 'wceasypay'),
-            'request_failed' => __("Request failed!", 'wceasypay'),
-            'user_cancelled_order' => __("Your order is cancelled", 'wceasypay'),
-            'cannot_cancel_order' => __("Cannot cancel order!", 'wceasypay')
+            'auth_canceled_order_cancelled' => __("Authorization has timed out! Your order will be cancelled!",
+                'wceasypay'),
+            'auth_paid_order_shipped'       => __("Authorization has been paid for! Your order will be shipped as soon as possible!",
+                'wceasypay'),
+            'request_failed'                => __("Request failed!", 'wceasypay'),
+            'user_cancelled_order'          => __("Your order is cancelled", 'wceasypay'),
+            'cannot_cancel_order'           => __("Cannot cancel order!", 'wceasypay')
         ]);
 
         $href = esc_url(apply_filters('woocommerce_return_to_shop_redirect', wc_get_page_permalink('shop')));
@@ -272,9 +274,6 @@ class WC_Easypay_Request
         </div>
         <div style="padding: 5px; clear: both;">
             <a class="button wc-backward" href="<?= $href ?>"><?= __('Return to shop', 'wceasypay') ?></a>
-        </div>
-        <div style="padding: 5px; clear: both;">
-            <a id="wc-ep-cancel-order" class="button wc-backward" href="#"><?= __('Cancel Purchase', 'wceasypay') ?></a>
         </div>
         <?php
 

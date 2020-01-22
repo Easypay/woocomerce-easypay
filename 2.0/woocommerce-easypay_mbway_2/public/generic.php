@@ -75,8 +75,10 @@ if ($ep_status == 'processed') {
         'message'   => 'Document already processed',
         'ep_status' => 'ok0',
     ]);
-    wp_die();
+    exit(0);
 }
+
+
 //
 // GET the payment so we can validate this notification
 //
@@ -147,6 +149,7 @@ $order = new WC_Order($t_key);
 $where = [
     'ep_payment_id' => $ep_payment_id,
 ];
+$set = array();
 // check for cc errors
 if ($ep_method == 'cc') {
 
@@ -158,7 +161,7 @@ if ($ep_method == 'cc') {
         ];
         $wpdb->update($notifications_table, $set, $where);
         print_r($set);
-        wp_die();
+        exit(0);
     }
     //
     // Check if the plugin is set for auto capture
@@ -291,11 +294,6 @@ if ($ep_method == 'cc') {
             $set['ep_status'] = 'processed';
             $p1 = 'completed';
             $p2 = 'Payment completed';
-        } else {
-
-            $set['ep_status'] = 'declined';
-            $p1 = 'cancelled';
-            $p2 = $ep_notification['messages'][0];
         }
 
     } elseif ($ep_notification['type'] == 'void') {
@@ -312,7 +310,10 @@ if ($ep_method == 'cc') {
         $p2 = 'Payment completed';
     }
 
-    $wpdb->update($notifications_table, $set, $where);
+    if (!empty($notifications_table) && !empty($set) && !empty($where)) {
+        $wpdb->update($notifications_table, $set, $where);
+    }
+
     if (isset($p1) && isset($p2)) {
         $order->update_status($p1, $p2);
     }
