@@ -59,23 +59,6 @@ jQuery(document).ready(function () {
     timeoutID = window.setTimeout(function () {
         check_for_payment(ajax_object.ajax_url, data);
     }, timeout);
-
-    jQuery('#wc-ep-cancel-order').on('click', function () {
-
-        data.action = 'ep_mbway_user_cancelled';
-        window.clearTimeout(timeoutID);
-        try_counter = -1;
-
-        jQuery.getJSON(ajax_object.ajax_url, data, function (response) {
-            if (true === response) {
-                updateOrderUI(ep_lng.user_cancelled_order);
-            } else {
-                updateOrderUI(ep_lng.cannot_cancel_order);
-            }
-        }).fail(function () {
-            updateOrderUI(ep_lng.cannot_cancel_order);
-        });
-    });
 });
 
 function updateOrderUI(text_msg) {
@@ -85,9 +68,6 @@ function updateOrderUI(text_msg) {
 
     jQuery(loader).fadeOut(function () {
         jQuery(this).empty().remove();
-    });
-    jQuery('a#wc-ep-cancel-order').fadeOut(function () {
-        jQuery(this).parent().remove();
     });
     jQuery(msg_placeholder).text(text_msg).fadeIn();
 }
