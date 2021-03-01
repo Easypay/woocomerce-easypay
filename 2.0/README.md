@@ -33,9 +33,9 @@ Once the payment process is completed easypay’s online services notify the plu
 ### WooCommerce Easypay MBWay
 This plugin allows for MBWay order payment at your shop using easypay as a payment provider and the MBWay app installed on the customer’s cellphone. 
 
-When your customer checks out he / she will receive an notification on they’re MBWay app that you wish to charge they’re account with the order value. 
+When your customer checks out he / she will receive an notification on they’re MBWay app that you wish to bill they’re account with the order value. 
 
-The plugin waits for 5 minutes for the customer’s OK or NOT OK. When the customer allows the transaction the plugin tries to get the funs from the customer if automatic capture is configured, if not you may do it on easypay’s Backoffice. 
+The plugin waits for 5 minutes for the customer’s OK or NOT OK. When the customer allows the transaction the plugin tries to get the funds from the customer if automatic capture is configured, if not you may do it on easypay’s Backoffice. 
 
 If the 5 minutes are over and the customer does nothing the order and authorisation are automatically canceled. 
 
@@ -54,7 +54,7 @@ After you have your account activated you must go to _WebServices_ > _Configurat
 ![Your new Account ID and API Key pair to configure/use in the plugin](doc-images/webservices-config-api-2-show-account_id-api_key.png "Your new Account ID and API Key pair to configure/use in the plugin")
 
 ## Plugin installation
-- Download the plugin installation zip file available at [easypay's downloads page](https://docs.easypay.pt/download)
+- Download the plugin installation zip file available at [easypay's downloads page](https://easypay.pt/en/woocommerce)
 - Install the zipped folder with the Wordpress buit-in plugin installation tool **OR** unzip the plugin and copy as a folder to the plugins dir, making sure the web server can read the plugin files directory (555) and files (444)
 - Activate the plugin in the plugins list. The plugin is named after the payment method it provides, like this: 
   - Easypay CC
@@ -125,6 +125,7 @@ Check this box to enforce payment expiration. Your customer won’t be able to p
 
 #### Notification URL
 This is the URL in your system that easypay will use to communicate with the plugin, to communicate payment status or other operations.
+If you have more that one payment method, you only need to configure this once. You should use MB by default. If you're not using MB, use MBWay instead.
 
 > Notification URL to copy&paste into backoffice
 ![Notification URL to copy&paste into backoffice](doc-images/woocommerce-easypay-plugin-mb-notification_url-example.png "Notification URL to copy&paste into backoffice") 
@@ -159,3 +160,4 @@ Copy&paste this url into easypay's Backoffice web services configuration, _WebSe
 We strongly recommend against having older versions of the plugin installed at the same time. We recommend you uninstall older version and only use this new one.
 
 If you'd like to understand how the plugin uses easypay's payment APIs you can read our online docs available at https://api.prod.easypay.pt/docs
+
