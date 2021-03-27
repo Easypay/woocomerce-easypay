@@ -122,7 +122,7 @@ class WC_Gateway_Easypay_MB extends WC_Payment_Gateway
      * @param   $order
      * @param   $sent_to_admin
      */
-    public function reference_in_mail_2($order, $sent_to_admin, $plain_text, $email)
+    public function reference_in_mail_2($order, $sent_to_admin)
     {
         if ($order->get_payment_method() == 'easypay_mb_2') {
             global $wpdb;
