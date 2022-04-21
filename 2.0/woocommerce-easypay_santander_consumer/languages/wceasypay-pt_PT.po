@@ -1,0 +1,335 @@
+# Copyright (C) 2014 
+# This file is distributed under the same license as the  package.
+msgid ""
+msgstr ""
+"Project-Id-Version: wceasypay 0.1.3\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/tag/woocommerce-easypay-gateway\n"
+"POT-Creation-Date: 2014-01-31 16:07:42+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2014-07-02 14:56-0000\n"
+"Last-Translator: \n"
+"Language-Team: Easypay <tec@easypay.pt>\n"
+"X-Generator: Poedit 1.6.5\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: pt_PT\n"
+
+#: cron/payment-check.php:57 public/boleto-fwd.php:27 public/visa-fwd.php:46
+msgid "Payment error: "
+msgstr "Erro no pagamento"
+
+#: cron/payment-check.php:57
+msgid "Error on payment listings"
+msgstr "Erro na listagem dos pagamentos"
+
+#: public/boleto-fwd.php:26 public/boleto-fwd.php:27 public/visa-fwd.php:45
+#: public/visa-fwd.php:46
+msgid "Error on payment request"
+msgstr "Erro no pedido do pagamento"
+
+#: wc-easypay.php:57 wc-easypay.php:165
+msgid "Easypay"
+msgstr "Easypay"
+
+#: wc-easypay.php:58 wc-easypay.php:171
+msgid "Don't leave for tomorrow what you can receive today"
+msgstr "Não deixe para amanhã o que pode receber hoje."
+
+#: wc-easypay.php:143
+msgid "Easypay standard"
+msgstr "Padrão Easypay"
+
+#: wc-easypay.php:144
+msgid ""
+"Easypay standard works by sending the user to Easypay to enter their payment "
+"information."
+msgstr ""
+"A Easypay funciona por redirecionar o utilizador para o gateway da Easypay, "
+"ai insere a informação para o pagamento."
+
+#: wc-easypay.php:156
+msgid "Enable/Disable"
+msgstr "Activar / Desactivar"
+
+#: wc-easypay.php:158
+msgid "Enable Easypay Payment Gateway."
+msgstr "Activar o módulo de pagamento da Easypay"
+
+#: wc-easypay.php:162
+msgid "Title"
+msgstr "Titulo"
+
+#: wc-easypay.php:164
+msgid "This controls the title which the user sees during checkout."
+msgstr "Aqui pode controlar o titulo que o utilizador vê durante o checkout."
+
+#: wc-easypay.php:169
+msgid "Customer Message"
+msgstr "Mensagem ao Cliente"
+
+#: wc-easypay.php:174
+msgid "CIN"
+msgstr "CIN"
+
+#: wc-easypay.php:176
+msgid "The Client Identification Number of your easypay account."
+msgstr "Número de identificação de cliente relativamente á sua conta Easypay. "
+
+#: wc-easypay.php:180
+msgid "User"
+msgstr "Utilizador"
+
+#: wc-easypay.php:182
+msgid "The USER of your easypay account."
+msgstr "O Utilizador da sua conta Easypay"
+
+#: wc-easypay.php:186 wc-easypay.php:466
+msgid "Entity"
+msgstr "Entidade"
+
+#: wc-easypay.php:188
+msgid ""
+"The ENTITY of your easypay account. <br/>Please refer to our commercial "
+"department for more information."
+msgstr ""
+"Entidade associada á sua conta Easypay. <br />Por favor contacte o nosso "
+"departamento comercial para mais informação."
+
+#: wc-easypay.php:192
+msgid "Code"
+msgstr "Código"
+
+#: wc-easypay.php:194
+msgid ""
+"Security Token, use this only if you have validation by code instead of "
+"validation by IP."
+msgstr ""
+"Security Token, use this only if you have validation by code instead of "
+"validation by IP."
+
+#: wc-easypay.php:198
+msgid "Country"
+msgstr "País"
+
+#: wc-easypay.php:200
+msgid "Must be always PT."
+msgstr "É obrigatório que seja PT."
+
+#: wc-easypay.php:204
+msgid "Language"
+msgstr "Idioma"
+
+#: wc-easypay.php:206
+msgid "The language that the user should see on credit card gateway."
+msgstr ""
+"Idioma que o utilizador deverá ver quando for redireccionado para a gateway "
+"de cartões de crédito."
+
+#: wc-easypay.php:210
+msgid "Payment types"
+msgstr "Tipos de pagamentos"
+
+#: wc-easypay.php:215
+msgid "Pay by Multibanco"
+msgstr "Multibanco"
+
+#: wc-easypay.php:220
+msgid "Credit Card"
+msgstr "Cartão de Crédito"
+
+#: wc-easypay.php:225
+msgid "Boleto Bancário"
+msgstr "Boleto Bancário"
+
+#: wc-easypay.php:230
+msgid "Gateway Testing"
+msgstr "Testes"
+
+#: wc-easypay.php:235
+msgid "Easypay sandbox"
+msgstr "Easypay sandbox"
+
+#: wc-easypay.php:237
+msgid "Enable Easypay sandbox"
+msgstr "Activar Easypay sandbox"
+
+#: wc-easypay.php:239
+msgid "Easypay sandbox can be used to test payments."
+msgstr "A sandbox pode ser utilizada para testar os pagamentos."
+
+#: wc-easypay.php:242
+msgid "Debug"
+msgstr "Debug"
+
+#: wc-easypay.php:244
+msgid "Enable logging"
+msgstr "Activar logs."
+
+#: wc-easypay.php:246
+msgid ""
+"Log Easypay events such as API requests, the logs will be placed in "
+"<code>woocommerce/logs/easypay.txt</code>"
+msgstr ""
+"Regista eventos tais como pedidos á API, os logs serão colocados em "
+"<code>woocommerce/logs/easypay.txt</code>"
+
+#: wc-easypay.php:249
+msgid "Easypay Configurations"
+msgstr "Configurações Easypay"
+
+#: wc-easypay.php:254
+msgid "Go to \"Webservices\" > \"URL Configuration\""
+msgstr "Vá a \"Webservices\" > \"URL Configuration\""
+
+#: wc-easypay.php:258
+msgid "Visa detail URL"
+msgstr "Visa detail URL"
+
+#: wc-easypay.php:263
+msgid "Visa - Fwd URL"
+msgstr "Visa - Fwd URL"
+
+#: wc-easypay.php:268
+msgid "Boleto - Fwd URL"
+msgstr "Boleto - Fwd URL"
+
+#: wc-easypay.php:273
+msgid "Notification URL"
+msgstr "Notification URL"
+
+#: wc-easypay.php:278
+msgid "On your server"
+msgstr "No seu servidor"
+
+#: wc-easypay.php:282
+msgid "Cron Job"
+msgstr "Cron Job"
+
+#: wc-easypay.php:284
+msgid ""
+"For Credit Card payment check you must create a cron job, we sugest you "
+"config your cron job to call this file once a day."
+msgstr ""
+"Para verificar o pagamento com Cartão de Crédito precisa criar um cron job, "
+"sugerimos-lhe que configure o seu cron job para executar este ficheiro uma "
+"vez por dia."
+
+#: wc-easypay.php:339
+msgid "Awaiting for reference payment."
+msgstr "Aguardando pagamento de referência."
+
+#: wc-easypay.php:404
+msgid ""
+"An error has occurred while processing your payment, please try again. Or "
+"contact us for assistance."
+msgstr ""
+"Ocorreu um erro durante o processamento do seu pagamento, por favor tente "
+"novamente, ou contacte-nos para assistência."
+
+#: wc-easypay.php:407
+msgid "Click to try again"
+msgstr "Tente Novamente"
+
+#: wc-easypay.php:466
+msgid "Reference"
+msgstr "Referência"
+
+#: wc-easypay.php:466
+msgid "Value"
+msgstr "Valor"
+
+#: wc-easypay.php:485 wc-easypay.php:504
+msgid "Pay Now"
+msgstr "Pague Agora"
+
+#: wc-easypay.php:511
+msgid ""
+"<strong>Easypay Gateway Disabled</strong> Missing CIN. %sClick here to "
+"configure.%s"
+msgstr ""
+"<strong>Módulo Easypay Desativado</strong> Falta o CIN. %sClique aqui para "
+"configurar.%s"
+
+#: wc-easypay.php:520
+msgid ""
+"<strong>Easypay Gateway Disabled</strong> Missing USER. %sClick here to "
+"configure.%s"
+msgstr ""
+"<strong>Módulo Easypay Desativado</strong> Falta o Utilizador. %sClique aqui "
+"para configurar.%s"
+
+#: wc-easypay.php:529
+msgid ""
+"<strong>Easypay Gateway Disabled</strong> Missing ENTITY. %sClick here to "
+"configure.%s"
+msgstr ""
+"<strong>Módulo Easypay Desativado</strong> Falta a Entidade. %sClique aqui "
+"para configurar.%s"
+
+#: wc-easypay.php:538
+msgid ""
+"<strong>Easypay Gateway Disabled</strong> Missing COUNTRY. %sClick here to "
+"configure.%s"
+msgstr ""
+"<strong>Módulo Easypay Desativado</strong> Falta o País. %sClique aqui para "
+"configurar.%s"
+
+#: wc-easypay.php:547
+msgid ""
+"<strong>Easypay Gateway Disabled</strong> Missing LANGUAGE. %sClick here to "
+"configure.%s"
+msgstr ""
+"<strong>Módulo Easypay Desativado</strong> Falta o Idioma. %sClique aqui "
+"para configurar.%s"
+
+#: wc-easypay.php:556
+msgid ""
+"<strong>Easypay Gateway Disabled</strong> The currency your cart is using is "
+"not valid, please set to Euro (EUR) if you want to use Easypay payments. "
+"%sClick here to configure.%s"
+msgstr ""
+"<strong>Módulo Easypay Desativado</strong> A moeda do seu carrinho não é "
+"suportada, por favor altere para Euro (EUR) se quiser utilizar pagamentos "
+"através da Easypay. %sClique aqui para configurar.%s"
+
+#: wc-easypay.php:594
+msgid "Fiscal Number"
+msgstr "NIF"
+
+#: wc-easypay.php:595
+msgctxt "placeholder"
+msgid "Fiscal Number"
+msgstr "NIF"
+
+#: wc-easypay.php:614
+msgid ""
+"WooCommerce Easypay Gateway depends on the last version of <a href=\"http://"
+"wordpress.org/extend/plugins/woocommerce/\">WooCommerce</a> to work!"
+msgstr ""
+"WooCommerce Easypay Gateway depende da última versão do <a href=\"http://"
+"wordpress.org/extend/plugins/woocommerce/\">WooCommerce</a> para funcionar!"
+
+msgid "Cancel Purchase"
+msgstr "Cancelar Compra"
+
+msgid "Authorization has timed out! Your order will be cancelled!"
+msgstr "Autorização expirou! A sua encomenda vai ser cancelada!"
+
+msgid "Authorization has been paid for! Your order will be shipped as soon as possible!"
+msgstr "Autorização paga! A sua encomenda vai ser expedida o mais depressa possível"
+
+msgid "Request failed!"
+msgstr "Pedido falhou!"
+
+msgid "Your order is cancelled"
+msgstr "A sua encomenda foi cancelada"
+
+msgid "Cannot cancel order!"
+msgstr "Não foi possível cancelar a sua encomenda"
+
+msgid "Authorization voided! Your order will be cancelled!"
+msgstr "Autorização cancelada! A sua encomenda foi cancelada"
+
+msgid "Authorization declined! Your order will be cancelled!"
+msgstr "Autorização cancelada! A sua encomenda foi cancelada"
