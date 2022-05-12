@@ -418,6 +418,8 @@ elseif ($ep_method == 'sc') {
             'ep_status' => 'declined',
         ];
         $wpdb->update($notifications_table, $set, $where);
+        $order->update_status('failed', __('Funding request declined/cancelled', 'wceasypay'));
+
         print_r($set);
         exit(0);
     }

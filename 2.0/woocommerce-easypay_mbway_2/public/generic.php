@@ -78,7 +78,6 @@ if ($ep_status == 'processed') {
     exit(0);
 }
 
-
 //
 // GET the payment so we can validate this notification
 //
@@ -110,6 +109,24 @@ switch ($ep_method) {
                 . 'wc-gateway-easypay-mbway.php';
         }
         $wcep = new WC_Gateway_Easypay_MBWay();
+        break;
+
+    case 'uf':
+        if (!class_exists('WC_Gateway_Easypay_Universo_Flex')) {
+            include realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR
+                . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR
+                . 'wc-gateway-easypay-universo-flex.php';
+        }
+        $wcep = new WC_Gateway_Easypay_Universo_Flex();
+        break;
+
+    case 'sc':
+        if (!class_exists('WC_Gateway_Easypay_Santander_Consumer')) {
+            include realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR
+                . '..' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR
+                . 'wc-gateway-easypay-santander-consumer.php';
+        }
+        $wcep = new WC_Gateway_Easypay_Santander_Consumer();
         break;
 }
 
@@ -223,8 +240,8 @@ if ($ep_method == 'cc') {
     $wpdb->update($notifications_table, $set, $where);
     $order->update_status($p1, $p2);
 
-} elseif ($ep_method == 'mb'
-    && $ep_notification['status'] == 'success') {
+}
+elseif ($ep_method == 'mb' && $ep_notification['status'] == 'success') {
 
     $set = [
         'ep_status' => 'processed',
@@ -232,7 +249,8 @@ if ($ep_method == 'cc') {
     $wpdb->update($notifications_table, $set, $where);
     $order->update_status('completed', 'Payment completed');
 
-} elseif ($ep_method == 'mbw') {
+}
+elseif ($ep_method == 'mbw') {
 
     if ($ep_notification['type'] == 'authorisation'
         && $ep_notification['status'] == 'failed'
@@ -318,6 +336,104 @@ if ($ep_method == 'cc') {
         $order->update_status($p1, $p2);
     }
 }
+elseif ($ep_method == 'uf') {
 
+    if ($ep_notification['type'] == 'authorisation'
+        && $ep_notification['status'] == 'failed'
+    ) {
+        $set = [
+            'ep_status' => 'declined',
+        ];
+        $wpdb->update($notifications_table, $set, $where);
+        print_r($set);
+        exit(0);
+    }
+    //
+    // Check if the plugin is set for auto capture
+    elseif ($wcep->autoCapture == 'yes'
+        && $ep_notification['type'] == 'authorisation'
+        && $ep_notification['status'] == 'success'
+    ) {
+        // Capture
+        $body = [
+            'transaction_key' => (string)$t_key,
+            'capture_date'    => date('Y-m-d'),
+            'descriptive'     => (string)$t_key,
+            'value'           => $ep_value,
+        ];
+        //
+        // make the capture request to easypay
+        $capture_request_response = $capture_request->get_contents($body);
+        $set = [
+            'ep_status'              => 'waiting_capture',
+            'ep_last_operation_type' => 'capture',
+            'ep_last_operation_id'   => null,
+        ];
+        if (!empty($capture_request_response)) {
+
+            $set['ep_last_operation_id'] = $capture_request_response['id'];
+            if ($capture_request_response['status'] != 'ok') {
+
+                $msg = '[' . basename(__FILE__)
+                    . "] {$capture_request_response['message'][0]}";
+                (new WC_Logger())->add('easypay', $msg);
+            }
+        }
+
+        $p1 = 'pending payment';
+        $p2 = 'Card authorized, waiting for capture';
+
+    } elseif ($ep_notification['type'] == 'capture'
+        && $ep_notification['status'] == 'success'
+    ) {
+
+        $set['ep_status'] = 'processed';
+        $p1 = 'completed';
+        $p2 = 'Payment completed';
+
+    } else {
+        if ($wcep->autoCapture == 'no'
+            && $ep_notification['type'] == 'authorisation'
+            && $ep_notification['status'] == 'success'
+        ) {
+
+            $set = [
+                'ep_status' => 'authorized',
+            ];
+            $p1 = 'pending payment';
+            $p2 = 'Card authorized, waiting for capture';
+        }
+    }
+
+    $wpdb->update($notifications_table, $set, $where);
+    $order->update_status($p1, $p2);
+
+}
+elseif ($ep_method == 'sc') {
+
+    if ($ep_notification['type'] == 'capture'
+        && $ep_notification['status'] == 'failed'
+    ) {
+        $set = [
+            'ep_status' => 'declined',
+        ];
+        $wpdb->update($notifications_table, $set, $where);
+        $order->update_status('failed', __('Funding request declined/cancelled', 'wceasypay'));
+
+        print_r($set);
+        exit(0);
+    }
+    elseif ($ep_notification['type'] == 'capture'
+        && $ep_notification['status'] == 'success'
+    ) {
+        $set['ep_status'] = 'processed';
+        $p1 = 'completed';
+        $p2 = 'Payment completed';
+    }
+
+    $wpdb->update($notifications_table, $set, $where);
+    $order->update_status($p1, $p2);
+
+}
 print_r($set);
 exit;
