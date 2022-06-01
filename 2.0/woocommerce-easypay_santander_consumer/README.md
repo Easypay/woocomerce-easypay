@@ -22,6 +22,9 @@ This plugin allows for (single payment) santander consumer order payment at your
 When your customer checks out he / she will be taken to santander consumer finance gateway to enter the card details.
 
 Once the payment process is completed easypay’s online services notify the plugin.
+
+___Note:___ _Santander consumer finance services only allow payment amounts between_ ****300€**** and ****6000€****. 
+_So in your shop, the plugin will hide this payment method automatically for order amounts that is out of this range._ 
  
 ## Before installing the plugin...
 You **must** uninstall previous versions of the plugin. We strongly recommend against having older versions of the plugin installed simultaneously.

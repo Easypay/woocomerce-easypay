@@ -71,6 +71,42 @@ function woocommerce_gateway_easypay_santander_consumer_init()
 
     add_filter('woocommerce_payment_gateways', 'woocommerce_add_gateway_easypay_santander_consumer');
 
+    /**
+     * Filter for santander consumer Finance for payment total amount products in the cart including
+     * the shipping costs and fees that is under 300€ and over 6000€
+     * @param $available_gateways
+     * @return mixed
+     */
+    function easypay_a3ee7c47_2aae_4509_bf31_f693e340acac_conditional_payment_gateways($available_gateways)
+    {
+        if (is_admin()) {
+            return $available_gateways;
+        }
+
+        // STEP 1: Get order/cart total
+        if (is_wc_endpoint_url('order-pay')) { // Pay for order page
+
+            $order_id = wc_get_order_id_by_order_key($_GET['key']);
+            $order = wc_get_order($order_id);
+            $order_total = $order->get_total();
+
+        } else { // Cart/Checkout page
+            $order_total = WC()->cart->total;
+        }
+
+        // STEP 2: Disable payment gateway if order/cart total is more than 6000 and less than 300
+        if ($order_total < 300 || $order_total > 6000) {
+            unset($available_gateways['easypay_santander_consumer']); // unset Cash on Delivery
+        }
+        return $available_gateways;
+    }
+
+
+    //Filter for santander consumer Finance for payment total amount products int the cart including
+    // the shipping costs and fees that is under 300€ and over 6000€
+    add_filter('woocommerce_available_payment_gateways',
+        'easypay_a3ee7c47_2aae_4509_bf31_f693e340acac_conditional_payment_gateways');
+
 } //END of function woocommerce_gateway_easypay_santander_consumer_init
 
 /**
@@ -80,5 +116,6 @@ function woocommerce_gateway_easypay_santander_consumer_init()
  */
 function wceasypay_woocommerce_notice_santander_consumer()
 {
-    echo '<div class="error"><p>' . __('WooCommerce Easypay Gateway depends on the last version of <a href="http://wordpress.org/extend/plugins/woocommerce/">WooCommerce</a> to work!', 'wceasypay') . '</p></div>';
+    echo '<div class="error"><p>' . __('WooCommerce Easypay Gateway depends on the last version of <a href="http://wordpress.org/extend/plugins/woocommerce/">WooCommerce</a> to work!',
+            'wceasypay') . '</p></div>';
 }

@@ -48,6 +48,9 @@ When your customer checks out he / she will be taken to santander consumer finan
 
 Once the payment process is completed easypay’s online services notify the plugin.
 
+___Note:___ _Santander consumer finance services only allow payment amounts between_ ****300€**** and ****6000€****.
+_So in your shop, the plugin will hide this payment method automatically for order amounts that is out of this range._
+
 ### WooCommerce Easypay Universo Flex
 This plugin allows for (single payment) Universo Flex order payment at your shop, enabling a costumer to jump into our gateway for safe authorization and later (manual ou automatic) values capture.
 
