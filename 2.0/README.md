@@ -6,10 +6,12 @@ You can even test easypay’s online payment services with these plugins before 
 - Credit Card (single payment only)
 - Multibanco
 - MBWay
+- Universo Flex (single payment only)
+- Santander Consumer Finance (single payment only)
 
 # How it works
 ## In general 
-Your clients checkout their order and pay you using Credit Card / Multibanco / MBWay through easypay’s payment plugin. 
+Your clients checkout their order and pay you using Credit Card / Multibanco / MBWay /Santander Consumer Finance / Universo Flex through easypay’s payment plugin. 
 
 Once the payment process is completed easypay’s online services notify the plugin and you can verify it on easypay’s Backoffice or on your own system.
 
@@ -39,6 +41,23 @@ The plugin waits for 5 minutes for the customer’s OK or NOT OK. When the custo
 
 If the 5 minutes are over and the customer does nothing the order and authorisation are automatically canceled. 
 
+### WooCommerce Easypay Santander Consumer Finance
+This plugin allows for (single payment) santander consumer order payment at your shop, enabling a costumer to jump into santander consumer finance gateway for safe finance process.
+
+When your customer checks out he / she will be taken to santander consumer finance gateway to enter the card details.
+
+Once the payment process is completed easypay’s online services notify the plugin.
+
+### WooCommerce Easypay Universo Flex
+This plugin allows for (single payment) Universo Flex order payment at your shop, enabling a costumer to jump into our gateway for safe authorization and later (manual ou automatic) values capture.
+
+When your customer checks out he / she will be taken to Universo Flex gateway to enter the card details and choose how the customer wish to pay. After the transaction is authorised by Universo Flex services he / she is redirected back to your online shop.
+
+If you have automatic capture configured the plugin tries to capture the funds as soon as possible.
+
+Once the payment process is completed easypay’s online services notify the plugin.
+
+
 ## Before installing the plugin...
 You **must** uninstall previous versions of the plugin. We strongly recommend against having older versions of the plugin installed simultaneously.
 
@@ -60,6 +79,8 @@ After you have your account activated you must go to _WebServices_ > _Configurat
   - Easypay CC
   - Easypay MB
   - Easypay MBWay
+  - Universo Flex (single payment only)
+  - Santander Consumer Finance (single payment only)
 
 > easypay WooCommerce's payments plugin list
 ![easypay WooCommerce's payments plugin list](doc-images/woocommerce-payments-plugin-list.png "easypay WooCommerce's payments plugin list")
@@ -155,6 +176,64 @@ Copy&paste this url into easypay's Backoffice web services configuration, _WebSe
 
 > Paste notification URL here
 ![Paste notification URL here](doc-images/webservices-config-api-2-account_id-notifications_url.png "Paste notification URL here")
+
+
+### WooCommerce Easypay Universo Flex
+#### Auto Capture
+Check this box if you want the funds to be captured automatically after payment authorisation.
+
+#### Notification URL
+This is the URL in your system that easypay will use to communicate with the plugin, to communicate payment status or other operations.
+
+> Notification URL to copy&paste into backoffice
+![Notification URL to copy&paste into backoffice](doc-images/woocommerce-easypay-plugin-notification_url-visa_fwd-example.png "Notification URL to copy&paste into backoffice")
+
+Copy&paste this url into easypay's Backoffice web services configuration, _WebServices_ > _Configuration 2.0_ > _[Your payments account]_ > _Notifications_ > _Generic - URL_
+
+> Your payments account to be configured in backoffice
+![Your payments account to be configured in backoffice](doc-images/webservices-config-api-2-account_id-notifications.png "Your payments account to be configured in backoffice")
+
+> Paste notification URL here
+![Paste notification URL here](doc-images/webservices-config-api-2-account_id-notifications_url.png "Paste notification URL here")
+
+#### VISA-FWD URL
+This is the URL your customer is redirected to after leaving the gateway, either with payment authorised or not.
+
+> VISA-FWD URL to copy&paste into backoffice
+![VISA-FWD URL to copy&paste into backoffice](doc-images/woocommerce-easypay-plugin-notification_url-visa_fwd-example.png "VISA-FWD URL to copy&paste into backoffice")
+
+Copy&paste this url into easypay's Backoffice web services configuration, _WebServices_ > _URL Configuration_ > _[Your payments account]_ > _VISA:Forward_
+
+> Paste VISA-FWD URL here
+![Paste VISA-FWD URL here](doc-images/webservices-config-api-2-account_id-visa_fwd_url.png "Paste VISA-FWD URL here")
+
+> Notification URL to copy&paste into backoffice
+![Notification URL to copy&paste into backoffice](doc-images/woocommerce-easypay-plugin-notification_url-example.png "Notification URL to copy&paste into backoffice")
+
+Copy&paste this url into easypay's Backoffice web services configuration, _WebServices_ > _Configuration 2.0_ > _[Your payments account]_ > _Notifications_ > _Generic - URL_
+
+> Your payments account to be configured in backoffice
+![Your payments account to be configured in backoffice](doc-images/webservices-config-api-2-account_id-notifications.png "Your payments account to be configured in backoffice")
+
+> Paste notification URL here
+![Paste notification URL here](doc-images/webservices-config-api-2-account_id-notifications_url.png "Paste notification URL here")
+
+### WooCommerce Easypay Santander Consumer Finance
+
+#### Notification URL
+This is the URL in your system that easypay will use to communicate with the plugin, to communicate payment status or other operations.
+
+> Notification URL to copy&paste into backoffice
+![Notification URL to copy&paste into backoffice](doc-images/woocommerce-easypay-plugin-notification_url-visa_fwd-example.png "Notification URL to copy&paste into backoffice")
+
+Copy&paste this url into easypay's Backoffice web services configuration, _WebServices_ > _Configuration 2.0_ > _[Your payments account]_ > _Notifications_ > _Generic - URL_
+
+> Your payments account to be configured in backoffice
+![Your payments account to be configured in backoffice](doc-images/webservices-config-api-2-account_id-notifications.png "Your payments account to be configured in backoffice")
+
+> Paste notification URL here
+![Paste notification URL here](doc-images/webservices-config-api-2-account_id-notifications_url.png "Paste notification URL here")
+
 
 ## Final Notes
 We strongly recommend against having older versions of the plugin installed at the same time. We recommend you uninstall older version and only use this new one.
